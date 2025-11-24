@@ -103,3 +103,29 @@ fun ApplicationCall.isAdmin(): Boolean {
     return hasRole("ADMINISTRADOR")
 }
 
+/**
+ * Verifica si el usuario tiene una suscripción activa
+ * 
+ * Esta función verifica en siga_comercial.SUSCRIPCIONES si el usuario
+ * (identificado por email) tiene una suscripción ACTIVA y no vencida.
+ * 
+ * @return true si tiene suscripción activa, false en caso contrario
+ */
+fun ApplicationCall.hasActiveSubscription(): Boolean {
+    val email = getUserEmail() ?: return false
+    return com.siga.backend.services.SubscriptionService.hasActiveSubscription(email)
+}
+
+/**
+ * Verifica autenticación y suscripción activa
+ * 
+ * Útil para endpoints del SaaS que requieren ambos
+ * 
+ * @return true si está autenticado Y tiene suscripción activa
+ */
+fun ApplicationCall.isAuthenticatedAndSubscribed(): Boolean {
+    val userId = getUserId()
+    if (userId == null) return false
+    return hasActiveSubscription()
+}
+

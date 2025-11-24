@@ -31,6 +31,18 @@ fun Application.configureSaasChatRoutes() {
                             return@post
                         }
                         
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                ChatResponse(
+                                    success = false,
+                                    message = "Se requiere una suscripción activa para usar el asistente operativo. Por favor, suscríbete a un plan."
+                                )
+                            )
+                            return@post
+                        }
+                        
                         val request = call.receive<ChatRequest>()
                         
                         if (request.message.isBlank()) {

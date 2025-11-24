@@ -81,6 +81,15 @@ fun Application.configureVentasRoutes() {
                             return@get
                         }
                         
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                VentasListResponse(success = false, ventas = emptyList(), total = 0)
+                            )
+                            return@get
+                        }
+                        
                         val ventas = transaction {
                             val query = if (userRol == "OPERADOR") {
                                 // OPERADOR solo ve sus ventas
@@ -134,6 +143,15 @@ fun Application.configureVentasRoutes() {
                 // GET /api/saas/ventas/{id} - Obtener venta por ID
                 get("{id}") {
                     try {
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                VentaDetailResponse(success = false, message = "Se requiere una suscripción activa")
+                            )
+                            return@get
+                        }
+                        
                         val ventaId = call.parameters["id"]?.toIntOrNull()
                             ?: throw IllegalArgumentException("ID inválido")
                         
@@ -194,6 +212,15 @@ fun Application.configureVentasRoutes() {
                         val userId = call.getUserId()
                             ?: throw IllegalStateException("Usuario no autenticado")
                         
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                VentaDetailResponse(success = false, message = "Se requiere una suscripción activa")
+                            )
+                            return@post
+                        }
+                        
                         val request = call.receive<VentaRequest>()
                         
                         if (request.detalles.isEmpty()) {
@@ -204,14 +231,71 @@ fun Application.configureVentasRoutes() {
                             return@post
                         }
                         
-                        // Calcular total
-                        val total = request.detalles.sumOf { detalle ->
-                            val precio = BigDecimal(detalle.precioUnitario)
-                            precio.multiply(BigDecimal(detalle.cantidad))
-                        }
-                        
+                        // Validaciones y creación de venta en una sola transacción
                         val ventaId = transaction {
-                            // Crear venta
+                            // 1. Validar que todos los productos existan y estén activos
+                            val productosInvalidos = mutableListOf<Int>()
+                            val productosInfo = mutableMapOf<Int, Pair<Boolean, BigDecimal?>>()
+                            
+                            request.detalles.forEach { detalle ->
+                                val producto = ProductoTable.select {
+                                    ProductoTable.id eq detalle.productoId
+                                }.firstOrNull()
+                                
+                                if (producto == null || !producto[ProductoTable.activo]) {
+                                    productosInvalidos.add(detalle.productoId)
+                                } else {
+                                    val precio = producto[ProductoTable.precioUnitario] 
+                                        ?: BigDecimal(detalle.precioUnitario)
+                                    productosInfo[detalle.productoId] = Pair(
+                                        producto[ProductoTable.activo],
+                                        precio
+                                    )
+                                }
+                            }
+                            
+                            if (productosInvalidos.isNotEmpty()) {
+                                throw IllegalArgumentException(
+                                    "Productos no encontrados o inactivos: ${productosInvalidos.joinToString()}"
+                                )
+                            }
+                            
+                            // 2. Validar stock suficiente para cada producto
+                            val productosSinStock = mutableListOf<String>()
+                            
+                            request.detalles.forEach { detalle ->
+                                val stock = StockTable.select {
+                                    (StockTable.productoId eq detalle.productoId) and
+                                    (StockTable.localId eq request.localId)
+                                }.firstOrNull()
+                                
+                                val stockDisponible = stock?.get(StockTable.cantidad) ?: 0
+                                
+                                if (stockDisponible < detalle.cantidad) {
+                                    val productoNombre = ProductoTable.select {
+                                        ProductoTable.id eq detalle.productoId
+                                    }.first()[ProductoTable.nombre]
+                                    
+                                    productosSinStock.add(
+                                        "$productoNombre (disponible: $stockDisponible, solicitado: ${detalle.cantidad})"
+                                    )
+                                }
+                            }
+                            
+                            if (productosSinStock.isNotEmpty()) {
+                                throw IllegalArgumentException(
+                                    "Stock insuficiente para: ${productosSinStock.joinToString("; ")}"
+                                )
+                            }
+                            
+                            // 3. Calcular total usando precios de la BD o los enviados
+                            val total = request.detalles.sumOf { detalle ->
+                                val precio = productosInfo[detalle.productoId]?.second 
+                                    ?: BigDecimal(detalle.precioUnitario)
+                                precio.multiply(BigDecimal(detalle.cantidad))
+                            }
+                            
+                            // 4. Crear venta
                             VentaTable.insert {
                                 it[VentaTable.localId] = request.localId
                                 it[VentaTable.usuarioId] = userId
@@ -221,17 +305,17 @@ fun Application.configureVentasRoutes() {
                             }
                             
                             // Obtener el ID de la venta creada
-                            VentaTable.select {
+                            val ventaId = VentaTable.select {
                                 VentaTable.localId eq request.localId
                             }.orderBy(VentaTable.fecha, SortOrder.DESC).first()[VentaTable.id]
-                        }
-                        
-                        // Crear detalles de venta
-                        transaction {
+                            
+                            // 5. Crear detalles de venta y descontar stock
                             request.detalles.forEach { detalle ->
-                                val precio = BigDecimal(detalle.precioUnitario)
+                                val precio = productosInfo[detalle.productoId]?.second 
+                                    ?: BigDecimal(detalle.precioUnitario)
                                 val subtotal = precio.multiply(BigDecimal(detalle.cantidad))
                                 
+                                // Crear detalle de venta
                                 DetalleVentaTable.insert {
                                     it[DetalleVentaTable.ventaId] = ventaId
                                     it[DetalleVentaTable.productoId] = detalle.productoId
@@ -239,7 +323,24 @@ fun Application.configureVentasRoutes() {
                                     it[DetalleVentaTable.precioUnitario] = precio
                                     it[DetalleVentaTable.subtotal] = subtotal
                                 }
+                                
+                                // Descontar stock automáticamente
+                                val stockActual = StockTable.select {
+                                    (StockTable.productoId eq detalle.productoId) and
+                                    (StockTable.localId eq request.localId)
+                                }.first()
+                                
+                                val nuevaCantidad = stockActual[StockTable.cantidad] - detalle.cantidad
+                                
+                                StockTable.update({
+                                    (StockTable.productoId eq detalle.productoId) and
+                                    (StockTable.localId eq request.localId)
+                                }) {
+                                    it[StockTable.cantidad] = nuevaCantidad
+                                }
                             }
+                            
+                            ventaId
                         }
                         
                         // Obtener la venta creada con detalles

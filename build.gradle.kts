@@ -92,7 +92,7 @@ tasks.register<JavaExec>("verifyTables") {
 // Tarea para verificar base de datos
 tasks.register<JavaExec>("verifyDb") {
     group = "database"
-    description = "Verifica el estado de la base de datos"
+    description = "Verifica la conexion a la base de datos"
     mainClass.set("com.siga.backend.VerifyDatabaseKt")
     classpath = sourceSets["main"].runtimeClasspath
 }

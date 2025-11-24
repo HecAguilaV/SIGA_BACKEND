@@ -1,0 +1,405 @@
+openapi: 3.0.3
+info:
+  title: SIGA Backend API
+  description: API REST para el Sistema Inteligente de Gestión de Activos
+  version: 1.0.0
+  contact:
+    name: SIGA Team
+    email: support@siga.com
+
+servers:
+  - url: http://localhost:8080
+    description: Servidor de desarrollo
+  - url: https://siga-backend.railway.app
+    description: Servidor de producción
+
+tags:
+  - name: Autenticación
+    description: Endpoints de autenticación y registro
+  - name: Productos
+    description: Gestión de productos
+  - name: Stock
+    description: Gestión de inventario y stock
+  - name: Ventas
+    description: Gestión de ventas
+  - name: Planes
+    description: Planes de suscripción
+  - name: Suscripciones
+    description: Gestión de suscripciones
+  - name: Asistentes IA
+    description: Asistentes conversacionales
+
+paths:
+  /api/auth/register:
+    post:
+      tags:
+        - Autenticación
+      summary: Registrar nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Usuario registrado exitosamente
+        '400':
+          description: Datos inválidos
+        '409':
+          description: Usuario ya existe
+
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticación
+      summary: Iniciar sesión
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login exitoso
+        '401':
+          description: Credenciales inválidas
+
+  /api/auth/refresh:
+    post:
+      tags:
+        - Autenticación
+      summary: Renovar token de acceso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Token renovado exitosamente
+        '401':
+          description: Token inválido
+
+  /api/saas/productos:
+    get:
+      tags:
+        - Productos
+      summary: Listar productos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de productos
+        '401':
+          description: No autenticado
+    post:
+      tags:
+        - Productos
+      summary: Crear producto
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoRequest'
+      responses:
+        '201':
+          description: Producto creado
+        '401':
+          description: No autenticado
+        '403':
+          description: Sin permisos (requiere ADMIN)
+
+  /api/saas/productos/{id}:
+    get:
+      tags:
+        - Productos
+      summary: Obtener producto por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Producto encontrado
+        '404':
+          description: Producto no encontrado
+    put:
+      tags:
+        - Productos
+      summary: Actualizar producto
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductoRequest'
+      responses:
+        '200':
+          description: Producto actualizado
+        '403':
+          description: Sin permisos (requiere ADMIN)
+    delete:
+      tags:
+        - Productos
+      summary: Eliminar producto (soft delete)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Producto eliminado
+        '403':
+          description: Sin permisos (requiere ADMIN)
+
+  /api/saas/stock:
+    get:
+      tags:
+        - Stock
+      summary: Listar stock
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: local_id
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Lista de stock
+        '401':
+          description: No autenticado
+    post:
+      tags:
+        - Stock
+      summary: Agregar o actualizar stock
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockRequest'
+      responses:
+        '200':
+          description: Stock actualizado
+        '401':
+          description: No autenticado
+
+  /api/comercial/planes:
+    get:
+      tags:
+        - Planes
+      summary: Listar planes disponibles
+      responses:
+        '200':
+          description: Lista de planes
+
+  /api/comercial/planes/{id}:
+    get:
+      tags:
+        - Planes
+      summary: Obtener plan por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Plan encontrado
+        '404':
+          description: Plan no encontrado
+
+  /api/comercial/suscripciones:
+    get:
+      tags:
+        - Suscripciones
+      summary: Listar suscripciones del usuario
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista de suscripciones
+        '401':
+          description: No autenticado
+    post:
+      tags:
+        - Suscripciones
+      summary: Crear suscripción
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuscripcionRequest'
+      responses:
+        '201':
+          description: Suscripción creada
+        '401':
+          description: No autenticado
+
+  /api/comercial/chat:
+    post:
+      tags:
+        - Asistentes IA
+      summary: Asistente comercial (público)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Respuesta del asistente
+
+  /api/saas/chat:
+    post:
+      tags:
+        - Asistentes IA
+      summary: Asistente operativo (requiere autenticación)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Respuesta del asistente
+        '401':
+          description: No autenticado
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - email
+        - password
+        - nombre
+        - rol
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+        nombre:
+          type: string
+        apellido:
+          type: string
+        rol:
+          type: string
+          enum: [ADMINISTRADOR, OPERADOR, CAJERO]
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    RefreshRequest:
+      type: object
+      required:
+        - refreshToken
+      properties:
+        refreshToken:
+          type: string
+
+    ProductoRequest:
+      type: object
+      required:
+        - nombre
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        categoriaId:
+          type: integer
+        codigoBarras:
+          type: string
+        precioUnitario:
+          type: string
+
+    StockRequest:
+      type: object
+      required:
+        - productoId
+        - localId
+        - cantidad
+      properties:
+        productoId:
+          type: integer
+        localId:
+          type: integer
+        cantidad:
+          type: integer
+          minimum: 0
+        cantidadMinima:
+          type: integer
+          minimum: 0
+
+    SuscripcionRequest:
+      type: object
+      required:
+        - planId
+      properties:
+        planId:
+          type: integer
+        periodo:
+          type: string
+          enum: [MENSUAL, ANUAL]
+          default: MENSUAL
+
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+

@@ -30,7 +30,6 @@ fun Application.testModule() {
     
     // Configurar rutas
     configureAuthRoutes()
-    configureExampleProtectedRoutes()
     configureCommercialChatRoutes()
     configureSaasChatRoutes()
     configureProductosRoutes()

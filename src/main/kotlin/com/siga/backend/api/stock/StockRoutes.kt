@@ -64,6 +64,15 @@ fun Application.configureStockRoutes() {
                             return@get
                         }
                         
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                StockListResponse(success = false, stock = emptyList(), total = 0)
+                            )
+                            return@get
+                        }
+                        
                         val stock = transaction {
                             val query = if (localIdParam != null) {
                                 StockTable.select {
@@ -124,6 +133,15 @@ fun Application.configureStockRoutes() {
                 // GET /api/saas/stock/{producto_id}/{local_id} - Obtener stock específico
                 get("{producto_id}/{local_id}") {
                     try {
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                StockDetailResponse(success = false, message = "Se requiere una suscripción activa")
+                            )
+                            return@get
+                        }
+                        
                         val productoId = call.parameters["producto_id"]?.toIntOrNull()
                             ?: throw IllegalArgumentException("ID de producto inválido")
                         val localId = call.parameters["local_id"]?.toIntOrNull()
@@ -167,6 +185,15 @@ fun Application.configureStockRoutes() {
                 // POST /api/saas/stock - Agregar o actualizar stock
                 post {
                     try {
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                StockDetailResponse(success = false, message = "Se requiere una suscripción activa")
+                            )
+                            return@post
+                        }
+                        
                         val request = call.receive<StockRequest>()
                         
                         if (request.cantidad < 0) {

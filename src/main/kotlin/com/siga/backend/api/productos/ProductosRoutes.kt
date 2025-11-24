@@ -69,6 +69,15 @@ fun Application.configureProductosRoutes() {
                             return@get
                         }
                         
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                ProductoDetailResponse(success = false, message = "Se requiere una suscripción activa para acceder a este recurso")
+                            )
+                            return@get
+                        }
+                        
                         val productos = transaction {
                             ProductoTable.select {
                                 ProductoTable.activo eq true
@@ -102,6 +111,15 @@ fun Application.configureProductosRoutes() {
                 // GET /api/saas/productos/{id} - Obtener producto por ID
                 get("{id}") {
                     try {
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                ProductoDetailResponse(success = false, message = "Se requiere una suscripción activa para acceder a este recurso")
+                            )
+                            return@get
+                        }
+                        
                         val productoId = call.parameters["id"]?.toIntOrNull()
                             ?: throw IllegalArgumentException("ID inválido")
                         
@@ -146,6 +164,15 @@ fun Application.configureProductosRoutes() {
                 // POST /api/saas/productos - Crear producto
                 post {
                     try {
+                        // Verificar suscripción activa
+                        if (!call.hasActiveSubscription()) {
+                            call.respond(
+                                HttpStatusCode.PaymentRequired,
+                                ProductoDetailResponse(success = false, message = "Se requiere una suscripción activa para acceder a este recurso")
+                            )
+                            return@post
+                        }
+                        
                         // Solo ADMINISTRADOR puede crear productos
                         if (!call.isAdmin()) {
                             call.respond(

@@ -509,5 +509,3 @@ Crear un backend robusto que:
 
 **¡Éxito con el desarrollo!** 🚀
 
-Si tienes dudas, consulta `ECOSISTEMA_SIGA.md` para el contexto completo.
-
