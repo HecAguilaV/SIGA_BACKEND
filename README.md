@@ -151,3 +151,7 @@ Este software es propiedad privada. No se permite su uso comercial sin autorizac
 
 Propietario - SIGA
 
+
+**Desarrollado por**
+> **Héctor Aguila**
+>> ###### Un Soñador con Poca RAM 🧑🏼‍💻
