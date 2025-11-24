@@ -4,7 +4,7 @@ import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.timestamp
 import java.time.Instant
 
-object UsuarioComercialTable : Table("siga_comercial.usuarios") {
+object UsuarioComercialTable : Table("siga_comercial.USUARIOS") {
     val id = integer("id").autoIncrement()
     val email = varchar("email", 255).uniqueIndex()
     val passwordHash = varchar("password_hash", 255)

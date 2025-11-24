@@ -6,6 +6,12 @@ import io.ktor.server.netty.*
 import com.siga.backend.config.*
 import com.siga.backend.api.auth.*
 import com.siga.backend.api.*
+import com.siga.backend.api.chat.*
+import com.siga.backend.api.productos.*
+import com.siga.backend.api.stock.*
+import com.siga.backend.api.planes.*
+import com.siga.backend.api.ventas.*
+import com.siga.backend.api.suscripciones.*
 import com.siga.backend.utils.EnvLoader
 
 fun main() {
@@ -41,10 +47,14 @@ fun Application.configureRoutes() {
     // Rutas de ejemplo para probar el middleware (temporal)
     configureExampleProtectedRoutes()
     
-    // Rutas de asistentes
-    // comercialChatRoutes()
-    // saasChatRoutes()
+    // Rutas de asistentes IA
+    configureCommercialChatRoutes()
+    configureSaasChatRoutes()
     
-    // Otras rutas
-    // productosRoutes()
+    // Rutas CRUD
+    configureProductosRoutes()
+    configureStockRoutes()
+    configureVentasRoutes()
+    configurePlanesRoutes()
+    configureSuscripcionesRoutes()
 }

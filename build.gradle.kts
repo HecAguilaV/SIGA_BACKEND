@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    // Ktor
+    // Ktor Server
     implementation("io.ktor:ktor-server-core:2.3.5")
     implementation("io.ktor:ktor-server-netty:2.3.5")
     implementation("io.ktor:ktor-server-content-negotiation:2.3.5")
@@ -22,6 +22,12 @@ dependencies {
     implementation("io.ktor:ktor-server-cors:2.3.5")
     implementation("io.ktor:ktor-server-auth:2.3.5")
     implementation("io.ktor:ktor-server-auth-jwt:2.3.5")
+    
+    // Ktor Client (para llamadas a Gemini API)
+    implementation("io.ktor:ktor-client-core:2.3.5")
+    implementation("io.ktor:ktor-client-cio:2.3.5")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
     
     // PostgreSQL
     implementation("org.postgresql:postgresql:42.7.1")
@@ -55,6 +61,8 @@ dependencies {
     // Testing
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-server-test-host:2.3.5")
+    testImplementation("io.ktor:ktor-client-content-negotiation:2.3.5")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
 }
 
 tasks.withType<KotlinCompile> {
