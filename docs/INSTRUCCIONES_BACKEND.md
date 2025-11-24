@@ -214,7 +214,7 @@ Backend (Monolito Modular)
 - **ORM**: Exposed
 - **Serialización**: kotlinx.serialization
 - **Autenticación**: JWT
-- **IA**: Google Gemini 1.5 Flash
+- **IA**: Google Gemini 2.5 Flash
 - **Despliegue**: Railway (plan gratuito)
 
 ---
