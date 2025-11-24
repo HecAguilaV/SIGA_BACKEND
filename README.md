@@ -9,7 +9,7 @@ Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA).
 - PostgreSQL (Always Data)
 - Exposed ORM
 - JWT Authentication
-- Google Gemini 1.5 Flash (IA)
+- Google Gemini 2.5 Flash (IA)
 
 ## Estructura del Proyecto
 
