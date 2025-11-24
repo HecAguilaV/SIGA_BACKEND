@@ -75,7 +75,7 @@ export const POST: RequestHandler = async ({ request }) => {
 En tu proyecto SvelteKit, agrega en `.env`:
 
 ```env
-GEMINI_API_KEY=AIzaSyCFP_toj6X_q7ye_1Sbt8W1gKAC1tMgKdQ
+GEMINI_API_KEY=tu_api_key_gemini_aqui
 ```
 
 Y en Vercel, agrega la variable de entorno en el dashboard.

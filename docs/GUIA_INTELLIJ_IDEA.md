@@ -173,7 +173,7 @@ DB_USER=postgres
 DB_PASSWORD=tu_password_local
 
 # API Keys
-GEMINI_API_KEY=AIzaSyCFP_toj6X_q7ye_1Sbt8W1gKAC1tMgKdQ
+GEMINI_API_KEY=tu_api_key_gemini_aqui
 
 # JWT
 JWT_SECRET=tu_secret_key_super_seguro_aqui

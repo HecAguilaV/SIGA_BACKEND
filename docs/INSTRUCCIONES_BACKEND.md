@@ -337,7 +337,7 @@ Crear scripts SQL para:
 
 La API key de Gemini se configura en variables de entorno:
 ```env
-GEMINI_API_KEY=AIzaSyCFP_toj6X_q7ye_1Sbt8W1gKAC1tMgKdQ
+GEMINI_API_KEY=tu_api_key_gemini_aqui
 ```
 
 ### Contexto SIGA para Gemini
