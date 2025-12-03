@@ -27,29 +27,26 @@ fun Application.configureHealthRoutes() {
     routing {
         get("/health") {
             try {
-                // Verificar conexión a base de datos (con timeout corto)
+                // Health check simple y rápido - solo verificar que el servidor responde
+                // No verificamos DB aquí para que Railway pueda validar el deploy
+                // incluso si la DB no está configurada aún
                 val dbStatus = try {
-                    // Usar un timeout corto para no bloquear el health check
-                    kotlinx.coroutines.withTimeout(2000) {
+                    kotlinx.coroutines.withTimeout(1000) {
                         transaction {
                             exec("SELECT 1")
                         }
                     }
                     "connected"
                 } catch (e: Exception) {
-                    // Si falla la DB, aún respondemos OK para que Railway no falle el deploy
-                    // pero indicamos el estado de la DB
                     "disconnected"
                 }
                 
                 // Siempre respondemos OK si el servidor está corriendo
                 // Railway solo necesita saber que el servidor responde
-                val status = "healthy"
-                
                 call.respond(
                     HttpStatusCode.OK,
                     HealthResponse(
-                        status = status,
+                        status = "healthy",
                         database = dbStatus,
                         timestamp = java.time.Instant.now().toString()
                     )

@@ -1,5 +1,5 @@
 [phases.setup]
-nixPkgs = ["gradle"]
+nixPkgs = ["gradle", "jdk21"]
 
 [phases.install]
 cmds = ["gradle build -x test --no-daemon"]
