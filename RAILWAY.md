@@ -44,6 +44,7 @@ Railway usará:
 4. Debe retornar: `{"status":"healthy","database":"connected",...}`
 
 ### 5. Obtener URL de Producción
+siga-backend-production.up.railway.app
 
 Railway asignará una URL como:
 - `https://siga-backend-production.up.railway.app`
