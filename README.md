@@ -2,11 +2,11 @@
 
 Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Mini ERP para PYMES chilenas.
 
-## 📋 Descripción
+## Descripción
 
 SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporciona servicios para la gestión de inventario, ventas, suscripciones y asistentes de inteligencia artificial conversacionales.
 
-## 🚀 Tecnologías
+## Tecnologías
 
 - **Lenguaje**: Kotlin 1.9.22
 - **Framework**: Spring Boot 3.2.0
@@ -18,14 +18,14 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **Build**: Gradle 8.5
 - **Deployment**: Docker + Railway
 
-## 📦 Requisitos Previos
+## Requisitos Previos
 
 - **JDK 21** o superior
 - **Gradle 8.5** (incluido en el proyecto via `gradlew`)
 - **PostgreSQL** (local o remoto)
 - **Git**
 
-## 🔧 Instalación
+## Instalación
 
 ### 1. Clonar el Repositorio
 
@@ -87,7 +87,7 @@ Las tablas deben crearse manualmente mediante scripts SQL. Ver estructura en `do
 - `siga_saas`: Sistema operativo (productos, stock, ventas, usuarios)
 - `siga_comercial`: Portal comercial (planes, suscripciones)
 
-## 🏃 Ejecución
+## Ejecución
 
 ### Desarrollo Local
 
@@ -112,7 +112,7 @@ curl http://localhost:8080/health
 # {"status":"healthy","database":"connected","timestamp":"..."}
 ```
 
-## 📚 Documentación API
+## Documentación API
 
 ### Swagger UI
 
@@ -128,7 +128,7 @@ Documentación OpenAPI en formato JSON:
 http://localhost:8080/api-docs
 ```
 
-## 🗂️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 src/main/kotlin/com/siga/backend/
@@ -171,7 +171,7 @@ src/main/kotlin/com/siga/backend/
     └── SecurityUtils.kt          # Helpers para SecurityContext
 ```
 
-## 🔌 Endpoints Principales
+## Endpoints Principales
 
 ### Autenticación
 
@@ -216,7 +216,7 @@ src/main/kotlin/com/siga/backend/
 
 - `GET /health` - Estado del servidor y base de datos
 
-## 🔐 Autenticación
+## Autenticación
 
 ### Obtener Token
 
@@ -246,7 +246,7 @@ curl -X GET http://localhost:8080/api/saas/productos \
   -H "Authorization: Bearer eyJhbGc..."
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Ejecutar Todos los Tests
 
@@ -272,7 +272,7 @@ curl -X GET http://localhost:8080/api/saas/productos \
 - 13 tests de servicios (JWT, Password)
 - 8 tests de controllers (Auth, Productos)
 
-## 🐳 Docker
+## Docker
 
 ### Construir Imagen
 
@@ -294,7 +294,7 @@ docker run -d \
   siga-backend
 ```
 
-## 🚂 Despliegue en Railway
+## Despliegue en Railway
 
 ### Pasos Rápidos
 
@@ -319,14 +319,14 @@ docker run -d \
 
 Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 
-## 📖 Documentación Adicional
+## Documentación Adicional
 
 - [RAILWAY.md](./RAILWAY.md) - Guía de despliegue en Railway
 - [docs/API_FRONTEND_APPWEB.md](./docs/API_FRONTEND_APPWEB.md) - Documentación API para frontend web
 - [docs/API_FRONTEND_APP.md](./docs/API_FRONTEND_APP.md) - Documentación API para app móvil
 - [docs/API_FRONTEND_COMERCIAL.md](./docs/API_FRONTEND_COMERCIAL.md) - Documentación API para portal comercial
 
-## 🛠️ Comandos Útiles
+## Comandos Útiles
 
 ```bash
 # Compilar proyecto
@@ -348,7 +348,7 @@ Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 ./gradlew build -x test
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: "No se puede conectar a la base de datos"
 - Verificar que PostgreSQL esté corriendo
@@ -367,16 +367,16 @@ Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 - Verificar que la base de datos de test esté configurada
 - Ejecutar `./gradlew clean test`
 
-## 📝 Licencia
+## Licencia
 
 Copyright (c) 2025 Héctor Aguila - All Rights Reserved
 
 Este software es propiedad privada. No se permite su uso comercial sin autorización.
 
-## 👤 Autor
+## Autor
 
 **Héctor Aguila**
 
 ---
 
-**Desarrollado con ❤️ para PYMES chilenas**
+**Desarrollado para PYMES chilenas**
