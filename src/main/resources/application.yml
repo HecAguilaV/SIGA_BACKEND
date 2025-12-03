@@ -33,6 +33,7 @@ spring:
 
 server:
   port: ${PORT:8080}
+  address: 0.0.0.0  # Escuchar en todas las interfaces para aceptar healthchecks de Railway
   error:
     include-message: always
     include-binding-errors: always

@@ -7,6 +7,12 @@ import org.springframework.boot.runApplication
 class SigaBackendApplication
 
 fun main(args: Array<String>) {
+    // Log del puerto al iniciar para debugging
+    val port = System.getenv("PORT") ?: "8080"
+    println("========================================")
+    println("Iniciando SIGA Backend")
+    println("Puerto: $port")
+    println("========================================")
     runApplication<SigaBackendApplication>(*args)
 }
 

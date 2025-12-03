@@ -17,12 +17,12 @@ class HealthController {
     fun health(): ResponseEntity<HealthResponse> {
         // Health check simple que siempre responde
         // No depende de BD para que Railway pueda verificar que la app está corriendo
-        return ResponseEntity.ok(
-            HealthResponse(
-                status = "healthy",
-                timestamp = Instant.now().toString()
-            )
+        // Acepta requests de healthcheck.railway.app
+        val response = HealthResponse(
+            status = "healthy",
+            timestamp = Instant.now().toString()
         )
+        return ResponseEntity.ok(response)
     }
 }
 
