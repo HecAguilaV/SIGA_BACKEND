@@ -5,7 +5,7 @@ Documentación de endpoints para el frontend del portal comercial (siga.com).
 ## Base URL
 
 - Desarrollo: `http://localhost:8080`
-- Producción: `https://siga-backend.railway.app` (actualizar con URL real de Railway)
+- Producción: `https://siga-backend-production.up.railway.app`
 
 ## Frontend URL
 
@@ -47,7 +47,7 @@ Registrar nuevo usuario en el portal comercial.
 **Ejemplo con fetch:**
 ```javascript
 // Reemplazar con la URL real de Railway cuando esté desplegado
-const API_URL = 'https://siga-backend.railway.app'; // Actualizar con URL real
+const API_URL = 'https://siga-backend-production.up.railway.app';
 
 const response = await fetch(`${API_URL}/api/auth/register`, {
   method: 'POST',

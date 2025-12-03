@@ -40,16 +40,18 @@ Railway usará:
 
 1. Railway construirá el proyecto automáticamente
 2. Verificar logs en Railway dashboard
-3. Probar endpoint: `https://tu-proyecto.railway.app/health`
+3. Probar endpoint: `https://siga-backend-production.up.railway.app/health`
 4. Debe retornar: `{"status":"healthy","database":"connected",...}`
 
 ### 5. Obtener URL de Producción
-siga-backend-production.up.railway.app
 
-Railway asignará una URL como:
-- `https://siga-backend-production.up.railway.app`
+**URL de Producción**: `https://siga-backend-production.up.railway.app`
 
-Actualizar `ALLOWED_ORIGINS` con las URLs de los frontends en producción.
+Railway asignará una URL como la anterior. Esta URL debe configurarse en:
+- Variables de entorno de los frontends en Vercel como `API_URL`
+- Documentación de API para referencia
+
+Actualizar `ALLOWED_ORIGINS` con las URLs de los frontends en producción si es necesario.
 
 ## Troubleshooting
 

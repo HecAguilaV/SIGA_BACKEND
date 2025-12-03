@@ -5,7 +5,7 @@ Documentación de endpoints para la aplicación móvil Android (siga-app).
 ## Base URL
 
 - Desarrollo: `http://localhost:8080`
-- Producción: `https://siga-backend.railway.app` (actualizar con URL real de Railway)
+- Producción: `https://siga-backend-production.up.railway.app`
 
 **Nota**: En todos los ejemplos, usar variable `API_URL` que debe configurarse según el entorno.
 
@@ -48,7 +48,7 @@ import io.ktor.http.*
 
 suspend fun login(email: String, password: String): LoginResponse {
     val client = HttpClient()
-    val apiUrl = "https://siga-backend.railway.app" // Actualizar con URL real
+    val apiUrl = "https://siga-backend-production.up.railway.app"
     val response = client.post("$apiUrl/api/auth/login") {
         contentType(ContentType.Application.Json)
         setBody(LoginRequest(email, password))
@@ -72,7 +72,7 @@ Listar productos. Mismo formato que app web.
 ```kotlin
 suspend fun getProductos(token: String): ProductosListResponse {
     val client = HttpClient()
-    val apiUrl = "https://siga-backend.railway.app" // Actualizar con URL real
+    val apiUrl = "https://siga-backend-production.up.railway.app"
     val response = client.get("$apiUrl/api/saas/productos") {
         header("Authorization", "Bearer $token")
     }
@@ -99,7 +99,7 @@ Listar stock. Filtrar por local: `?local_id={id}`
 ```kotlin
 suspend fun getStock(token: String, localId: Int? = null): StockListResponse {
     val client = HttpClient()
-    val apiUrl = "https://siga-backend.railway.app" // Actualizar con URL real
+    val apiUrl = "https://siga-backend-production.up.railway.app"
     val url = if (localId != null) {
         "$apiUrl/api/saas/stock?local_id=$localId"
     } else {
@@ -151,7 +151,7 @@ suspend fun createVenta(
     detalles: List<DetalleVentaRequest>
 ): VentaDetailResponse {
     val client = HttpClient()
-    val apiUrl = "https://siga-backend.railway.app" // Actualizar con URL real
+    val apiUrl = "https://siga-backend-production.up.railway.app"
     val response = client.post("$apiUrl/api/saas/ventas") {
         contentType(ContentType.Application.Json)
         header("Authorization", "Bearer $token")
@@ -177,7 +177,7 @@ Chat con asistente operativo.
 ```kotlin
 suspend fun chatOperativo(token: String, message: String): ChatResponse {
     val client = HttpClient()
-    val apiUrl = "https://siga-backend.railway.app" // Actualizar con URL real
+    val apiUrl = "https://siga-backend-production.up.railway.app"
     val response = client.post("$apiUrl/api/saas/chat") {
         contentType(ContentType.Application.Json)
         header("Authorization", "Bearer $token")
@@ -212,7 +212,7 @@ class ApiClient(private val tokenManager: TokenManager) {
         }
         
         defaultRequest {
-            url("https://siga-backend.railway.app") // Actualizar con URL real
+            url("https://siga-backend-production.up.railway.app")
             header("Content-Type", "application/json")
         }
         

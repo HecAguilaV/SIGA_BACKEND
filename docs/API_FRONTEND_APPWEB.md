@@ -5,12 +5,23 @@ Documentación de endpoints para la aplicación web SaaS (app.siga.com).
 ## Base URL
 
 - Desarrollo: `http://localhost:8080`
-- Producción: `https://siga-backend.railway.app` (actualizar con URL real de Railway)
+- Producción: `https://siga-backend-production.up.railway.app`
 
 ## Frontend URL
 
 - Desarrollo: `http://localhost:5173` o `http://localhost:3000`
 - Producción: `https://siga-appweb.vercel.app`
+
+## Configuración de API_URL
+
+En el código frontend, configurar la variable de entorno `API_URL`:
+
+```javascript
+// Usar variable de entorno o definir según el entorno
+const API_URL = process.env.API_URL || 'https://siga-backend-production.up.railway.app';
+```
+
+**Nota**: En producción, configurar `API_URL` como variable de entorno en Vercel.
 
 ## Autenticación
 

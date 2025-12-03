@@ -132,6 +132,8 @@ Ejecutar test específico:
 3. Railway detectará automáticamente el proyecto Kotlin
 4. El servidor se desplegará automáticamente
 
+**URL de Producción**: `https://siga-backend-production.up.railway.app`
+
 ### Variables de Entorno en Railway
 
 Configurar las mismas variables que en `.env`:
@@ -142,6 +144,11 @@ Configurar las mismas variables que en `.env`:
 - `JWT_SECRET`
 - `PORT` (Railway lo asigna automáticamente)
 - `ALLOWED_ORIGINS`
+
+### Configuración en Frontends (Vercel)
+
+Configurar en cada proyecto de Vercel la variable de entorno:
+- `API_URL` = `https://siga-backend-production.up.railway.app`
 
 ## Licencia
 
