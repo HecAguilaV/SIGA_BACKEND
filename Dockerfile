@@ -30,5 +30,6 @@ ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 # Run the application
 # Railway asigna PORT dinámicamente, leer de variable de entorno
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
+# Usar exec para que Java reciba señales correctamente
+ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
 

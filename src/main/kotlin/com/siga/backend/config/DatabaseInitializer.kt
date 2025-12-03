@@ -17,7 +17,7 @@ class DatabaseInitializer(
         try {
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS siga_saas")
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS siga_comercial")
-            println("Esquemas de base de datos inicializados correctamente")
+            System.out.println("Esquemas de base de datos inicializados correctamente")
         } catch (e: Exception) {
             // Log del error pero no detener la aplicación
             System.err.println("ADVERTENCIA: Error al inicializar esquemas: ${e.message}")
