@@ -32,9 +32,10 @@ ALLOWED_ORIGINS=https://siga-appweb.vercel.app,https://siga-web.vercel.app,http:
 ### 3. Configurar Build
 
 Railway usará:
-- Builder: NIXPACKS (detecta automáticamente Gradle)
-- Start Command: `./gradlew run`
+- Builder: **DOCKERFILE** (configurado en `railway.json`)
+- Dockerfile: Usa multi-stage build (Gradle build + JRE runtime)
 - Health Check: `/health`
+- El Dockerfile construye el JAR de Spring Boot y lo ejecuta con `java -jar`
 
 ### 4. Verificar Despliegue
 
@@ -67,6 +68,8 @@ Actualizar `ALLOWED_ORIGINS` con las URLs de los frontends en producción si es 
 - Revisar logs en Railway
 - Verificar que `build.gradle.kts` esté correcto
 - Verificar que todas las dependencias estén disponibles
+- Verificar que el Dockerfile esté correcto
+- Spring Boot genera un JAR ejecutable, verificar que se cree correctamente
 
 ## Notas
 
