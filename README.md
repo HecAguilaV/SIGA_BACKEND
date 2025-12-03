@@ -80,13 +80,25 @@ DB_PASSWORD=tu_password_alwaysdata
 
 ### 4. Crear Tablas
 
-Las tablas deben crearse manualmente mediante scripts SQL en la base de datos. 
+Las tablas deben crearse manualmente ejecutando los scripts SQL que se encuentran en:
+```
+src/main/resources/db/migrations/
+```
 
-**Esquemas** (se crean automáticamente al iniciar):
-- `siga_saas`: Sistema operativo (productos, stock, ventas, usuarios)
-- `siga_comercial`: Portal comercial (planes, suscripciones)
+**Scripts disponibles** (ejecutar en orden):
+1. `001_create_schemas.sql` - Crea los esquemas (ya se crean automáticamente, pero por si acaso)
+2. `002_create_siga_saas_tables.sql` - Crea tablas del sistema operativo
+3. `003_create_siga_comercial_tables.sql` - Crea tablas del portal comercial
+4. `004_insert_initial_data.sql` - Inserta datos iniciales (planes, categorías, etc.)
 
-**Nota**: Las tablas dentro de cada esquema deben crearse manualmente. Ver estructura en `docs/` o usar herramientas de migración como Flyway o Liquibase.
+**Cómo ejecutar**:
+- Desde Always Data: Panel → Bases de datos → PostgreSQL → phpPgAdmin
+- Desde terminal: `psql -h postgresql-hector.alwaysdata.net -U hector -d hector_siga_db`
+- Desde IntelliJ IDEA: Database tool window → Ejecutar cada script
+
+**Ver instrucciones detalladas**: `src/main/resources/db/migrations/README.md`
+
+**Nota**: Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación Spring Boot mediante `DatabaseInitializer`, pero las tablas deben crearse manualmente con estos scripts.
 
 ## Ejecución
 
@@ -118,9 +130,23 @@ curl http://localhost:8080/health
 ### Swagger UI
 
 Acceder a la interfaz interactiva de Swagger:
+
+**Ruta principal (recomendada)**:
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
+**Rutas alternativas** (requieren reiniciar el servidor después de los cambios):
 ```
 http://localhost:8080/swagger-ui.html
+http://localhost:8080/swagger-ui/
 ```
+
+**Nota**: En la interfaz de Swagger UI puedes:
+- Ver todos los endpoints disponibles
+- Probar los endpoints directamente desde el navegador
+- Ver la documentación de cada endpoint
+- Autenticarte con JWT usando el botón "Authorize"
 
 ### API Docs (JSON)
 
@@ -129,48 +155,6 @@ Documentación OpenAPI en formato JSON:
 http://localhost:8080/api-docs
 ```
 
-## Estructura del Proyecto
-
-```
-src/main/kotlin/com/siga/backend/
-├── controller/             # REST Controllers
-│   ├── AuthController.kt          # Autenticación (register, login, refresh)
-│   ├── ProductosController.kt     # CRUD Productos
-│   ├── StockController.kt         # Gestión de Stock
-│   ├── VentasController.kt        # Gestión de Ventas
-│   ├── PlanesController.kt        # Planes de suscripción
-│   ├── SuscripcionesController.kt # Suscripciones
-│   ├── ChatController.kt          # Asistentes IA
-│   └── HealthController.kt       # Health check
-├── service/                # Servicios de negocio
-│   ├── JWTService.kt             # Generación y validación de JWT
-│   ├── PasswordService.kt        # Hashing de contraseñas (BCrypt)
-│   ├── SubscriptionService.kt    # Validación de suscripciones
-│   ├── GeminiService.kt          # Cliente para Gemini API
-│   ├── CommercialAssistantService.kt  # Asistente comercial
-│   └── OperationalAssistantService.kt  # Asistente operativo
-├── entity/                 # Entidades JPA
-│   ├── UsuarioSaas.kt
-│   ├── UsuarioComercial.kt
-│   ├── Producto.kt
-│   ├── Stock.kt
-│   ├── Venta.kt
-│   ├── Plan.kt
-│   ├── Suscripcion.kt
-│   ├── Categoria.kt
-│   └── Local.kt
-├── repository/             # Repositorios JPA
-│   ├── UsuarioSaasRepository.kt
-│   ├── ProductoRepository.kt
-│   └── ...
-├── config/                 # Configuración Spring Boot
-│   ├── SecurityConfig.kt          # Configuración de seguridad
-│   ├── JwtAuthenticationFilter.kt # Filtro JWT
-│   ├── DatabaseInitializer.kt     # Inicialización de esquemas
-│   └── SwaggerConfig.kt          # Configuración Swagger
-└── utils/                  # Utilidades
-    └── SecurityUtils.kt          # Helpers para SecurityContext
-```
 
 ## Endpoints Principales
 

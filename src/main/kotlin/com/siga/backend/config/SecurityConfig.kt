@@ -44,6 +44,22 @@ class SecurityConfig(
         configuration.maxAge = 3600L
         
         val source = UrlBasedCorsConfigurationSource()
+        
+        // Configuración especial para Swagger/OpenAPI (permite cualquier origen)
+        val swaggerConfig = CorsConfiguration()
+        swaggerConfig.allowedOriginPatterns = listOf("*")
+        swaggerConfig.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")
+        swaggerConfig.allowedHeaders = listOf("*")
+        swaggerConfig.allowCredentials = false
+        swaggerConfig.maxAge = 3600L
+        
+        source.registerCorsConfiguration("/swagger-ui/**", swaggerConfig)
+        source.registerCorsConfiguration("/api-docs/**", swaggerConfig)
+        source.registerCorsConfiguration("/v3/api-docs/**", swaggerConfig)
+        source.registerCorsConfiguration("/openapi.yaml", swaggerConfig)
+        source.registerCorsConfiguration("/openapi.yml", swaggerConfig)
+        
+        // Configuración normal para el resto de endpoints
         source.registerCorsConfiguration("/**", configuration)
         return source
     }
@@ -63,8 +79,14 @@ class SecurityConfig(
                         "/api/comercial/chat",
                         "/api/comercial/planes/**",
                         "/swagger-ui/**",
+                        "/swagger-ui",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
                         "/api-docs/**",
-                        "/openapi.yaml"
+                        "/api-docs.yaml",
+                        "/api-docs.yml",
+                        "/openapi.yaml",
+                        "/openapi.yml"
                     ).permitAll()
                     // Todos los demás requieren autenticación
                     .anyRequest().authenticated()

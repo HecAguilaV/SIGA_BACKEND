@@ -101,7 +101,7 @@ class ProductosControllerTest {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.success").value(true))
             .andExpect(jsonPath("$.producto.nombre").value("Producto Test"))
-            .andExpect(jsonPath("$.producto.precioUnitario").value("1000.5"))
+            .andExpect(jsonPath("$.producto.precioUnitario").value("1000.50"))
     }
 
     @Test
@@ -134,7 +134,7 @@ class ProductosControllerTest {
         )
 
         whenever(subscriptionService.hasActiveSubscription(any())).thenReturn(true)
-        whenever(productoRepository.save(any())).thenReturn(productoGuardado)
+        doReturn(productoGuardado).whenever(productoRepository).save(any())
 
         mockMvc.perform(
             post("/api/saas/productos")
@@ -189,8 +189,9 @@ class ProductosControllerTest {
             fechaActualizacion = Instant.now()
         )
 
+        whenever(subscriptionService.hasActiveSubscription(any())).thenReturn(true)
         whenever(productoRepository.findById(1)).thenReturn(java.util.Optional.of(productoExistente))
-        whenever(productoRepository.save(any())).thenReturn(productoActualizado)
+        doReturn(productoActualizado).whenever(productoRepository).save(any())
 
         mockMvc.perform(
             put("/api/saas/productos/1")
@@ -216,8 +217,9 @@ class ProductosControllerTest {
 
         val productoEliminado = producto.copy(activo = false)
 
+        whenever(subscriptionService.hasActiveSubscription(any())).thenReturn(true)
         whenever(productoRepository.findById(1)).thenReturn(java.util.Optional.of(producto))
-        whenever(productoRepository.save(any())).thenReturn(productoEliminado)
+        doReturn(productoEliminado).whenever(productoRepository).save(any())
 
         mockMvc.perform(delete("/api/saas/productos/1"))
             .andExpect(status().isOk)

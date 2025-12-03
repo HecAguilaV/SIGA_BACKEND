@@ -62,7 +62,7 @@ class AuthControllerTest {
 
         whenever(usuarioSaasRepository.existsByEmail("test@example.com".lowercase())).thenReturn(false)
         whenever(passwordService.hashPassword("password123")).thenReturn(hashedPassword)
-        whenever(usuarioSaasRepository.save(any())).thenReturn(savedUser)
+        doReturn(savedUser).whenever(usuarioSaasRepository).save(any())
         whenever(jwtService.generateAccessToken(1, "test@example.com", "OPERADOR")).thenReturn("access_token")
         whenever(jwtService.generateRefreshToken(1)).thenReturn("refresh_token")
 

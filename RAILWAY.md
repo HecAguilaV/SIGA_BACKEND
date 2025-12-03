@@ -52,7 +52,7 @@ Railway usará automáticamente:
    - Verificar inicialización de esquemas: `Esquemas de base de datos inicializados correctamente`
 3. Probar endpoint de health: `https://tu-proyecto.railway.app/health`
 4. Debe retornar: `{"status":"healthy","database":"connected","timestamp":"..."}`
-5. Probar Swagger: `https://tu-proyecto.railway.app/swagger-ui.html`
+5. Probar Swagger: `https://tu-proyecto.railway.app/swagger-ui/index.html`
 
 ### 5. Obtener URL de Producción
 
