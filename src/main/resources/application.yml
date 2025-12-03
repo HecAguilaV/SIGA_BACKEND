@@ -15,6 +15,7 @@ spring:
       max-lifetime: 600000 # 10 minutos (recomendado para bases de datos remotas)
       validation-timeout: 5000
       leak-detection-threshold: 60000 # Detectar conexiones que no se cierran
+      initialization-fail-timeout: -1 # No fallar si no puede conectar al inicio
   
   jpa:
     hibernate:

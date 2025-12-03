@@ -18,8 +18,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @Configuration
 @EnableWebSecurity
 class SecurityConfig(
-    @Value("\${jwt.secret}") private val jwtSecret: String,
-    @Value("\${cors.allowed-origins}") private val allowedOrigins: String
+    @Value("\${jwt.secret:default_secret_change_in_production}") private val jwtSecret: String,
+    @Value("\${cors.allowed-origins:*}") private val allowedOrigins: String
 ) {
     
     @Bean
