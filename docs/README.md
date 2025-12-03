@@ -24,28 +24,15 @@ Este directorio contiene toda la documentación técnica del backend de SIGA.
    - Estrategia de testing
    - Guía de ejecución
 
-### Documentación de Desarrollo
-
-4. **INSTRUCCIONES_BACKEND.md**
-   - Guía completa de desarrollo
-   - Arquitectura del sistema
-   - Configuración y despliegue
-   - Checklist de desarrollo
-
-5. **MIGRACION_BACKEND.md**
-   - Documentación de la migración de Ktor a Spring Boot
-   - Cambios realizados
-   - Guía de actualización
-
 ### Documentación de APIs Frontend
 
-6. **API_FRONTEND_APP.md**
+4. **API_FRONTEND_APP.md**
    - Endpoints específicos para la app móvil Android
 
-7. **API_FRONTEND_APPWEB.md**
+5. **API_FRONTEND_APPWEB.md**
    - Endpoints específicos para la aplicación web operativa
 
-8. **API_FRONTEND_COMERCIAL.md**
+6. **API_FRONTEND_COMERCIAL.md**
    - Endpoints específicos para el portal comercial
 
 ## Documentación Interactiva
@@ -68,17 +55,16 @@ docs/
 ├── API_DOCUMENTACION.md
 ├── APIS_INTEGRACION.md
 ├── COBERTURA_TESTING.md
-├── INSTRUCCIONES_BACKEND.md
-├── MIGRACION_BACKEND.md
 ├── API_FRONTEND_APP.md
 ├── API_FRONTEND_APPWEB.md
 └── API_FRONTEND_COMERCIAL.md
 ```
 
+**Nota**: Documentación de desarrollo interno (INSTRUCCIONES_BACKEND.md, MIGRACION_BACKEND.md) se encuentra en el directorio `CHALLA/` (excluido del repositorio).
+
 ## Uso Rápido
 
 - **Para desarrolladores frontend**: Comenzar con `APIS_INTEGRACION.md`
-- **Para desarrolladores backend**: Comenzar con `INSTRUCCIONES_BACKEND.md`
 - **Para testing**: Ver `COBERTURA_TESTING.md`
 - **Para referencia de API**: Usar `API_DOCUMENTACION.md` o Swagger UI
 

@@ -48,3 +48,6 @@ bin/
 .env
 .env.local
 .env.*.local
+
+### Desarrollo Local / Challas ###
+CHALLA/
