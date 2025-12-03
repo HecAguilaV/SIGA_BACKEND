@@ -38,6 +38,11 @@ server:
     include-binding-errors: always
   forward-headers-strategy: framework
   use-forward-headers: true
+  tomcat:
+    remoteip:
+      remote-ip-header: x-forwarded-for
+      protocol-header: x-forwarded-proto
+      protocol-header-https-value: https
 
 # Swagger/OpenAPI
 springdoc:
@@ -50,7 +55,11 @@ springdoc:
     urls:
       - url: /api-docs
         name: SIGA Backend API
+    config-url: /api-docs
+    disable-swagger-default-url: true
   show-actuator: false
+  default-consumes-media-type: application/json
+  default-produces-media-type: application/json
 
 # CORS
 cors:
