@@ -65,36 +65,18 @@ cors:
 
 ### 3. Configurar Base de Datos
 
-**Nota**: La base de datos de producción está alojada en **Always Data** (PostgreSQL).
-
-#### Opción A: Usar Base de Datos en Always Data (Producción)
-
-La base de datos ya está configurada en Always Data. Solo necesitas configurar las variables de entorno:
+La base de datos está alojada en **Always Data** (PostgreSQL remoto). La conexión se configura mediante variables de entorno:
 
 ```yaml
 DATABASE_URL=jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db
 DB_USER=hector
-DB_PASSWORD=tu_password
+DB_PASSWORD=tu_password_alwaysdata
 ```
 
-Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación.
-
-#### Opción B: PostgreSQL Local (Desarrollo)
-
-1. Instalar PostgreSQL localmente
-2. Crear base de datos:
-```sql
-CREATE DATABASE siga_db;
-```
-
-3. Configurar `DATABASE_URL` en `application.yml`:
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/siga_db
-```
-
-4. Los esquemas se crean automáticamente al iniciar la aplicación.
+**Importante**: 
+- Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación
+- Las tablas dentro de cada esquema deben crearse manualmente mediante scripts SQL
+- Si prefieres usar PostgreSQL local para desarrollo, cambia `DATABASE_URL` a `jdbc:postgresql://localhost:5432/siga_db`
 
 ### 4. Crear Tablas
 
