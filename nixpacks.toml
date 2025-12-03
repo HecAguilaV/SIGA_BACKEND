@@ -2,11 +2,11 @@
 nixPkgs = ["gradle"]
 
 [phases.install]
-cmds = ["gradle build -x test"]
+cmds = ["gradle build -x test --no-daemon"]
 
 [phases.build]
-cmds = ["gradle build -x test"]
+cmds = ["echo 'Build completed in install phase'"]
 
 [start]
-cmd = "./gradlew run"
+cmd = "./gradlew run --no-daemon"
 

@@ -67,6 +67,20 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "21"
+    kotlinOptions.freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+}
+
+// Optimizaciones para builds más rápidos
+tasks.withType<JavaCompile> {
+    options.isIncremental = true
+}
+
+// Cacheo de dependencias
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor(0, "seconds")
+        cacheDynamicVersionsFor(0, "seconds")
+    }
 }
 
 application {
