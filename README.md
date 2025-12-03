@@ -13,7 +13,7 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **ORM**: Spring Data JPA (Hibernate)
 - **Base de Datos**: PostgreSQL
 - **Autenticación**: JWT con Spring Security
-- **IA**: Google Gemini 1.5 Flash
+- **IA**: Google Gemini 2.5 Flash
 - **Documentación**: Swagger/OpenAPI (SpringDoc)
 - **Build**: Gradle 8.5
 - **Deployment**: Docker + Railway
@@ -65,27 +65,46 @@ cors:
 
 ### 3. Configurar Base de Datos
 
-#### Opción A: PostgreSQL Local
+**Nota**: La base de datos de producción está alojada en **Always Data** (PostgreSQL).
 
-1. Instalar PostgreSQL
+#### Opción A: Usar Base de Datos en Always Data (Producción)
+
+La base de datos ya está configurada en Always Data. Solo necesitas configurar las variables de entorno:
+
+```yaml
+DATABASE_URL=jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db
+DB_USER=hector
+DB_PASSWORD=tu_password
+```
+
+Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación.
+
+#### Opción B: PostgreSQL Local (Desarrollo)
+
+1. Instalar PostgreSQL localmente
 2. Crear base de datos:
 ```sql
 CREATE DATABASE siga_db;
 ```
 
-3. Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación.
+3. Configurar `DATABASE_URL` en `application.yml`:
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/siga_db
+```
 
-#### Opción B: PostgreSQL Remoto
-
-Configurar `DATABASE_URL` con la URL de tu servidor PostgreSQL remoto.
+4. Los esquemas se crean automáticamente al iniciar la aplicación.
 
 ### 4. Crear Tablas
 
-Las tablas deben crearse manualmente mediante scripts SQL. Ver estructura en `docs/` o usar herramientas de migración como Flyway o Liquibase.
+Las tablas deben crearse manualmente mediante scripts SQL en la base de datos. 
 
-**Esquemas**:
+**Esquemas** (se crean automáticamente al iniciar):
 - `siga_saas`: Sistema operativo (productos, stock, ventas, usuarios)
 - `siga_comercial`: Portal comercial (planes, suscripciones)
+
+**Nota**: Las tablas dentro de cada esquema deben crearse manualmente. Ver estructura en `docs/` o usar herramientas de migración como Flyway o Liquibase.
 
 ## Ejecución
 
@@ -319,14 +338,7 @@ docker run -d \
 
 Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 
-## Documentación Adicional
-
-- [RAILWAY.md](./RAILWAY.md) - Guía de despliegue en Railway
-- [docs/API_FRONTEND_APPWEB.md](./docs/API_FRONTEND_APPWEB.md) - Documentación API para frontend web
-- [docs/API_FRONTEND_APP.md](./docs/API_FRONTEND_APP.md) - Documentación API para app móvil
-- [docs/API_FRONTEND_COMERCIAL.md](./docs/API_FRONTEND_COMERCIAL.md) - Documentación API para portal comercial
-
-## Comandos Útiles
+## Comandos
 
 ```bash
 # Compilar proyecto
@@ -348,35 +360,14 @@ Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 ./gradlew build -x test
 ```
 
-## Troubleshooting
-
-### Error: "No se puede conectar a la base de datos"
-- Verificar que PostgreSQL esté corriendo
-- Verificar `DATABASE_URL`, `DB_USER`, `DB_PASSWORD`
-- Verificar que la base de datos exista
-
-### Error: "Port already in use"
-- Cambiar puerto en `application.yml`: `server.port: 8081`
-- O matar proceso en puerto 8080
-
-### Error: "JWT_SECRET not set"
-- Configurar variable de entorno `JWT_SECRET`
-- O agregar en `application.yml`
-
-### Error en Tests
-- Verificar que la base de datos de test esté configurada
-- Ejecutar `./gradlew clean test`
-
 ## Licencia
 
 Copyright (c) 2025 Héctor Aguila - All Rights Reserved
 
 Este software es propiedad privada. No se permite su uso comercial sin autorización.
 
+---
 ## Autor
 
-**Héctor Aguila**
-
----
-
-**Desarrollado para PYMES chilenas**
+>**Héctor Aguila**
+>>Un Soñasor con Poca RAM 
