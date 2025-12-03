@@ -26,9 +26,9 @@ COPY --from=build /app/app.jar app.jar
 EXPOSE 8080
 
 # Set environment variables
-ENV PORT=8080
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
 # Run the application
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT}"]
+# Railway asigna PORT dinámicamente, leer de variable de entorno
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080}"]
 

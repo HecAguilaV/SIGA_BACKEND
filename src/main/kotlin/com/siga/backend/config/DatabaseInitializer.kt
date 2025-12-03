@@ -13,13 +13,16 @@ class DatabaseInitializer(
     @PostConstruct
     fun init() {
         // Crear esquemas si no existen
+        // No lanzar excepción para permitir que la aplicación inicie incluso si hay problemas de BD
         try {
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS siga_saas")
             jdbcTemplate.execute("CREATE SCHEMA IF NOT EXISTS siga_comercial")
             println("Esquemas de base de datos inicializados correctamente")
         } catch (e: Exception) {
-            println("Error al inicializar esquemas: ${e.message}")
-            e.printStackTrace()
+            // Log del error pero no detener la aplicación
+            System.err.println("ADVERTENCIA: Error al inicializar esquemas: ${e.message}")
+            System.err.println("La aplicación continuará iniciando, pero algunos endpoints pueden fallar")
+            // No hacer throw para permitir que la app inicie
         }
     }
 }
