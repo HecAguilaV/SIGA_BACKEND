@@ -24,48 +24,51 @@ fun main() {
         ?: EnvLoader.getEnv("PORT")?.toIntOrNull() 
         ?: 8080
     
-    println("🚀 Iniciando servidor SIGA Backend en puerto $port")
-    println("📡 Host: 0.0.0.0")
+    println("Iniciando servidor SIGA Backend en puerto $port")
+    println("Host: 0.0.0.0")
+    println("JAVA_HOME: ${System.getenv("JAVA_HOME")}")
+    println("PORT: $port")
     
     embeddedServer(Netty, port = port, host = "0.0.0.0", module = Application::module)
         .start(wait = true)
 }
 
 fun Application.module() {
-    println("⚙️ Configurando módulos de la aplicación...")
+    println("Configurando modulos de la aplicacion...")
     
     // Configurar CORS
     configureCORS()
-    println("✅ CORS configurado")
+    println("CORS configurado")
     
     // Configurar serialización JSON
     configureSerialization()
-    println("✅ Serialización configurada")
+    println("Serializacion configurada")
     
     // Configurar autenticación JWT (middleware)
     configureJWTAuth()
-    println("✅ JWT Auth configurado")
+    println("JWT Auth configurado")
     
     // Configurar base de datos
     try {
         configureDatabase()
-        println("✅ Base de datos configurada")
+        println("Base de datos configurada")
     } catch (e: Exception) {
-        println("⚠️ Error configurando base de datos: ${e.message}")
+        println("ERROR configurando base de datos: ${e.message}")
+        e.printStackTrace()
         // Continuamos aunque falle la DB para que el health check funcione
     }
     
     // Configurar OpenAPI/Swagger
     configureOpenAPI()
-    println("✅ OpenAPI configurado")
+    println("OpenAPI configurado")
     
     // Configurar rutas
     configureHealthRoutes() // Health check debe ir primero
-    println("✅ Health check configurado")
+    println("Health check configurado")
     configureRoutes()
-    println("✅ Rutas configuradas")
+    println("Rutas configuradas")
     
-    println("🎉 Aplicación lista para recibir requests")
+    println("Aplicacion lista para recibir requests")
 }
 
 fun Application.configureRoutes() {
