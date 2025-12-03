@@ -1,0 +1,65 @@
+spring:
+  application:
+    name: siga-backend
+  
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db}
+    username: ${DB_USER:hector}
+    password: ${DB_PASSWORD:kike4466}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  
+  jpa:
+    hibernate:
+      ddl-auto: none # No crear tablas automáticamente, usamos migraciones SQL
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+  
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${PORT:8080}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# Swagger/OpenAPI
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# CORS
+cors:
+  allowed-origins: ${ALLOWED_ORIGINS:https://siga-appweb.vercel.app,https://siga-web.vercel.app,http://localhost:5173,http://localhost:3000}
+
+# JWT
+jwt:
+  secret: ${JWT_SECRET:default_secret_change_in_production}
+  issuer: siga-backend
+  access-token-expiry: 86400000 # 24 horas en ms
+  refresh-token-expiry: 604800000 # 7 días en ms
+
+# Gemini API
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+
+logging:
+  level:
+    root: INFO
+    com.siga.backend: DEBUG
+    org.springframework.security: DEBUG
+

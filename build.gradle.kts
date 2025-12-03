@@ -2,8 +2,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.9.22"
-    kotlin("plugin.serialization") version "1.9.22"
-    application
+    kotlin("plugin.spring") version "1.9.22"
+    kotlin("plugin.jpa") version "1.9.22"
+    id("org.springframework.boot") version "3.2.0"
+    id("io.spring.dependency-management") version "1.1.4"
 }
 
 group = "com.siga"
@@ -14,60 +16,50 @@ repositories {
 }
 
 dependencies {
-    // Ktor Server
-    implementation("io.ktor:ktor-server-core:2.3.5")
-    implementation("io.ktor:ktor-server-netty:2.3.5")
-    implementation("io.ktor:ktor-server-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
-    implementation("io.ktor:ktor-server-cors:2.3.5")
-    implementation("io.ktor:ktor-server-auth:2.3.5")
-    implementation("io.ktor:ktor-server-auth-jwt:2.3.5")
+    // Spring Boot
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springframework.boot:spring-boot-starter-webflux") // Para HTTP client (Gemini API)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.7.3")
     
-    // Ktor Client (para llamadas a Gemini API)
-    implementation("io.ktor:ktor-client-core:2.3.5")
-    implementation("io.ktor:ktor-client-cio:2.3.5")
-    implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
+    // Kotlin
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     
     // PostgreSQL
     implementation("org.postgresql:postgresql:42.7.1")
     
-    // Exposed (ORM)
-    implementation("org.jetbrains.exposed:exposed-core:0.44.1")
-    implementation("org.jetbrains.exposed:exposed-dao:0.44.1")
-    implementation("org.jetbrains.exposed:exposed-jdbc:0.44.1")
-    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:0.44.1")
-    implementation("org.jetbrains.exposed:exposed-java-time:0.44.1")
-    
-    // Serialización
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-    
-    // Google Generative AI (Gemini)
-    // Nota: Usaremos la API REST directamente con Ktor Client
-    // implementation("com.google.ai.client.generativeai:generativeai:0.2.2")
-    
-    // Logging
-    implementation("ch.qos.logback:logback-classic:1.4.14")
-    
-    // HikariCP (Connection Pool)
-    implementation("com.zaxxer:HikariCP:5.1.0")
+    // JWT
+    implementation("com.auth0:java-jwt:4.4.0")
     
     // Password Hashing
     implementation("org.mindrot:jbcrypt:0.4")
     
-    // JWT
-    implementation("com.auth0:java-jwt:4.4.0")
+    // Swagger/OpenAPI
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0")
+    
+    // Logging (Spring Boot incluye Logback, pero especificamos versión compatible)
+    // Logback se incluye automáticamente con Spring Boot, no necesitamos especificarlo
     
     // Testing
-    testImplementation(kotlin("test"))
-    testImplementation("io.ktor:ktor-server-test-host:2.3.5")
-    testImplementation("io.ktor:ktor-client-content-negotiation:2.3.5")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "21"
-    kotlinOptions.freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+    kotlinOptions {
+        jvmTarget = "21"
+        freeCompilerArgs = listOf("-Xjsr305=strict")
+    }
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 // Optimizaciones para builds más rápidos
@@ -83,9 +75,7 @@ configurations.all {
     }
 }
 
-application {
-    mainClass.set("com.siga.backend.ApplicationKt")
-}
+// Spring Boot no necesita mainClass, lo detecta automáticamente
 
 // Tarea para ejecutar migraciones
 tasks.register<JavaExec>("migrate") {
