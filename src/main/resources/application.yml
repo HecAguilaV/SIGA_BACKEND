@@ -38,11 +38,6 @@ server:
     include-binding-errors: always
   forward-headers-strategy: framework
   use-forward-headers: true
-  tomcat:
-    remoteip:
-      remote-ip-header: x-forwarded-for
-      protocol-header: x-forwarded-proto
-      protocol-header-https-value: https
 
 # Swagger/OpenAPI
 springdoc:
