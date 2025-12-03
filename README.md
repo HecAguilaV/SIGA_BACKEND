@@ -5,34 +5,55 @@ Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA).
 ## Tecnologías
 
 - Kotlin 1.9.22
-- Ktor 2.3.5
+- Spring Boot 3.2.0
+- Spring Data JPA (Hibernate)
 - PostgreSQL (Always Data)
-- Exposed ORM
-- JWT Authentication
-- Google Gemini 2.5 Flash (IA)
+- JWT Authentication (Spring Security)
+- Google Gemini 1.5 Flash (IA)
+- Swagger/OpenAPI (SpringDoc)
 
 ## Estructura del Proyecto
 
 ```
 src/main/kotlin/com/siga/backend/
-├── api/                    # Endpoints REST
-│   ├── auth/              # Autenticación
-│   ├── chat/              # Asistentes IA
-│   ├── productos/         # CRUD Productos
-│   ├── stock/             # Gestión de Stock
-│   ├── ventas/            # Gestión de Ventas
-│   ├── planes/             # Planes de suscripción
-│   └── suscripciones/      # Suscripciones
-├── config/                 # Configuración
-├── models/                 # Modelos Exposed
-├── services/               # Servicios de negocio
+├── controller/             # REST Controllers (Spring Boot)
+│   ├── AuthController.kt
+│   ├── ProductosController.kt
+│   ├── StockController.kt
+│   ├── VentasController.kt
+│   ├── PlanesController.kt
+│   ├── SuscripcionesController.kt
+│   ├── ChatController.kt
+│   └── HealthController.kt
+├── service/                # Servicios de negocio
+│   ├── JWTService.kt
+│   ├── PasswordService.kt
+│   ├── SubscriptionService.kt
+│   ├── GeminiService.kt
+│   ├── CommercialAssistantService.kt
+│   └── OperationalAssistantService.kt
+├── entity/                 # Entidades JPA
+│   ├── UsuarioSaas.kt
+│   ├── UsuarioComercial.kt
+│   ├── Producto.kt
+│   ├── Stock.kt
+│   ├── Venta.kt
+│   └── ...
+├── repository/             # Repositorios JPA
+├── config/                 # Configuración Spring Boot
+│   ├── SecurityConfig.kt
+│   ├── JwtAuthenticationFilter.kt
+│   ├── DatabaseInitializer.kt
+│   └── SwaggerConfig.kt
 └── utils/                  # Utilidades
+    └── SecurityUtils.kt
 ```
 
 ## Configuración
 
-1. Copiar `.env.example` a `.env`
-2. Configurar variables de entorno:
+Las variables de entorno se configuran en `application.yml` o como variables de entorno del sistema:
+
+**Variables requeridas**:
    - `DATABASE_URL`: URL de PostgreSQL
    - `DB_USER`: Usuario de BD
    - `DB_PASSWORD`: Contraseña de BD
@@ -43,12 +64,11 @@ src/main/kotlin/com/siga/backend/
 
 ## Base de Datos
 
-### Migraciones
+### Inicialización
 
-Ejecutar migraciones:
-```bash
-./gradlew migrate
-```
+Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación mediante `DatabaseInitializer`.
+
+**Nota**: Las tablas deben crearse manualmente mediante scripts SQL o herramientas de migración.
 
 Verificar tablas:
 ```bash
@@ -65,7 +85,13 @@ Verificar tablas:
 ### Desarrollo Local
 
 ```bash
-./gradlew run
+./gradlew bootRun
+```
+
+O usando Spring Boot directamente:
+```bash
+./gradlew build
+java -jar build/libs/SIGA_Backend-1.0-SNAPSHOT.jar
 ```
 
 El servidor estará disponible en `http://localhost:8080`
@@ -74,7 +100,12 @@ El servidor estará disponible en `http://localhost:8080`
 
 Swagger UI disponible en:
 ```
-http://localhost:8080/swagger-ui
+http://localhost:8080/swagger-ui.html
+```
+
+API Docs (JSON):
+```
+http://localhost:8080/api-docs
 ```
 
 ## Endpoints Principales
@@ -113,26 +144,35 @@ http://localhost:8080/swagger-ui
 
 ## Testing
 
-Ejecutar tests:
+Ejecutar todos los tests:
 ```bash
 ./gradlew test
 ```
 
 Ejecutar test específico:
 ```bash
-./gradlew test --tests "com.siga.backend.AuthTest"
+./gradlew test --tests "com.siga.backend.controller.AuthControllerTest"
+./gradlew test --tests "com.siga.backend.service.JWTServiceTest"
 ```
+
+**Tests disponibles**:
+- 13 tests de servicios (JWT, Password)
+- 8 tests de controllers (Auth, Productos)
+- Total: 21 tests pasando
 
 ## Despliegue
 
 ### Railway
 
-1. Conectar repositorio a Railway
-2. Configurar variables de entorno en Railway
-3. Railway detectará automáticamente el proyecto Kotlin
-4. El servidor se desplegará automáticamente
+1. Conectar repositorio a Railway (rama `main`)
+2. Railway detectará automáticamente el `Dockerfile`
+3. Configurar variables de entorno en Railway
+4. El servidor se construirá y desplegará automáticamente
 
-**URL de Producción**: `https://siga-backend-production.up.railway.app`
+**Build**: Docker multi-stage (Gradle build + JRE runtime)
+**Health Check**: `/health` (timeout: 300ms)
+
+**URL de Producción**: Verificar en Railway dashboard (ej: `https://siga-backend-production.up.railway.app`)
 
 ### Variables de Entorno en Railway
 
