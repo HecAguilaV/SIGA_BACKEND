@@ -53,6 +53,8 @@ springdoc:
         name: SIGA Backend API
     config-url: /api-docs
     disable-swagger-default-url: true
+    # Forzar uso de servidor HTTPS en producción
+    try-it-out-enabled: true
   show-actuator: false
   default-consumes-media-type: application/json
   default-produces-media-type: application/json

@@ -13,15 +13,25 @@ class SwaggerConfig {
     
     @Bean
     fun customOpenAPI(): OpenAPI {
-        // Servidor de producción (HTTPS) - primero para que sea el predeterminado
-        val productionServer = Server()
-            .url("https://siga-backend-production.up.railway.app")
-            .description("Servidor de producción")
+        // Detectar si estamos en producción (Railway)
+        val isProduction = System.getenv("RAILWAY_ENVIRONMENT") != null || 
+                          System.getenv("RAILWAY_PUBLIC_DOMAIN") != null
         
-        // Servidor local (HTTP) - solo para desarrollo
-        val localServer = Server()
-            .url("http://localhost:8080")
-            .description("Servidor local")
+        val servers = mutableListOf<Server>()
+        
+        if (isProduction) {
+            // En producción, solo usar HTTPS
+            val productionServer = Server()
+                .url("https://siga-backend-production.up.railway.app")
+                .description("Servidor de producción")
+            servers.add(productionServer)
+        } else {
+            // En desarrollo, usar localhost
+            val localServer = Server()
+                .url("http://localhost:8080")
+                .description("Servidor local")
+            servers.add(localServer)
+        }
         
         return OpenAPI()
             .info(
@@ -35,21 +45,37 @@ class SwaggerConfig {
                             .email("support@siga.com")
                     )
             )
-            // Servidor de producción primero para que sea el predeterminado
-            .servers(listOf(productionServer, localServer))
+            .servers(servers)
     }
     
     @Bean
     fun openApiCustomizer(): OpenApiCustomizer {
         return OpenApiCustomizer { openApi ->
-            // Forzar uso de servidor HTTPS en producción
-            // Asegurarse de que el primer servidor (producción) siempre use HTTPS
-            val servers = openApi.servers
-            if (servers != null && servers.isNotEmpty()) {
-                val firstServer = servers[0]
-                // Si el servidor contiene railway.app, forzar HTTPS
-                if (firstServer.url.contains("railway.app") && !firstServer.url.startsWith("https://")) {
-                    firstServer.url = firstServer.url.replace("http://", "https://")
+            // Detectar si estamos en producción
+            val isProduction = System.getenv("RAILWAY_ENVIRONMENT") != null || 
+                              System.getenv("RAILWAY_PUBLIC_DOMAIN") != null
+            
+            if (isProduction) {
+                // En producción, reemplazar TODOS los servidores con HTTPS
+                val httpsServer = Server()
+                    .url("https://siga-backend-production.up.railway.app")
+                    .description("Servidor de producción")
+                
+                // Reemplazar la lista de servidores con solo el servidor HTTPS
+                openApi.servers = listOf(httpsServer)
+                
+                // También forzar HTTPS en todas las operaciones
+                openApi.paths?.forEach { (path, pathItem) ->
+                    pathItem.readOperationsMap().forEach { (_, operation) ->
+                        operation.servers?.forEach { server ->
+                            if (server.url.startsWith("http://")) {
+                                server.url = server.url.replace("http://", "https://")
+                            }
+                            if (server.url.contains("railway.app") && !server.url.contains("siga-backend-production")) {
+                                server.url = "https://siga-backend-production.up.railway.app"
+                            }
+                        }
+                    }
                 }
             }
         }
