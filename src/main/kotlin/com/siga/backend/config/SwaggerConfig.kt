@@ -46,6 +46,7 @@ class SwaggerConfig {
         val securityRequirement = SecurityRequirement().addList("bearerAuth")
         
         // Definir tags en orden lógico del flujo del usuario
+        // IMPORTANTE: El orden aquí define el orden en Swagger UI
         val tags = listOf(
             Tag().name("1. Público - Sin Autenticación")
                 .description("Endpoints públicos que no requieren autenticación. Perfectos para empezar."),
@@ -56,7 +57,7 @@ class SwaggerConfig {
             Tag().name("4. Gestión Operativa")
                 .description("Productos, stock, ventas y chat operativo. Requiere autenticación + suscripción activa"),
             Tag().name("5. Administración")
-                .description("Endpoints administrativos adicionales")
+                .description("Endpoints administrativos para gestión de usuarios y configuración del sistema")
         )
         
         return OpenAPI()

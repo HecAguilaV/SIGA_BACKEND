@@ -88,6 +88,8 @@ class SecurityConfig(
                         "/openapi.yaml",
                         "/openapi.yml"
                     ).permitAll()
+                    // Endpoints administrativos requieren autenticación
+                    .requestMatchers("/api/admin/**").authenticated()
                     // Todos los demás requieren autenticación
                     .anyRequest().authenticated()
             }

@@ -17,7 +17,10 @@ data class HealthResponse(
 class HealthController {
     
     @GetMapping("/health")
-    @Operation(summary = "Health Check", description = "Verifica que el servidor esté funcionando. No requiere autenticación.")
+    @Operation(
+        summary = "Health Check",
+        description = "Verifica que el servidor esté funcionando. Retorna status 'healthy' y timestamp actual. Railway usa este endpoint para verificar que la aplicación está corriendo. NO requiere autenticación."
+    )
     fun health(): ResponseEntity<HealthResponse> {
         // Health check simple que siempre responde
         // No depende de BD para que Railway pueda verificar que la app está corriendo

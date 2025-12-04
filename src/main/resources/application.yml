@@ -50,9 +50,22 @@ springdoc:
     use-root-path: false
     disable-swagger-default-url: false
     try-it-out-enabled: true
+    # Personalización de la UI
+    doc-expansion: list  # none, list, full - muestra solo títulos inicialmente
+    default-models-expand-depth: 1
+    default-model-expand-depth: 1
+    filter: true  # Habilitar filtro de búsqueda
+    show-common-extensions: true
+    show-extensions: true
+    # NO ordenar tags alfabéticamente - respetar el orden definido en SwaggerConfig (1, 2, 3, 4, 5)
+    # Si se especifica tags-sorter, Swagger UI los ordenará alfabéticamente
+    # Ordenar operaciones dentro de cada tag alfabéticamente
+    operations-sorter: alpha
   show-actuator: false
   default-consumes-media-type: application/json
   default-produces-media-type: application/json
+  # Ordenar paths
+  paths-to-match: /api/**
 
 # CORS
 cors:

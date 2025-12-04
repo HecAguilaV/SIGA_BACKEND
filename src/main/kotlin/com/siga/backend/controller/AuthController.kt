@@ -174,26 +174,5 @@ class AuthController(
         )
     }
     
-    // Endpoint temporal para listar usuarios (solo para desarrollo/debugging)
-    // Muestra solo email, nombre y rol (sin contraseñas)
-    @GetMapping("/users")
-    fun listUsers(): ResponseEntity<Map<String, Any>> {
-        val users = usuarioSaasRepository.findAll().map { user ->
-            mapOf(
-                "id" to user.id,
-                "email" to user.email,
-                "nombre" to user.nombre,
-                "apellido" to user.apellido,
-                "rol" to user.rol.name,
-                "activo" to user.activo
-            )
-        }
-        
-        return ResponseEntity.ok(mapOf(
-            "success" to true,
-            "total" to users.size,
-            "usuarios" to users
-        ))
-    }
 }
 
