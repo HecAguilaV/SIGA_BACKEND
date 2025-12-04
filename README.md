@@ -13,7 +13,7 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **ORM**: Spring Data JPA (Hibernate)
 - **Base de Datos**: PostgreSQL
 - **Autenticación**: JWT con Spring Security
-- **IA**: Google Gemini 2.5 Flash
+- **IA**: Google Gemini 2.5 Flash-Lite
 - **Documentación**: Swagger/OpenAPI (SpringDoc)
 - **Build**: Gradle 8.5
 - **Deployment**: Docker + Railway

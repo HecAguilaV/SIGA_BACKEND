@@ -28,22 +28,20 @@ class CommercialChatController(
     
     @PostMapping("/chat")
     fun chatComercial(@Valid @RequestBody request: ChatRequest): ResponseEntity<ChatResponse> {
-        return try {
-            val result = commercialAssistantService.processMessage(request.message)
-            
-            result.fold(
-                onSuccess = { response ->
-                    ResponseEntity.ok(ChatResponse(success = true, response = response))
-                },
-                onFailure = { error ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(ChatResponse(success = false, message = "Error: ${error.message}"))
+        val result = commercialAssistantService.processMessage(request.message)
+        
+        return result.fold(
+            onSuccess = { response ->
+                ResponseEntity.ok(ChatResponse(success = true, response = response))
+            },
+            onFailure = { error ->
+                // Convertir Throwable a Exception para que GlobalExceptionHandler lo maneje
+                when (error) {
+                    is Exception -> throw error
+                    else -> throw RuntimeException("Error al procesar la solicitud", error)
                 }
-            )
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ChatResponse(success = false, message = "Error: ${e.message}"))
-        }
+            }
+        )
     }
 }
 
@@ -68,22 +66,20 @@ class SaasChatController(
                 .body(ChatResponse(success = false, message = "Se requiere una suscripción activa"))
         }
         
-        return try {
-            val result = operationalAssistantService.processMessage(request.message, userId, SecurityUtils.getUserRol())
-            
-            result.fold(
-                onSuccess = { response ->
-                    ResponseEntity.ok(ChatResponse(success = true, response = response))
-                },
-                onFailure = { error ->
-                    ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(ChatResponse(success = false, message = "Error: ${error.message}"))
+        val result = operationalAssistantService.processMessage(request.message, userId, SecurityUtils.getUserRol())
+        
+        return result.fold(
+            onSuccess = { response ->
+                ResponseEntity.ok(ChatResponse(success = true, response = response))
+            },
+            onFailure = { error ->
+                // Convertir Throwable a Exception para que GlobalExceptionHandler lo maneje
+                when (error) {
+                    is Exception -> throw error
+                    else -> throw RuntimeException("Error al procesar la solicitud", error)
                 }
-            )
-        } catch (e: Exception) {
-            ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ChatResponse(success = false, message = "Error: ${e.message}"))
-        }
+            }
+        )
     }
 }
 
