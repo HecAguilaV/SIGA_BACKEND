@@ -28,7 +28,7 @@ EXPOSE 8080
 # Set environment variables
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Run the application directly (sin script para simplificar)
-# Railway asigna PORT dinámicamente
-CMD ["sh", "-c", "java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080} --server.address=0.0.0.0"]
+# Run the application
+# Railway asigna PORT dinámicamente, usar ENTRYPOINT con shell para expandir variables
+ENTRYPOINT exec java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080} --server.address=0.0.0.0
 
