@@ -22,15 +22,18 @@ WORKDIR /app
 # Copy the executable JAR from build stage
 COPY --from=build /app/app.jar app.jar
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+
+# Make entrypoint executable
+RUN chmod +x /docker-entrypoint.sh
+
 # Expose port
 EXPOSE 8080
 
 # Set environment variables
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
 
-# Run the application
-# Railway asigna PORT dinámicamente, leer de variable de entorno
-# Usar exec para que Java reciba señales correctamente
-# Forzar server.address=0.0.0.0 para aceptar conexiones externas
-ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar app.jar --server.port=${PORT:-8080} --server.address=0.0.0.0"]
+# Run the application using the entrypoint script
+ENTRYPOINT ["/docker-entrypoint.sh"]
 

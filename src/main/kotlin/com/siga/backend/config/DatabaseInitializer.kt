@@ -5,12 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Configuration
 import org.springframework.jdbc.core.JdbcTemplate
 
-@Configuration
+// TEMPORALMENTE DESHABILITADO PARA DEBUGGING
+// @Configuration
 class DatabaseInitializer(
     @Autowired private val jdbcTemplate: JdbcTemplate
 ) {
     
-    @PostConstruct
+    // @PostConstruct
     fun init() {
         // Crear esquemas si no existen
         // No lanzar excepción para permitir que la aplicación inicie incluso si hay problemas de BD
