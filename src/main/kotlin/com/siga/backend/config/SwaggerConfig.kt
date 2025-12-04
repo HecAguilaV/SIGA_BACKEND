@@ -64,18 +64,40 @@ class SwaggerConfig {
                 // Reemplazar la lista de servidores con solo el servidor HTTPS
                 openApi.servers = listOf(httpsServer)
                 
-                // También forzar HTTPS en todas las operaciones
-                openApi.paths?.forEach { (path, pathItem) ->
-                    pathItem.readOperationsMap().forEach { (_, operation) ->
-                        operation.servers?.forEach { server ->
+                // También forzar HTTPS en todas las operaciones (manejo seguro de nulls)
+                try {
+                    openApi.paths?.forEach { (_, pathItem) ->
+                        // Iterar sobre todas las operaciones posibles
+                        pathItem.get?.servers?.forEach { server ->
                             if (server.url.startsWith("http://")) {
                                 server.url = server.url.replace("http://", "https://")
                             }
-                            if (server.url.contains("railway.app") && !server.url.contains("siga-backend-production")) {
-                                server.url = "https://siga-backend-production.up.railway.app"
+                        }
+                        pathItem.post?.servers?.forEach { server ->
+                            if (server.url.startsWith("http://")) {
+                                server.url = server.url.replace("http://", "https://")
+                            }
+                        }
+                        pathItem.put?.servers?.forEach { server ->
+                            if (server.url.startsWith("http://")) {
+                                server.url = server.url.replace("http://", "https://")
+                            }
+                        }
+                        pathItem.delete?.servers?.forEach { server ->
+                            if (server.url.startsWith("http://")) {
+                                server.url = server.url.replace("http://", "https://")
+                            }
+                        }
+                        pathItem.patch?.servers?.forEach { server ->
+                            if (server.url.startsWith("http://")) {
+                                server.url = server.url.replace("http://", "https://")
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    // Si hay algún error, simplemente continuar
+                    // El servidor principal ya está configurado con HTTPS
+                    System.err.println("Advertencia al configurar servidores de operaciones: ${e.message}")
                 }
             }
         }
