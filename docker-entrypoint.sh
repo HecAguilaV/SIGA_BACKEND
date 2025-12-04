@@ -1,14 +1,17 @@
 #!/bin/sh
 set -e
 
+# Logging inmediato
 echo "========================================"
 echo "DOCKER ENTRYPOINT INICIADO"
 echo "========================================"
+echo "Working directory: $(pwd)"
+echo "Files in directory:"
+ls -la
 
 # Verificar que el JAR existe
 if [ ! -f "app.jar" ]; then
     echo "ERROR: app.jar no encontrado!"
-    ls -la
     exit 1
 fi
 
@@ -16,23 +19,17 @@ echo "JAR encontrado: $(ls -lh app.jar)"
 
 # Obtener el puerto
 PORT=${PORT:-8080}
-echo "Puerto configurado: $PORT"
-echo "JAVA_OPTS: ${JAVA_OPTS:--Xmx512m -Xms256m}"
+echo "Puerto: $PORT"
+echo "JAVA_OPTS: ${JAVA_OPTS}"
 
 # Verificar Java
 echo "Java version:"
-java -version
+java -version 2>&1
 
 echo "========================================"
-echo "INICIANDO APLICACIÓN SPRING BOOT"
+echo "INICIANDO APLICACIÓN"
 echo "========================================"
 
-# Ejecutar la aplicación con logging detallado
-exec java ${JAVA_OPTS:--Xmx512m -Xms256m} \
-    -Dspring.profiles.active=prod \
-    -Dlogging.level.root=INFO \
-    -Dlogging.level.com.siga.backend=DEBUG \
-    -jar app.jar \
-    --server.port=$PORT \
-    --server.address=0.0.0.0
+# Ejecutar la aplicación
+exec java ${JAVA_OPTS} -jar app.jar --server.port=$PORT --server.address=0.0.0.0
 
