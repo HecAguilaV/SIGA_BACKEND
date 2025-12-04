@@ -14,13 +14,25 @@ class SwaggerConfig {
     
     @Bean
     fun customOpenAPI(): OpenAPI {
-        val productionServer = Server()
-            .url("https://siga-backend-production.up.railway.app")
-            .description("Servidor de producción")
+        // Detectar si estamos en producción
+        val isProduction = System.getenv("RAILWAY_ENVIRONMENT") != null || 
+                          System.getenv("RAILWAY_PUBLIC_DOMAIN") != null
         
-        val localServer = Server()
-            .url("http://localhost:8080")
-            .description("Servidor local")
+        val servers = mutableListOf<Server>()
+        
+        if (isProduction) {
+            // En producción, solo usar servidor HTTPS
+            val productionServer = Server()
+                .url("https://siga-backend-production.up.railway.app")
+                .description("Servidor de producción")
+            servers.add(productionServer)
+        } else {
+            // En desarrollo, usar localhost primero
+            val localServer = Server()
+                .url("http://localhost:8080")
+                .description("Servidor local")
+            servers.add(localServer)
+        }
         
         // Configurar esquema de seguridad JWT
         val securityScheme = SecurityScheme()
@@ -44,7 +56,7 @@ class SwaggerConfig {
                             .email("support@siga.com")
                     )
             )
-            .servers(listOf(productionServer, localServer))
+            .servers(servers)
             .components(
                 io.swagger.v3.oas.models.Components()
                     .addSecuritySchemes("bearerAuth", securityScheme)
