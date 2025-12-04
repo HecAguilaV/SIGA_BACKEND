@@ -18,7 +18,7 @@ En Railway, agregar las siguientes variables de entorno:
 DATABASE_URL=jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db
 DB_USER=hector
 DB_PASSWORD=kike4466
-GEMINI_API_KEY=AIzaSyCFP_toj6X_q7ye_1Sbt8W1gKAC1tMgKdQ
+GEMINI_API_KEY=tu_gemini_api_key_aqui
 JWT_SECRET=tu_secret_key_super_seguro_cambiar_en_produccion
 PORT=8080
 ALLOWED_ORIGINS=https://siga-appweb.vercel.app,https://siga-web.vercel.app,http://localhost:5173,http://localhost:3000
