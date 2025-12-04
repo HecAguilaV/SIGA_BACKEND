@@ -7,6 +7,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import io.swagger.v3.oas.models.tags.Tag
+import org.springdoc.core.customizers.OpenApiCustomizer
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -46,7 +47,6 @@ class SwaggerConfig {
         val securityRequirement = SecurityRequirement().addList("bearerAuth")
         
         // Definir tags en orden lógico del flujo del usuario
-        // IMPORTANTE: El orden aquí define el orden en Swagger UI
         val tags = listOf(
             Tag().name("1. Público - Sin Autenticación")
                 .description("Endpoints públicos que no requieren autenticación. Perfectos para empezar."),
@@ -88,6 +88,34 @@ class SwaggerConfig {
                     .addSecuritySchemes("bearerAuth", securityScheme)
             )
             .addSecurityItem(securityRequirement)
+    }
+    
+    @Bean
+    fun openApiCustomizer(): OpenApiCustomizer {
+        return OpenApiCustomizer { openApi ->
+            // Forzar orden de tags: reordenar según el orden deseado
+            val tagOrder = listOf(
+                "1. Público - Sin Autenticación",
+                "2. Autenticación",
+                "3. Portal Comercial",
+                "4. Gestión Operativa",
+                "5. Administración"
+            )
+            
+            val orderedTags = mutableListOf<Tag>()
+            tagOrder.forEach { tagName ->
+                openApi.tags?.find { it.name == tagName }?.let { orderedTags.add(it) }
+            }
+            
+            // Agregar tags que no estén en la lista de orden
+            openApi.tags?.forEach { tag ->
+                if (!tagOrder.contains(tag.name)) {
+                    orderedTags.add(tag)
+                }
+            }
+            
+            openApi.tags = orderedTags
+        }
     }
 }
 
