@@ -73,6 +73,7 @@ class SwaggerConfig {
                         2. Regístrate o inicia sesión
                         3. Crea una suscripción
                         4. Usa los endpoints operativos (productos, ventas, chat operativo)
+                        5. Accede a funciones administrativas (gestión de usuarios)
                     """.trimIndent())
                     .contact(
                         Contact()
