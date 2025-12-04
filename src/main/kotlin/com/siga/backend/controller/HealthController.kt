@@ -1,5 +1,7 @@
 package com.siga.backend.controller
 
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
@@ -11,9 +13,11 @@ data class HealthResponse(
 )
 
 @RestController
+@Tag(name = "1. Público - Sin Autenticación", description = "Endpoints públicos")
 class HealthController {
     
     @GetMapping("/health")
+    @Operation(summary = "Health Check", description = "Verifica que el servidor esté funcionando. No requiere autenticación.")
     fun health(): ResponseEntity<HealthResponse> {
         // Health check simple que siempre responde
         // No depende de BD para que Railway pueda verificar que la app está corriendo

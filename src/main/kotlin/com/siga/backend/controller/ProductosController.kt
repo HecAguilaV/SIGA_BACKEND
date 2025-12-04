@@ -4,6 +4,9 @@ import com.siga.backend.entity.Producto
 import com.siga.backend.repository.ProductoRepository
 import com.siga.backend.service.SubscriptionService
 import com.siga.backend.utils.SecurityUtils
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -34,6 +37,7 @@ data class ProductoResponse(
 
 @RestController
 @RequestMapping("/api/saas/productos")
+@Tag(name = "4. Gestión Operativa", description = "Requiere autenticación + suscripción activa")
 class ProductosController(
     private val productoRepository: ProductoRepository,
     private val subscriptionService: SubscriptionService

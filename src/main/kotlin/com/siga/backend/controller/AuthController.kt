@@ -5,6 +5,8 @@ import com.siga.backend.entity.UsuarioSaas
 import com.siga.backend.repository.UsuarioSaasRepository
 import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -47,6 +49,7 @@ data class UserInfo(
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "2. Autenticación", description = "Registro y login de usuarios operativos")
 class AuthController(
     private val usuarioSaasRepository: UsuarioSaasRepository,
     private val passwordService: PasswordService,
@@ -54,6 +57,7 @@ class AuthController(
 ) {
     
     @PostMapping("/login")
+    @Operation(summary = "Iniciar Sesión", description = "Autentica un usuario operativo (ADMINISTRADOR, OPERADOR, CAJERO) y obtiene tokens JWT")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         val user = usuarioSaasRepository.findByEmail(request.email.lowercase()).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -89,6 +93,7 @@ class AuthController(
     }
     
     @PostMapping("/register")
+    @Operation(summary = "Registrar Usuario", description = "Registra un nuevo usuario operativo. Roles: ADMINISTRADOR, OPERADOR, CAJERO")
     fun register(@Valid @RequestBody request: RegisterRequest): ResponseEntity<AuthResponse> {
         val rol = try {
             Rol.valueOf(request.rol.uppercase())

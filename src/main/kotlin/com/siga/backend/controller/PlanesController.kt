@@ -2,6 +2,8 @@ package com.siga.backend.controller
 
 import com.siga.backend.entity.Plan
 import com.siga.backend.repository.PlanRepository
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -19,11 +21,13 @@ data class PlanResponse(
 
 @RestController
 @RequestMapping("/api/comercial/planes")
+@Tag(name = "1. Público - Sin Autenticación", description = "Endpoints públicos")
 class PlanesController(
     private val planRepository: PlanRepository
 ) {
     
     @GetMapping
+    @Operation(summary = "Listar Planes", description = "Obtiene todos los planes de suscripción disponibles. NO requiere autenticación.")
     fun listarPlanes(): ResponseEntity<Map<String, Any>> {
         val planes = planRepository.findByActivoTrueOrderByOrdenAsc().map { plan ->
             PlanResponse(

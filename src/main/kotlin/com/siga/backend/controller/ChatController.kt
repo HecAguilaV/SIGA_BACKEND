@@ -4,6 +4,9 @@ import com.siga.backend.service.CommercialAssistantService
 import com.siga.backend.service.OperationalAssistantService
 import com.siga.backend.service.SubscriptionService
 import com.siga.backend.utils.SecurityUtils
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -22,11 +25,16 @@ data class ChatResponse(
 
 @RestController
 @RequestMapping("/api/comercial")
+@Tag(name = "1. Público - Sin Autenticación", description = "Endpoints públicos")
 class CommercialChatController(
     private val commercialAssistantService: CommercialAssistantService
 ) {
     
     @PostMapping("/chat")
+    @Operation(
+        summary = "Chat Comercial (Público)",
+        description = "Consulta sobre planes, precios y características de SIGA. NO requiere autenticación."
+    )
     fun chatComercial(@Valid @RequestBody request: ChatRequest): ResponseEntity<ChatResponse> {
         val result = commercialAssistantService.processMessage(request.message)
         
@@ -47,12 +55,18 @@ class CommercialChatController(
 
 @RestController
 @RequestMapping("/api/saas")
+@Tag(name = "4. Gestión Operativa", description = "Requiere autenticación + suscripción activa")
 class SaasChatController(
     private val operationalAssistantService: OperationalAssistantService,
     private val subscriptionService: SubscriptionService
 ) {
     
     @PostMapping("/chat")
+    @Operation(
+        summary = "Chat Operativo",
+        description = "Asistente IA para consultas sobre inventario, stock y ventas de TU negocio. Requiere autenticación + suscripción activa.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
     fun chatSaas(@Valid @RequestBody request: ChatRequest): ResponseEntity<ChatResponse> {
         val userId = SecurityUtils.getUserId()
         if (userId == null || !SecurityUtils.isAuthenticated()) {

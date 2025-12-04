@@ -7,6 +7,9 @@ import com.siga.backend.repository.PlanRepository
 import com.siga.backend.repository.SuscripcionRepository
 import com.siga.backend.repository.UsuarioComercialRepository
 import com.siga.backend.utils.SecurityUtils
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -32,6 +35,7 @@ data class SuscripcionResponse(
 
 @RestController
 @RequestMapping("/api/comercial/suscripciones")
+@Tag(name = "3. Portal Comercial", description = "Requiere autenticación como Usuario Comercial")
 class SuscripcionesController(
     private val suscripcionRepository: SuscripcionRepository,
     private val usuarioComercialRepository: UsuarioComercialRepository,
