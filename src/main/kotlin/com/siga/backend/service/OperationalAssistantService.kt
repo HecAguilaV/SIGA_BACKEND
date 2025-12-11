@@ -60,8 +60,14 @@ class OperationalAssistantService(
     }
     
     fun processMessage(message: String, userId: Int, userRol: String?): Result<String> {
-        val ragContext = buildRAGContext(userId, userRol ?: "OPERADOR", message)
-        val fullPrompt = """
+        val logger = org.slf4j.LoggerFactory.getLogger(OperationalAssistantService::class.java)
+        
+        try {
+            logger.debug("Procesando mensaje para usuario $userId con rol ${userRol ?: "OPERADOR"}")
+            val ragContext = buildRAGContext(userId, userRol ?: "OPERADOR", message)
+            logger.debug("Contexto RAG construido: ${ragContext.length} caracteres")
+            
+            val fullPrompt = """
             $systemContext
             
             CONTEXTO DE DATOS:
@@ -72,8 +78,21 @@ class OperationalAssistantService(
             
             Responde de forma clara y amigable basándote en el contexto proporcionado.
         """.trimIndent()
-        
-        return geminiService.generateContent(fullPrompt)
+            
+            logger.debug("Enviando prompt a Gemini (${fullPrompt.length} caracteres)")
+            val result = geminiService.generateContent(fullPrompt)
+            
+            result.onSuccess {
+                logger.debug("Respuesta exitosa de Gemini (${it.length} caracteres)")
+            }.onFailure { error ->
+                logger.error("Error al generar contenido con Gemini", error)
+            }
+            
+            return result
+        } catch (e: Exception) {
+            logger.error("Excepción no controlada en processMessage", e)
+            return Result.failure(e)
+        }
     }
 }
 
