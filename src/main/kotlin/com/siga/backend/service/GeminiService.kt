@@ -35,8 +35,7 @@ class GeminiService(
     @Value("\${gemini.api-key}") private val apiKey: String
 ) {
     private val logger = LoggerFactory.getLogger(GeminiService::class.java)
-    // Usar gemini-1.5-flash que es más estable y ampliamente disponible
-    private val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent"
+    private val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
     private val webClient = WebClient.builder().build()
     
     fun generateContent(prompt: String): Result<String> {
