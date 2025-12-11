@@ -68,8 +68,10 @@ springdoc:
   paths-to-match: /api/**
 
 # CORS
+# En desarrollo: se permite cualquier puerto de localhost automáticamente
+# En producción: usar ALLOWED_ORIGINS en Railway
 cors:
-  allowed-origins: ${ALLOWED_ORIGINS:https://siga-appweb.vercel.app,https://siga-web.vercel.app,http://localhost:5173,http://localhost:3000}
+  allowed-origins: ${ALLOWED_ORIGINS:https://siga-appweb.vercel.app,https://siga-web.vercel.app}
 
 # JWT
 jwt:

@@ -37,7 +37,23 @@ class SecurityConfig(
     @Bean
     fun corsConfigurationSource(): CorsConfigurationSource {
         val configuration = CorsConfiguration()
-        configuration.allowedOrigins = allowedOrigins.split(",").map { it.trim() }
+        
+        // Detectar si estamos en desarrollo (no en Railway/producción)
+        val isDevelopment = System.getenv("RAILWAY_ENVIRONMENT") == null && 
+                           System.getenv("RAILWAY_PUBLIC_DOMAIN") == null
+        
+        if (isDevelopment) {
+            // En desarrollo: permitir cualquier puerto de localhost usando patrones
+            configuration.allowedOriginPatterns = listOf(
+                "http://localhost:*",
+                "http://127.0.0.1:*"
+            )
+        } else {
+            // En producción: usar orígenes específicos de la configuración
+            val origins = allowedOrigins.split(",").map { it.trim() }
+            configuration.allowedOrigins = origins
+        }
+        
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
         configuration.allowCredentials = true
