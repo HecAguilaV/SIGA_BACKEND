@@ -43,20 +43,22 @@ class SecurityConfig(
                            System.getenv("RAILWAY_PUBLIC_DOMAIN") == null
         
         if (isDevelopment) {
-            // En desarrollo: permitir cualquier puerto de localhost usando patrones
+            // En desarrollo: usar patrones para permitir cualquier puerto de localhost
+            // Nota: allowCredentials debe ser false cuando usamos patrones con wildcard
             configuration.allowedOriginPatterns = listOf(
                 "http://localhost:*",
                 "http://127.0.0.1:*"
             )
+            configuration.allowCredentials = false // Necesario con patrones
         } else {
             // En producción: usar orígenes específicos de la configuración
             val origins = allowedOrigins.split(",").map { it.trim() }
             configuration.allowedOrigins = origins
+            configuration.allowCredentials = true // OK con orígenes específicos
         }
         
         configuration.allowedMethods = listOf("GET", "POST", "PUT", "DELETE", "OPTIONS")
         configuration.allowedHeaders = listOf("*")
-        configuration.allowCredentials = true
         configuration.maxAge = 3600L
         
         val source = UrlBasedCorsConfigurationSource()
