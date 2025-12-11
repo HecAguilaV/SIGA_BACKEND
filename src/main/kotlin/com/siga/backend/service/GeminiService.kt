@@ -65,7 +65,14 @@ class GeminiService(
                     .bodyValue(request)
                     .retrieve()
                     .onStatus({ status -> status.isError }) { response ->
-                        logger.error("Error HTTP de Gemini: ${response.statusCode()}")
+                        val statusCode = response.statusCode()
+                        logger.error("Error HTTP de Gemini: $statusCode")
+                        
+                        // Para 503, intentar obtener más detalles
+                        if (statusCode.value() == 503) {
+                            logger.error("Gemini API retornó 503 Service Unavailable - puede ser temporal o el modelo no está disponible")
+                        }
+                        
                         response.bodyToMono<String>()
                             .doOnNext { body -> logger.error("Cuerpo de error: $body") }
                             .then()
