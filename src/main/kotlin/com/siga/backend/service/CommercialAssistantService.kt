@@ -1,6 +1,7 @@
 package com.siga.backend.service
 
 import com.siga.backend.repository.PlanRepository
+import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Service
 
@@ -10,6 +11,7 @@ class CommercialAssistantService(
     private val planRepository: PlanRepository,
     private val jdbcTemplate: JdbcTemplate
 ) {
+    private val logger = LoggerFactory.getLogger(CommercialAssistantService::class.java)
     
     private val systemContext = """
         Eres SIGA, el asistente virtual del Sistema Inteligente de Gestión de Activos.
@@ -31,28 +33,47 @@ class CommercialAssistantService(
     fun buildRAGContext(): String {
         val context = mutableListOf<String>()
         
-        val planes = planRepository.findByActivoTrueOrderByOrdenAsc()
-        if (planes.isNotEmpty()) {
-            context.add("=== PLANES DISPONIBLES ===")
-            planes.forEach { plan ->
-                context.add("""
-                    Plan: ${plan.nombre}
-                    Precio Mensual: $${plan.precioMensual}
-                    ${if (plan.precioAnual != null) "Precio Anual: $${plan.precioAnual}" else ""}
-                    Descripción: ${plan.descripcion ?: "Sin descripción"}
-                    Límite Bodegas: ${plan.limiteBodegas}
-                    Límite Usuarios: ${plan.limiteUsuarios}
-                    ${if (plan.limiteProductos != null) "Límite Productos: ${plan.limiteProductos}" else "Productos: Ilimitados"}
-                """.trimIndent())
+        try {
+            logger.debug("Construyendo contexto RAG para chat comercial")
+            val planes = planRepository.findByActivoTrueOrderByOrdenAsc()
+            logger.debug("Planes encontrados: ${planes.size}")
+            
+            if (planes.isNotEmpty()) {
+                context.add("=== PLANES DISPONIBLES ===")
+                planes.forEach { plan ->
+                    context.add("""
+                        Plan: ${plan.nombre}
+                        Precio Mensual: $${plan.precioMensual}
+                        ${if (plan.precioAnual != null) "Precio Anual: $${plan.precioAnual}" else ""}
+                        Descripción: ${plan.descripcion ?: "Sin descripción"}
+                        Límite Bodegas: ${plan.limiteBodegas}
+                        Límite Usuarios: ${plan.limiteUsuarios}
+                        ${if (plan.limiteProductos != null) "Límite Productos: ${plan.limiteProductos}" else "Productos: Ilimitados"}
+                    """.trimIndent())
+                }
+            } else {
+                logger.warn("No se encontraron planes activos en la base de datos")
+                context.add("=== PLANES DISPONIBLES ===")
+                context.add("No hay planes disponibles en este momento.")
             }
+        } catch (e: Exception) {
+            logger.error("Error al construir contexto RAG para chat comercial", e)
+            context.add("=== PLANES DISPONIBLES ===")
+            context.add("Error al cargar información de planes.")
         }
         
-        return context.joinToString("\n\n")
+        val contextString = context.joinToString("\n\n")
+        logger.debug("Contexto RAG construido: ${contextString.length} caracteres")
+        return contextString
     }
     
     fun processMessage(message: String): Result<String> {
-        val ragContext = buildRAGContext()
-        val fullPrompt = """
+        try {
+            logger.debug("Procesando mensaje comercial: ${message.take(50)}...")
+            val ragContext = buildRAGContext()
+            logger.debug("Contexto RAG construido: ${ragContext.length} caracteres")
+            
+            val fullPrompt = """
             $systemContext
             
             CONTEXTO DE DATOS:
@@ -63,8 +84,21 @@ class CommercialAssistantService(
             
             Responde de forma clara y amigable basándote en el contexto proporcionado.
         """.trimIndent()
-        
-        return geminiService.generateContent(fullPrompt)
+            
+            logger.debug("Enviando prompt a Gemini (${fullPrompt.length} caracteres)")
+            val result = geminiService.generateContent(fullPrompt)
+            
+            result.onSuccess {
+                logger.debug("Respuesta exitosa de Gemini (${it.length} caracteres)")
+            }.onFailure { error ->
+                logger.error("Error al generar contenido con Gemini", error)
+            }
+            
+            return result
+        } catch (e: Exception) {
+            logger.error("Excepción no controlada en processMessage comercial", e)
+            return Result.failure(e)
+        }
     }
 }
 
