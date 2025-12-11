@@ -76,6 +76,7 @@ class SecurityConfig(
                     .requestMatchers(
                         "/health",
                         "/api/auth/**",
+                        "/api/comercial/auth/**",
                         "/api/comercial/chat",
                         "/api/comercial/planes/**",
                         "/swagger-ui/**",

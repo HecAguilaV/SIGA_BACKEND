@@ -1,0 +1,190 @@
+package com.siga.backend.controller
+
+import com.siga.backend.entity.UsuarioComercial
+import com.siga.backend.repository.UsuarioComercialRepository
+import com.siga.backend.service.JWTService
+import com.siga.backend.service.PasswordService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
+import java.time.Instant
+
+data class ComercialLoginRequest(
+    @field:NotBlank @field:Email val email: String,
+    @field:NotBlank val password: String
+)
+
+data class ComercialRegisterRequest(
+    @field:NotBlank @field:Email val email: String,
+    @field:NotBlank val password: String,
+    @field:NotBlank val nombre: String,
+    val apellido: String? = null,
+    val rut: String? = null,
+    val telefono: String? = null
+)
+
+data class ComercialRefreshTokenRequest(
+    @field:NotBlank val refreshToken: String
+)
+
+data class ComercialAuthResponse(
+    val success: Boolean,
+    val message: String? = null,
+    val accessToken: String? = null,
+    val refreshToken: String? = null,
+    val user: ComercialUserInfo? = null
+)
+
+data class ComercialUserInfo(
+    val id: Int,
+    val email: String,
+    val nombre: String,
+    val apellido: String?,
+    val rut: String?,
+    val telefono: String?
+)
+
+@RestController
+@RequestMapping("/api/comercial/auth")
+@Tag(name = "1. Público - Sin Autenticación", description = "Endpoints públicos de autenticación comercial")
+class ComercialAuthController(
+    private val usuarioComercialRepository: UsuarioComercialRepository,
+    private val passwordService: PasswordService,
+    private val jwtService: JWTService
+) {
+    
+    @PostMapping("/login")
+    @Operation(
+        summary = "Iniciar Sesión Comercial",
+        description = "Autentica un usuario comercial (cliente) y obtiene tokens JWT. NO requiere autenticación previa."
+    )
+    fun login(@Valid @RequestBody request: ComercialLoginRequest): ResponseEntity<ComercialAuthResponse> {
+        val user = usuarioComercialRepository.findByEmail(request.email.lowercase()).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Credenciales inválidas"))
+        
+        if (!user.activo) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Usuario inactivo"))
+        }
+        
+        if (!passwordService.verifyPassword(request.password, user.passwordHash)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Credenciales inválidas"))
+        }
+        
+        // Para usuarios comerciales no hay rol, se genera token sin rol
+        val accessToken = jwtService.generateAccessToken(user.id, user.email, null)
+        val refreshToken = jwtService.generateRefreshToken(user.id)
+        
+        return ResponseEntity.ok(
+            ComercialAuthResponse(
+                success = true,
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+                user = ComercialUserInfo(
+                    id = user.id,
+                    email = user.email,
+                    nombre = user.nombre,
+                    apellido = user.apellido,
+                    rut = user.rut,
+                    telefono = user.telefono
+                )
+            )
+        )
+    }
+    
+    @PostMapping("/register")
+    @Operation(
+        summary = "Registrar Usuario Comercial",
+        description = "Registra un nuevo usuario comercial (cliente). NO requiere autenticación previa."
+    )
+    fun register(@Valid @RequestBody request: ComercialRegisterRequest): ResponseEntity<ComercialAuthResponse> {
+        if (usuarioComercialRepository.existsByEmail(request.email.lowercase())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ComercialAuthResponse(success = false, message = "El email ya está registrado"))
+        }
+        
+        val passwordHash = passwordService.hashPassword(request.password)
+        val newUser = UsuarioComercial(
+            email = request.email.lowercase(),
+            passwordHash = passwordHash,
+            nombre = request.nombre,
+            apellido = request.apellido,
+            rut = request.rut,
+            telefono = request.telefono,
+            activo = true,
+            fechaCreacion = Instant.now(),
+            fechaActualizacion = Instant.now()
+        )
+        
+        val savedUser = usuarioComercialRepository.save(newUser)
+        
+        // Para usuarios comerciales no hay rol, se genera token sin rol
+        val accessToken = jwtService.generateAccessToken(savedUser.id, savedUser.email, null)
+        val refreshToken = jwtService.generateRefreshToken(savedUser.id)
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            ComercialAuthResponse(
+                success = true,
+                message = "Usuario registrado exitosamente",
+                accessToken = accessToken,
+                refreshToken = refreshToken,
+                user = ComercialUserInfo(
+                    id = savedUser.id,
+                    email = savedUser.email,
+                    nombre = savedUser.nombre,
+                    apellido = savedUser.apellido,
+                    rut = savedUser.rut,
+                    telefono = savedUser.telefono
+                )
+            )
+        )
+    }
+    
+    @PostMapping("/refresh")
+    @Operation(
+        summary = "Renovar Token Comercial",
+        description = "Renueva el token de acceso usando un refresh token válido. NO requiere autenticación previa."
+    )
+    fun refresh(@Valid @RequestBody request: ComercialRefreshTokenRequest): ResponseEntity<ComercialAuthResponse> {
+        val decodedJWT = jwtService.verifyToken(request.refreshToken)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Token inválido"))
+        
+        if (decodedJWT.getClaim("type").asString() != "refresh") {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Token de refresh inválido"))
+        }
+        
+        val userId = decodedJWT.subject.toIntOrNull()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Token inválido"))
+        
+        val user = usuarioComercialRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Usuario no encontrado"))
+        
+        if (!user.activo) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ComercialAuthResponse(success = false, message = "Usuario inactivo"))
+        }
+        
+        // Para usuarios comerciales no hay rol, se genera token sin rol
+        val newAccessToken = jwtService.generateAccessToken(user.id, user.email, null)
+        val newRefreshToken = jwtService.generateRefreshToken(user.id)
+        
+        return ResponseEntity.ok(
+            ComercialAuthResponse(
+                success = true,
+                accessToken = newAccessToken,
+                refreshToken = newRefreshToken
+            )
+        )
+    }
+}

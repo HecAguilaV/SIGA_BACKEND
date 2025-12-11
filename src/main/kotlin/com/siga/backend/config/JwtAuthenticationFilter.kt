@@ -28,8 +28,8 @@ class JwtAuthenticationFilter(
                 // Solo permitir access tokens (no refresh tokens)
                 if (tokenType == "access") {
                     val userId = decodedJWT.subject
-                    val email = decodedJWT.getClaim("email").asString()
-                    val rol = decodedJWT.getClaim("rol").asString()
+                    val email = decodedJWT.getClaim("email")?.asString()
+                    val rol = decodedJWT.getClaim("rol")?.asString() // Puede ser null para usuarios comerciales
                     
                     // Crear autenticación
                     val authorities = if (rol != null) {
@@ -44,8 +44,8 @@ class JwtAuthenticationFilter(
                         authorities
                     ).apply {
                         details = mapOf(
-                            "email" to email,
-                            "rol" to rol
+                            "email" to (email ?: ""),
+                            "rol" to (rol ?: "")
                         )
                     }
                     

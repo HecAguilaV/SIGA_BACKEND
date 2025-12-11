@@ -93,15 +93,30 @@ class GlobalExceptionHandler {
      */
     @ExceptionHandler(Exception::class)
     fun handleGenericException(ex: Exception): ResponseEntity<Map<String, Any>> {
-        logger.error("Error no controlado", ex)
+        logger.error("Error no controlado: ${ex.javaClass.simpleName} - ${ex.message}", ex)
+        logger.error("Stack trace completo:", ex)
         
-        // Sanitizar el mensaje para no exponer información sensible
+        // Log detallado para debugging
+        val rootCause = getRootCause(ex)
+        logger.error("Causa ra?z: ${rootCause.javaClass.simpleName} - ${rootCause.message}")
+        
+        // Sanitizar el mensaje para no exponer informaci?n sensible
         val sanitizedMessage = ErrorSanitizer.sanitizeException(ex)
         
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(mapOf(
             "success" to false,
-            "message" to sanitizedMessage
+            "message" to sanitizedMessage,
+            "errorType" to ex.javaClass.simpleName,
+            "rootCause" to rootCause.javaClass.simpleName
         ))
+    }
+    
+    private fun getRootCause(ex: Throwable): Throwable {
+        var cause = ex.cause
+        while (cause != null && cause.cause != null) {
+            cause = cause.cause
+        }
+        return cause ?: ex
     }
 }
 
