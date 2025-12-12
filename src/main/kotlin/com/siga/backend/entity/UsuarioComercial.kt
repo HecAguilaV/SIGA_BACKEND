@@ -31,6 +31,21 @@ data class UsuarioComercial(
     @Column(nullable = false)
     val activo: Boolean = true,
     
+    @Column(name = "en_trial", nullable = false)
+    val enTrial: Boolean = false,
+    
+    @Column(name = "fecha_inicio_trial")
+    val fechaInicioTrial: Instant? = null,
+    
+    @Column(name = "fecha_fin_trial")
+    val fechaFinTrial: Instant? = null,
+    
+    @Column(length = 20)
+    val rol: String = "cliente",  // 'admin' o 'cliente'
+    
+    @Column(name = "plan_id")
+    val planId: Int? = null,  // Cache del plan actual
+    
     @Column(name = "fecha_creacion", nullable = false)
     val fechaCreacion: Instant = Instant.now(),
     

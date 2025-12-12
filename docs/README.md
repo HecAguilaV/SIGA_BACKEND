@@ -60,7 +60,7 @@ docs/
 └── API_FRONTEND_COMERCIAL.md
 ```
 
-**Nota**: Documentación de desarrollo interno (INSTRUCCIONES_BACKEND.md, MIGRACION_BACKEND.md) se encuentra en el directorio `CHALLA/` (excluido del repositorio).
+**Nota**: Documentación de desarrollo interno (instrucciones para equipos, guías de migración, análisis de consistencia, validaciones internas) se encuentra en el directorio `CHALLA/` (excluido del repositorio).
 
 ## Uso Rápido
 

@@ -23,11 +23,11 @@ data class Plan(
     @Column(name = "precio_anual", precision = 10, scale = 2)
     val precioAnual: BigDecimal? = null,
     
-    @Column(name = "limite_bodegas", nullable = false)
-    val limiteBodegas: Int = 1,
+    @Column(name = "limite_bodegas")
+    val limiteBodegas: Int? = null,  // NULL = ilimitado
     
-    @Column(name = "limite_usuarios", nullable = false)
-    val limiteUsuarios: Int = 1,
+    @Column(name = "limite_usuarios")
+    val limiteUsuarios: Int? = null,  // NULL = ilimitado
     
     @Column(name = "limite_productos")
     val limiteProductos: Int? = null,
