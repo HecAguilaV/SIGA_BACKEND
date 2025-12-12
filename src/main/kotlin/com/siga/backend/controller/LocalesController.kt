@@ -137,9 +137,9 @@ class LocalesController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun crearLocal(@Valid @RequestBody request: LocalRequest): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeCrearLocales()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden crear locales"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para crear locales"))
         }
         
         val email = SecurityUtils.getUserEmail()
@@ -182,9 +182,9 @@ class LocalesController(
         @PathVariable id: Int,
         @Valid @RequestBody request: LocalRequest
     ): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeActualizarLocales()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden actualizar locales"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para actualizar locales"))
         }
         
         val local = localRepository.findById(id).orElse(null)
@@ -220,9 +220,9 @@ class LocalesController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun eliminarLocal(@PathVariable id: Int): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeEliminarLocales()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden eliminar locales"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para eliminar locales"))
         }
         
         val local = localRepository.findById(id).orElse(null)

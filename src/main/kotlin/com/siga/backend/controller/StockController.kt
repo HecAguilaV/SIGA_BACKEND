@@ -117,6 +117,11 @@ class StockController(
                 .body(mapOf("success" to false, "message" to "No autenticado"))
         }
         
+        if (!SecurityUtils.puedeActualizarStock()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes permiso para actualizar stock"))
+        }
+        
         val email = SecurityUtils.getUserEmail()
         if (email == null || !subscriptionService.hasActiveSubscription(email)) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)

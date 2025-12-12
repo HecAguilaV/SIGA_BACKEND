@@ -2,8 +2,11 @@ package com.siga.backend.controller
 
 import com.siga.backend.entity.UsuarioComercial
 import com.siga.backend.repository.UsuarioComercialRepository
+import com.siga.backend.repository.UsuarioSaasRepository
 import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
+import com.siga.backend.service.SubscriptionService
+import com.siga.backend.utils.SecurityUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
@@ -55,7 +58,9 @@ data class ComercialUserInfo(
 class ComercialAuthController(
     private val usuarioComercialRepository: UsuarioComercialRepository,
     private val passwordService: PasswordService,
-    private val jwtService: JWTService
+    private val jwtService: JWTService,
+    private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val subscriptionService: SubscriptionService
 ) {
     
     @PostMapping("/login")
@@ -186,5 +191,60 @@ class ComercialAuthController(
                 refreshToken = newRefreshToken
             )
         )
+    }
+    
+    @PostMapping("/obtener-token-operativo")
+    @Operation(
+        summary = "Obtener Token Operativo para WebApp",
+        description = "Intercambia token comercial por token operativo para acceder a WebApp. Requiere autenticación comercial y suscripción activa.",
+        security = [io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")]
+    )
+    fun obtenerTokenOperativo(): ResponseEntity<Map<String, Any>> {
+        val email = SecurityUtils.getUserEmail()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        // Verificar que el usuario comercial existe
+        val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario comercial no encontrado"))
+        
+        // Verificar suscripción activa
+        if (!subscriptionService.hasActiveSubscription(email)) {
+            return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
+                .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa para acceder a WebApp"))
+        }
+        
+        // Buscar usuario operativo (debe existir porque se crea automáticamente al adquirir suscripción)
+        val usuarioOperativo = usuarioSaasRepository.findByEmail(email.lowercase()).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf(
+                    "success" to false, 
+                    "message" to "Usuario operativo no encontrado. Por favor, contacta al administrador o intenta crear una nueva suscripción."
+                ))
+        
+        if (!usuarioOperativo.activo) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "Usuario operativo inactivo"))
+        }
+        
+        // Generar token operativo
+        val accessToken = jwtService.generateAccessToken(
+            usuarioOperativo.id,
+            usuarioOperativo.email,
+            usuarioOperativo.rol.name
+        )
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "accessToken" to accessToken,
+            "user" to mapOf(
+                "id" to usuarioOperativo.id,
+                "email" to usuarioOperativo.email,
+                "nombre" to usuarioOperativo.nombre,
+                "apellido" to usuarioOperativo.apellido,
+                "rol" to usuarioOperativo.rol.name
+            )
+        ))
     }
 }

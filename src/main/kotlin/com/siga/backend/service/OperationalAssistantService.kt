@@ -223,8 +223,8 @@ class OperationalAssistantService(
     
     // Métodos de ejecución de acciones específicas
     private fun ejecutarCrearProducto(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
-        if (!SecurityUtils.isAdmin()) {
-            return Result.success(AccionEjecutada(false, "CREATE_PRODUCT", null, "Solo administradores pueden crear productos"))
+        if (!SecurityUtils.puedeCrearProductos()) {
+            return Result.success(AccionEjecutada(false, "CREATE_PRODUCT", null, "No tienes permiso para crear productos"))
         }
         
         val nombre = params["nombre"] as? String ?: return Result.success(
@@ -266,8 +266,8 @@ class OperationalAssistantService(
     }
     
     private fun ejecutarActualizarProducto(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
-        if (!SecurityUtils.isAdmin()) {
-            return Result.success(AccionEjecutada(false, "UPDATE_PRODUCT", null, "Solo administradores pueden actualizar productos"))
+        if (!SecurityUtils.puedeActualizarProductos()) {
+            return Result.success(AccionEjecutada(false, "UPDATE_PRODUCT", null, "No tienes permiso para actualizar productos"))
         }
         
         val id = (params["id"] as? Number)?.toInt() ?: return Result.success(
@@ -306,8 +306,8 @@ class OperationalAssistantService(
     }
     
     private fun ejecutarEliminarProducto(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
-        if (!SecurityUtils.isAdmin()) {
-            return Result.success(AccionEjecutada(false, "DELETE_PRODUCT", null, "Solo administradores pueden eliminar productos"))
+        if (!SecurityUtils.puedeEliminarProductos()) {
+            return Result.success(AccionEjecutada(false, "DELETE_PRODUCT", null, "No tienes permiso para eliminar productos"))
         }
         
         val id = (params["id"] as? Number)?.toInt()
@@ -336,6 +336,10 @@ class OperationalAssistantService(
     }
     
     private fun ejecutarActualizarStock(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
+        if (!SecurityUtils.puedeActualizarStock()) {
+            return Result.success(AccionEjecutada(false, "UPDATE_STOCK", null, "No tienes permiso para actualizar stock"))
+        }
+        
         val productoNombre = params["producto"] as? String
         val localNombre = params["local"] as? String
         val cantidad = (params["cantidad"] as? Number)?.toInt()
@@ -394,8 +398,8 @@ class OperationalAssistantService(
     }
     
     private fun ejecutarCrearLocal(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
-        if (!SecurityUtils.isAdmin()) {
-            return Result.success(AccionEjecutada(false, "CREATE_LOCAL", null, "Solo administradores pueden crear locales"))
+        if (!SecurityUtils.puedeCrearLocales()) {
+            return Result.success(AccionEjecutada(false, "CREATE_LOCAL", null, "No tienes permiso para crear locales"))
         }
         
         val nombre = params["nombre"] as? String ?: return Result.success(
@@ -423,8 +427,8 @@ class OperationalAssistantService(
     }
     
     private fun ejecutarCrearCategoria(params: Map<String, Any>, userRol: String?): Result<AccionEjecutada> {
-        if (!SecurityUtils.isAdmin()) {
-            return Result.success(AccionEjecutada(false, "CREATE_CATEGORIA", null, "Solo administradores pueden crear categorías"))
+        if (!SecurityUtils.puedeCrearCategorias()) {
+            return Result.success(AccionEjecutada(false, "CREATE_CATEGORIA", null, "No tienes permiso para crear categorías"))
         }
         
         val nombre = params["nombre"] as? String ?: return Result.success(
@@ -510,7 +514,28 @@ class OperationalAssistantService(
                 )
             }
             
-            // Paso 4: Si es consulta o listado, usar el flujo original con Gemini
+            // Paso 4: Si es consulta o listado, verificar permisos para análisis IA
+            // Si la consulta requiere análisis (reportes, gráficos, productos más/menos vendidos)
+            val requiereAnalisis = message.contains("reporte", ignoreCase = true) ||
+                    message.contains("análisis", ignoreCase = true) ||
+                    message.contains("gráfico", ignoreCase = true) ||
+                    message.contains("más vendido", ignoreCase = true) ||
+                    message.contains("menos vendido", ignoreCase = true) ||
+                    message.contains("estadística", ignoreCase = true)
+            
+            if (requiereAnalisis && !SecurityUtils.puedeAnalisisIA()) {
+                return Result.success(
+                    "No tienes permiso para solicitar análisis. " +
+                    "Contacta al administrador para que te asigne el permiso de análisis."
+                )
+            }
+            
+            // Verificar permiso básico para usar asistente
+            if (!SecurityUtils.puedeUsarAsistente()) {
+                return Result.success("No tienes permiso para usar el asistente. Contacta al administrador.")
+            }
+            
+            // Paso 5: Si es consulta o listado, usar el flujo original con Gemini
             val ragContext = buildRAGContext(userId, userRol ?: "OPERADOR", message)
             logger.debug("Contexto RAG construido: ${ragContext.length} caracteres")
             

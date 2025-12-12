@@ -133,9 +133,9 @@ class CategoriasController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun crearCategoria(@Valid @RequestBody request: CategoriaRequest): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeCrearCategorias()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden crear categorías"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para crear categorías"))
         }
         
         val email = SecurityUtils.getUserEmail()
@@ -181,9 +181,9 @@ class CategoriasController(
         @PathVariable id: Int,
         @Valid @RequestBody request: CategoriaRequest
     ): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeActualizarCategorias()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden actualizar categorías"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para actualizar categorías"))
         }
         
         val categoria = categoriaRepository.findById(id).orElse(null)
@@ -223,9 +223,9 @@ class CategoriasController(
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun eliminarCategoria(@PathVariable id: Int): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeEliminarCategorias()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden eliminar categorías"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para eliminar categorías"))
         }
         
         val categoria = categoriaRepository.findById(id).orElse(null)

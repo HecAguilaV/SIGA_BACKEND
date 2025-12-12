@@ -119,9 +119,9 @@ class ProductosController(
     
     @PostMapping
     fun crearProducto(@Valid @RequestBody request: ProductoRequest): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeCrearProductos()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden crear productos"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para crear productos"))
         }
         
         val email = SecurityUtils.getUserEmail()
@@ -169,9 +169,9 @@ class ProductosController(
         @PathVariable id: Int,
         @Valid @RequestBody request: ProductoRequest
     ): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeActualizarProductos()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden actualizar productos"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para actualizar productos"))
         }
         
         val producto = productoRepository.findById(id).orElse(null)
@@ -212,9 +212,9 @@ class ProductosController(
     
     @DeleteMapping("/{id}")
     fun eliminarProducto(@PathVariable id: Int): ResponseEntity<Map<String, Any>> {
-        if (!SecurityUtils.isAdmin()) {
+        if (!SecurityUtils.puedeEliminarProductos()) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(mapOf("success" to false, "message" to "Solo administradores pueden eliminar productos"))
+                .body(mapOf("success" to false, "message" to "No tienes permiso para eliminar productos"))
         }
         
         val producto = productoRepository.findById(id).orElse(null)

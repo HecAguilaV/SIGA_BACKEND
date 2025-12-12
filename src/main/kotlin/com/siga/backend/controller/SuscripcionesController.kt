@@ -2,10 +2,13 @@ package com.siga.backend.controller
 
 import com.siga.backend.entity.EstadoSuscripcion
 import com.siga.backend.entity.PeriodoSuscripcion
+import com.siga.backend.entity.Rol
 import com.siga.backend.entity.Suscripcion
+import com.siga.backend.entity.UsuarioSaas
 import com.siga.backend.repository.PlanRepository
 import com.siga.backend.repository.SuscripcionRepository
 import com.siga.backend.repository.UsuarioComercialRepository
+import com.siga.backend.repository.UsuarioSaasRepository
 import com.siga.backend.utils.SecurityUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -39,7 +42,8 @@ data class SuscripcionResponse(
 class SuscripcionesController(
     private val suscripcionRepository: SuscripcionRepository,
     private val usuarioComercialRepository: UsuarioComercialRepository,
-    private val planRepository: PlanRepository
+    private val planRepository: PlanRepository,
+    private val usuarioSaasRepository: UsuarioSaasRepository
 ) {
     
     @GetMapping
@@ -110,6 +114,21 @@ class SuscripcionesController(
         )
         
         val suscripcionGuardada = suscripcionRepository.save(nuevaSuscripcion)
+        
+        // Crear usuario operativo automáticamente si no existe (para acceso a WebApp)
+        if (!usuarioSaasRepository.existsByEmail(usuario.email)) {
+            val usuarioOperativo = UsuarioSaas(
+                email = usuario.email,
+                passwordHash = usuario.passwordHash, // Misma contraseña que el usuario comercial
+                nombre = usuario.nombre,
+                apellido = usuario.apellido,
+                rol = Rol.ADMINISTRADOR, // Primer usuario es administrador
+                activo = true,
+                fechaCreacion = Instant.now(),
+                fechaActualizacion = Instant.now()
+            )
+            usuarioSaasRepository.save(usuarioOperativo)
+        }
         
         return ResponseEntity.status(HttpStatus.CREATED).body(mapOf(
             "success" to true,
