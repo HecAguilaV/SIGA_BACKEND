@@ -93,7 +93,9 @@ class SecurityConfig(
                     // Endpoints públicos
                     .requestMatchers(
                         "/health",
+                        "/actuator/health",
                         "/api/auth/**",
+                        "/api/saas/auth/**",
                         "/api/comercial/auth/**",
                         "/api/comercial/chat",
                         "/api/comercial/planes/**",

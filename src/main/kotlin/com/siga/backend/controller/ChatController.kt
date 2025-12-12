@@ -20,7 +20,15 @@ data class ChatRequest(
 data class ChatResponse(
     val success: Boolean,
     val response: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    val action: ActionInfo? = null  // Información sobre acción ejecutada
+)
+
+data class ActionInfo(
+    val executed: Boolean,
+    val type: String? = null,  // CREATE_PRODUCT, UPDATE_STOCK, etc.
+    val data: Map<String, Any>? = null,
+    val requiresConfirmation: Boolean = false
 )
 
 @RestController
@@ -84,7 +92,38 @@ class SaasChatController(
         
         return result.fold(
             onSuccess = { response ->
-                ResponseEntity.ok(ChatResponse(success = true, response = response))
+                // Detectar si la respuesta indica una acción ejecutada
+                val actionInfo = if (response.startsWith("✅") || response.startsWith("❌")) {
+                    // Extraer tipo de acción del mensaje si es posible
+                    val actionType = when {
+                        response.contains("Producto") && response.contains("creado") -> "CREATE_PRODUCT"
+                        response.contains("Producto") && response.contains("actualizado") -> "UPDATE_PRODUCT"
+                        response.contains("Producto") && response.contains("eliminado") -> "DELETE_PRODUCT"
+                        response.contains("Stock actualizado") -> "UPDATE_STOCK"
+                        response.contains("Local") && response.contains("creado") -> "CREATE_LOCAL"
+                        response.contains("Categoría") && response.contains("creada") -> "CREATE_CATEGORIA"
+                        else -> null
+                    }
+                    
+                    ActionInfo(
+                        executed = response.startsWith("✅"),
+                        type = actionType,
+                        data = null,
+                        requiresConfirmation = false
+                    )
+                } else if (response.contains("¿Estás seguro")) {
+                    // Requiere confirmación
+                    ActionInfo(
+                        executed = false,
+                        type = null,
+                        data = null,
+                        requiresConfirmation = true
+                    )
+                } else {
+                    null
+                }
+                
+                ResponseEntity.ok(ChatResponse(success = true, response = response, action = actionInfo))
             },
             onFailure = { error ->
                 // Convertir Throwable a Exception para que GlobalExceptionHandler lo maneje
