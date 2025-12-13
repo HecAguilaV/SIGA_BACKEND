@@ -2,9 +2,10 @@ spring:
   application:
     name: siga-backend
   
-  # Inicialización lazy para permitir que el healthcheck responda más rápido
+  # Inicialización lazy para que el arranque no espere a todos los beans
+  # Esto permite que /health responda antes, sin bloquearse por conexiones DB
   main:
-    lazy-initialization: false # Mantener false para evitar problemas, pero permitir inicio rápido
+    lazy-initialization: true
   
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db}
@@ -40,9 +41,6 @@ spring:
         # No validar relaciones al inicio
         validator:
           apply_to_ddl: false
-        # No inicializar conexiones al inicio
-        connection:
-          provider_disables_autocommit: false
     open-in-view: false
     # No inicializar repositorios al inicio si hay problemas
     repositories:
