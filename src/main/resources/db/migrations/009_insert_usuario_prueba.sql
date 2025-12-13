@@ -1,0 +1,58 @@
+-- ============================================
+-- Script de Migración: Usuario de Prueba para App Móvil
+-- ============================================
+-- 
+-- ⚠️ RECOMENDACIÓN: Usa el endpoint POST /api/auth/register en lugar de este script
+-- Ver instrucciones al final del archivo.
+--
+-- Credenciales de prueba:
+-- Email: operador.test@siga.com
+-- Password: test123
+-- Rol: OPERADOR
+--
+-- Permisos del OPERADOR (según sistema granular):
+-- - PRODUCTOS_VER, PRODUCTOS_CREAR, PRODUCTOS_ACTUALIZAR
+-- - STOCK_VER, STOCK_ACTUALIZAR
+-- - LOCALES_VER
+-- - CATEGORIAS_VER
+-- - ASISTENTE_USAR, ANALISIS_IA
+
+-- ============================================
+-- MÉTODO RECOMENDADO: Usar endpoint de registro
+-- ============================================
+-- Ejecuta este request una vez que Railway esté desplegado:
+--
+-- POST https://siga-backend-production.up.railway.app/api/auth/register
+-- Content-Type: application/json
+--
+-- {
+--   "email": "operador.test@siga.com",
+--   "password": "test123",
+--   "nombre": "Operador",
+--   "apellido": "Prueba",
+--   "rol": "OPERADOR"
+-- }
+--
+-- Esto creará el usuario automáticamente con el hash correcto.
+
+-- ============================================
+-- MÉTODO ALTERNATIVO: Script SQL (requiere hash BCrypt)
+-- ============================================
+-- Si prefieres usar SQL directamente, primero genera el hash BCrypt:
+-- 1. Ejecuta en Kotlin: BCrypt.hashpw("test123", BCrypt.gensalt(12))
+-- 2. Reemplaza el hash en el INSERT de abajo
+-- 3. Ejecuta este script en la base de datos
+
+-- INSERT INTO siga_saas.USUARIOS (email, password_hash, nombre, apellido, rol, activo)
+-- VALUES (
+--     'operador.test@siga.com',
+--     '$2a$12$[GENERAR_HASH_AQUI]', -- Reemplazar con hash BCrypt válido
+--     'Operador',
+--     'Prueba',
+--     'OPERADOR',
+--     true
+-- )
+-- ON CONFLICT (email) DO UPDATE
+-- SET 
+--     password_hash = EXCLUDED.password_hash,
+--     activo = true;
