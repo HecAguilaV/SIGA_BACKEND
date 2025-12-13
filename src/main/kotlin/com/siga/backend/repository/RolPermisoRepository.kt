@@ -9,9 +9,9 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface RolPermisoRepository : JpaRepository<RolPermiso, RolPermisoId> {
-    fun findByRol(rol: String): List<RolPermiso>
+    fun findById_Rol(rol: String): List<RolPermiso>
     
-    @Query("SELECT rp FROM RolPermiso rp WHERE rp.id.rol = :rol AND rp.id.permisoId = :permisoId")
+    @Query("SELECT COUNT(rp) > 0 FROM RolPermiso rp WHERE rp.id.rol = :rol AND rp.id.permisoId = :permisoId")
     fun existsByRolAndPermisoId(@Param("rol") rol: String, @Param("permisoId") permisoId: Int): Boolean
     
     fun existsById_RolAndId_PermisoId(rol: String, permisoId: Int): Boolean

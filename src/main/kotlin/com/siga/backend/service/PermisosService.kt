@@ -66,7 +66,7 @@ class PermisosService(
         
         // Permisos del rol
         val permisosRol = rolesPermisosRepository
-            .findByRol(usuario.rol.name)
+            .findById_Rol(usuario.rol.name)
             .mapNotNull { it.permiso?.codigo }
         
         // Permisos adicionales
