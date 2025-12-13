@@ -40,8 +40,14 @@ object SecurityUtils {
     
     /**
      * Verifica si el usuario actual tiene un permiso específico
+     * ADMINISTRADOR siempre tiene todos los permisos
      */
     fun tienePermiso(codigoPermiso: String): Boolean {
+        // Si es ADMINISTRADOR, tiene todos los permisos automáticamente
+        if (isAdmin()) {
+            return true
+        }
+        
         val userId = getUserId() ?: return false
         return try {
             val permisosService = ApplicationContextProvider.getBean(PermisosService::class.java)
