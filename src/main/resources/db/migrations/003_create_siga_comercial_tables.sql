@@ -115,6 +115,9 @@ CREATE TABLE IF NOT EXISTS siga_comercial.FACTURAS (
     metodo_pago VARCHAR(100),
     ultimos_4_digitos VARCHAR(4),
     
+    -- IVA (opcional, futuro)
+    iva DECIMAL(10,2) CHECK (iva >= 0),
+    
     -- Auditoría
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

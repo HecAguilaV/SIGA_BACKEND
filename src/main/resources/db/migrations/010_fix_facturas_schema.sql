@@ -1,91 +1,62 @@
 -- ============================================
 -- Migración: Corregir esquema de FACTURAS (siga_comercial)
 -- ============================================
--- Problema:
--- - Existía una tabla FACTURAS con estructura antigua (monto/iva/total/fecha_emision),
---   mientras que el backend actual usa campos denormalizados (usuario_nombre, plan_nombre, precio_uf, etc.).
+-- Este archivo está escrito en SQL PLANO (sin DO $$) para compatibilidad con phpPgAdmin/AlwaysData.
 --
--- Solución:
--- - Si la tabla existe y está vacía, se recrea con el esquema correcto.
--- - Si la tabla tiene datos, NO se toca (para evitar pérdida).
---
--- IMPORTANTE:
--- - Ejecutar en la BD destino (Railway/AlwaysData) con permisos de DDL.
+-- ⚠️ IMPORTANTE (manual):
+-- 1) Verifica que la tabla esté vacía:
+--    SELECT COUNT(*) FROM siga_comercial.facturas;
+-- 2) Si el conteo es 0, ejecuta TODO este script.
+-- 3) Si el conteo es > 0, NO lo ejecutes (haría DROP y perderías datos).
 
-DO $$
-DECLARE
-  tiene_datos BOOLEAN := FALSE;
-  existe_tabla BOOLEAN := FALSE;
-BEGIN
-  SELECT EXISTS (
-    SELECT 1
-    FROM information_schema.tables
-    WHERE table_schema = 'siga_comercial'
-      AND table_name = 'facturas'
-  ) INTO existe_tabla;
+-- 1) Eliminar tabla antigua (solo si está vacía, ver pasos arriba)
+DROP TABLE IF EXISTS siga_comercial.FACTURAS;
 
-  IF existe_tabla THEN
-    EXECUTE 'SELECT EXISTS (SELECT 1 FROM siga_comercial.facturas LIMIT 1)';
-    -- El EXECUTE anterior no puede asignar directo sin INTO en dynamic SQL:
-    EXECUTE 'SELECT EXISTS (SELECT 1 FROM siga_comercial.facturas LIMIT 1)' INTO tiene_datos;
-  END IF;
+-- 2) Crear tabla con el esquema que usa el backend actual (campos denormalizados)
+CREATE TABLE IF NOT EXISTS siga_comercial.FACTURAS (
+  id SERIAL PRIMARY KEY,
 
-  IF existe_tabla AND tiene_datos THEN
-    RAISE NOTICE 'siga_comercial.FACTURAS tiene datos; no se recrea automáticamente.';
-    RETURN;
-  END IF;
+  -- Relación opcional con suscripción/pago (para futuro)
+  suscripcion_id INTEGER REFERENCES siga_comercial.SUSCRIPCIONES(id) ON DELETE SET NULL,
+  pago_id INTEGER REFERENCES siga_comercial.PAGOS(id) ON DELETE SET NULL,
 
-  -- Si existe pero está vacía, la recreamos para alinear con el backend actual
-  IF existe_tabla THEN
-    EXECUTE 'DROP TABLE siga_comercial.FACTURAS';
-  END IF;
+  -- Identidad
+  numero_factura VARCHAR(50) UNIQUE NOT NULL,
 
-  EXECUTE $SQL$
-    CREATE TABLE IF NOT EXISTS siga_comercial.FACTURAS (
-      id SERIAL PRIMARY KEY,
+  -- Campos denormalizados (evitar JOINs en impresión)
+  usuario_id INTEGER NOT NULL REFERENCES siga_comercial.USUARIOS(id) ON DELETE CASCADE,
+  usuario_nombre VARCHAR(255) NOT NULL,
+  usuario_email VARCHAR(255) NOT NULL,
+  plan_id INTEGER NOT NULL REFERENCES siga_comercial.PLANES(id),
+  plan_nombre VARCHAR(255) NOT NULL,
 
-      -- Relación opcional con suscripción/pago (para futuro)
-      suscripcion_id INTEGER REFERENCES siga_comercial.SUSCRIPCIONES(id) ON DELETE SET NULL,
-      pago_id INTEGER REFERENCES siga_comercial.PAGOS(id) ON DELETE SET NULL,
+  -- Precios
+  precio_uf DECIMAL(10,2) NOT NULL CHECK (precio_uf >= 0),
+  precio_clp DECIMAL(12,2) CHECK (precio_clp >= 0),
+  unidad VARCHAR(10) NOT NULL DEFAULT 'UF',
 
-      -- Identidad
-      numero_factura VARCHAR(50) UNIQUE NOT NULL,
+  -- Fechas
+  fecha_compra TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_vencimiento TIMESTAMP NULL,
 
-      -- Campos denormalizados (evitar JOINs en impresión)
-      usuario_id INTEGER NOT NULL REFERENCES siga_comercial.USUARIOS(id) ON DELETE CASCADE,
-      usuario_nombre VARCHAR(255) NOT NULL,
-      usuario_email VARCHAR(255) NOT NULL,
-      plan_id INTEGER NOT NULL REFERENCES siga_comercial.PLANES(id),
-      plan_nombre VARCHAR(255) NOT NULL,
+  -- Estado y pago
+  estado VARCHAR(20) NOT NULL DEFAULT 'PAGADA' CHECK (estado IN ('PENDIENTE', 'PAGADA', 'VENCIDA', 'ANULADA')),
+  metodo_pago VARCHAR(100),
+  ultimos_4_digitos VARCHAR(4),
 
-      -- Precios
-      precio_uf DECIMAL(10,2) NOT NULL CHECK (precio_uf >= 0),
-      precio_clp DECIMAL(12,2) CHECK (precio_clp >= 0),
-      unidad VARCHAR(10) NOT NULL DEFAULT 'UF',
+  -- IVA (opcional, futuro)
+  iva DECIMAL(10,2) CHECK (iva >= 0),
 
-      -- Fechas
-      fecha_compra TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      fecha_vencimiento TIMESTAMP NULL,
+  -- Auditoría
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
-      -- Estado y pago
-      estado VARCHAR(20) NOT NULL DEFAULT 'PAGADA' CHECK (estado IN ('PENDIENTE', 'PAGADA', 'VENCIDA', 'ANULADA')),
-      metodo_pago VARCHAR(100),
-      ultimos_4_digitos VARCHAR(4),
+COMMENT ON TABLE siga_comercial.FACTURAS IS 'Facturas generadas para suscripciones';
 
-      -- Auditoría
-      created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-    );
-
-    COMMENT ON TABLE siga_comercial.FACTURAS IS 'Facturas generadas para suscripciones';
-
-    CREATE INDEX IF NOT EXISTS idx_facturas_usuario_id ON siga_comercial.FACTURAS(usuario_id);
-    CREATE INDEX IF NOT EXISTS idx_facturas_plan_id ON siga_comercial.FACTURAS(plan_id);
-    CREATE INDEX IF NOT EXISTS idx_facturas_suscripcion ON siga_comercial.FACTURAS(suscripcion_id);
-    CREATE INDEX IF NOT EXISTS idx_facturas_pago ON siga_comercial.FACTURAS(pago_id);
-    CREATE INDEX IF NOT EXISTS idx_facturas_estado ON siga_comercial.FACTURAS(estado);
-  $SQL$;
-
-  RAISE NOTICE 'siga_comercial.FACTURAS recreada con el esquema correcto (backend actual).';
-END $$;
+CREATE INDEX IF NOT EXISTS idx_facturas_usuario_id ON siga_comercial.FACTURAS(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_facturas_plan_id ON siga_comercial.FACTURAS(plan_id);
+CREATE INDEX IF NOT EXISTS idx_facturas_suscripcion ON siga_comercial.FACTURAS(suscripcion_id);
+CREATE INDEX IF NOT EXISTS idx_facturas_pago ON siga_comercial.FACTURAS(pago_id);
+CREATE INDEX IF NOT EXISTS idx_facturas_estado ON siga_comercial.FACTURAS(estado);
 
