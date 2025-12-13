@@ -16,6 +16,8 @@ spring:
       validation-timeout: 5000
       leak-detection-threshold: 60000 # Detectar conexiones que no se cierran
       initialization-fail-timeout: -1 # No fallar si no puede conectar al inicio
+      # Permitir que la aplicación inicie incluso si la BD no está disponible
+      connection-test-query: SELECT 1
   
   jpa:
     hibernate:
@@ -25,6 +27,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
+        # Permitir que la aplicación inicie incluso si hay problemas con la BD
+        jdbc:
+          time_zone: UTC
+        # No validar esquema al inicio para permitir healthcheck rápido
+        temp:
+          use_jdbc_metadata_defaults: false
+        # No validar relaciones al inicio
+        validator:
+          apply_to_ddl: false
     open-in-view: false
   
   jackson:
