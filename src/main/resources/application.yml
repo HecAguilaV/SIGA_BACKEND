@@ -84,6 +84,24 @@ jwt:
 gemini:
   api-key: ${GEMINI_API_KEY:}
 
+# Spring Boot Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
+
 logging:
   level:
     root: INFO

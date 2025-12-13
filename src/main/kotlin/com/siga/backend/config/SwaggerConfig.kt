@@ -78,7 +78,7 @@ class SwaggerConfig {
                     .contact(
                         Contact()
                             .name("SIGA Team")
-                            .email("support@siga.com")
+                            .email("hdaguia@gmail.com")
                     )
             )
             .servers(servers)
