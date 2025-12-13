@@ -93,20 +93,20 @@ class SaasChatController(
         return result.fold(
             onSuccess = { response ->
                 // Detectar si la respuesta indica una acción ejecutada
-                val actionInfo = if (response.startsWith("✅") || response.startsWith("❌")) {
+                val actionInfo = if (response.startsWith("Éxito:") || response.startsWith("Error:")) {
                     // Extraer tipo de acción del mensaje si es posible
                     val actionType = when {
-                        response.contains("Producto") && response.contains("creado") -> "CREATE_PRODUCT"
+                        response.contains("Producto") && (response.contains("creado") || response.contains("creada")) -> "CREATE_PRODUCT"
                         response.contains("Producto") && response.contains("actualizado") -> "UPDATE_PRODUCT"
                         response.contains("Producto") && response.contains("eliminado") -> "DELETE_PRODUCT"
-                        response.contains("Stock actualizado") -> "UPDATE_STOCK"
-                        response.contains("Local") && response.contains("creado") -> "CREATE_LOCAL"
-                        response.contains("Categoría") && response.contains("creada") -> "CREATE_CATEGORIA"
+                        response.contains("Stock") && response.contains("actualizado") -> "UPDATE_STOCK"
+                        response.contains("Local") && (response.contains("creado") || response.contains("creada")) -> "CREATE_LOCAL"
+                        response.contains("Categoría") && (response.contains("creada") || response.contains("creado")) -> "CREATE_CATEGORIA"
                         else -> null
                     }
                     
                     ActionInfo(
-                        executed = response.startsWith("✅"),
+                        executed = response.startsWith("Éxito:"),
                         type = actionType,
                         data = null,
                         requiresConfirmation = false

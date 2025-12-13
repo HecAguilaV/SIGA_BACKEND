@@ -248,4 +248,48 @@ Agregar funcionalidad para agregar o quitar productos desde WebApp.
 
 ---
 
+## 6. Error de Parsing JSON en Asistente IA (App Móvil)
+
+### Problema
+```
+Error: Illegal input: Unexpected JSON token at offset 92: Expected beginning of the string, but got {"succes":true,"response":"X Producto no encontrado: mantequillas",...}
+```
+
+### Causa
+El frontend está tratando de parsear el campo `response` como JSON cuando es solo texto. Los emojis (✅, ❌) pueden causar problemas de encoding.
+
+### Solución (Backend - Ya implementada)
+✅ **Actualizado:** El backend ahora retorna:
+- `"Éxito: [mensaje]"` en lugar de `"✅ [mensaje]"`
+- `"Error: [mensaje]"` en lugar de `"❌ [mensaje]"`
+
+### Solución (Frontend App Móvil)
+**El campo `response` es texto plano, NO JSON:**
+```kotlin
+// CORRECTO
+data class ChatResponse(
+    val success: Boolean,
+    val response: String,  // ⬅️ Es texto, NO JSON
+    val message: String?,
+    val action: ActionInfo?
+)
+
+// Al parsear:
+val chatResponse = json.decodeFromString<ChatResponse>(responseBody)
+val mensaje = chatResponse.response  // Ya es String, no necesita parseo adicional
+```
+
+### Mejoras en Búsqueda de Productos
+✅ **Actualizado:** El asistente ahora:
+- Busca productos de forma flexible (coincidencia exacta, contiene, etc.)
+- Muestra mensajes de error más claros
+- Sugiere listar productos si no encuentra uno
+
+**Ejemplo de uso mejorado:**
+- Usuario: "agregar cinco mantequillas al local the House"
+- Asistente busca "mantequillas" de forma flexible
+- Si no encuentra, sugiere: "No encontré el producto 'mantequillas'. ¿Podrías verificar el nombre exacto? Puedes listar los productos disponibles."
+
+---
+
 **Última actualización:** 2025-01-XX

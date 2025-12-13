@@ -59,7 +59,7 @@ class OperationalAssistantService(
         - Si el mensaje contiene "crea", "crear", "agrega", "añade" + "producto" → CREATE_PRODUCT
         - Si el mensaje contiene "actualiza", "modifica", "cambia" + "producto" → UPDATE_PRODUCT
         - Si el mensaje contiene "elimina", "borra", "quita" + "producto" → DELETE_PRODUCT (requiereConfirmacion: true)
-        - Si el mensaje contiene "stock", "inventario", "cantidad" + "agrega", "actualiza" → UPDATE_STOCK
+        - Si el mensaje contiene "stock", "inventario", "cantidad" + ("agrega", "añade", "actualiza", "pon", "poner") → UPDATE_STOCK
         - Si el mensaje contiene "crea", "crear" + "local" → CREATE_LOCAL
         - Si el mensaje contiene "crea", "crear" + "categoría" o "categoria" → CREATE_CATEGORIA
         - Si el mensaje contiene "¿", "qué", "cuánto", "muestra", "lista" → CONSULTAR o LISTAR
@@ -68,8 +68,10 @@ class OperationalAssistantService(
         Extrae parámetros del mensaje:
         - "precio 1500" → "precio": "1500"
         - "llamado Café" o "producto Café" → "nombre": "Café"
-        - "50 unidades" → "cantidad": 50
-        - "local ITR" → "local": "ITR"
+        - "50 unidades" o "cinco" o "5" → "cantidad": 50 o 5
+        - "local ITR" o "al local ITR" → "local": "ITR"
+        - "cinco mantequillas" → "cantidad": 5, "producto": "mantequillas"
+        - "agregar cinco mantequillas al local the House" → "cantidad": 5, "producto": "mantequillas", "local": "the House"
         
         EJEMPLO: "Crea un producto llamado Café con precio 1500"
         RESPUESTA: {"intencion":"CREATE_PRODUCT","entidad":"producto","parametros":{"nombre":"Café","precio":"1500"},"requiereConfirmacion":false}
@@ -370,20 +372,38 @@ class OperationalAssistantService(
                 AccionEjecutada(false, "UPDATE_STOCK", null, "Se requiere la cantidad")
             )
         
-        // Buscar producto por nombre
-        val producto = productoNombre?.let { nombre ->
-            productoRepository.findByActivoTrue()
-                .firstOrNull { it.nombre.equals(nombre, ignoreCase = true) }
+        // Buscar producto por nombre (búsqueda flexible)
+        val producto = productoNombre?.let { nombreBuscar ->
+            val productos = productoRepository.findByActivoTrue()
+            // Primero intentar coincidencia exacta (case-insensitive)
+            productos.firstOrNull { it.nombre.equals(nombreBuscar, ignoreCase = true) }
+                // Si no encuentra, buscar que contenga el nombre
+                ?: productos.firstOrNull { it.nombre.contains(nombreBuscar, ignoreCase = true) }
+                // Si no encuentra, buscar que el nombre buscado contenga el nombre del producto
+                ?: productos.firstOrNull { nombreBuscar.contains(it.nombre, ignoreCase = true) }
         } ?: return Result.success(
-            AccionEjecutada(false, "UPDATE_STOCK", null, "Producto no encontrado: $productoNombre")
+            AccionEjecutada(
+                false, 
+                "UPDATE_STOCK", 
+                null, 
+                "No encontré el producto '$productoNombre'. ¿Podrías verificar el nombre exacto? Puedes listar los productos disponibles."
+            )
         )
         
-        // Buscar local por nombre
-        val local = localNombre?.let { nombre ->
-            localRepository.findByActivoTrue()
-                .firstOrNull { it.nombre.equals(nombre, ignoreCase = true) }
+        // Buscar local por nombre (búsqueda flexible)
+        val local = localNombre?.let { nombreBuscar ->
+            val locales = localRepository.findByActivoTrue()
+            // Primero intentar coincidencia exacta (case-insensitive)
+            locales.firstOrNull { it.nombre.equals(nombreBuscar, ignoreCase = true) }
+                // Si no encuentra, buscar que contenga el nombre
+                ?: locales.firstOrNull { it.nombre.contains(nombreBuscar, ignoreCase = true) }
         } ?: return Result.success(
-            AccionEjecutada(false, "UPDATE_STOCK", null, "Local no encontrado: $localNombre")
+            AccionEjecutada(
+                false, 
+                "UPDATE_STOCK", 
+                null, 
+                "No encontré el local '$localNombre'. ¿Podrías verificar el nombre exacto? Los locales disponibles aparecen en el contexto."
+            )
         )
         
         val stockExistente = stockRepository.findByProductoIdAndLocalId(producto.id, local.id)
@@ -523,16 +543,16 @@ class OperationalAssistantService(
                         if (accion.ejecutada) {
                             // Acción ejecutada exitosamente
                             val respuesta = accion.mensaje ?: "Acción ejecutada exitosamente"
-                            return Result.success("✅ $respuesta")
+                            return Result.success("Éxito: $respuesta")
                         } else {
-                            // Error en la ejecución
+                            // Error en la ejecución - retornar mensaje sin emoji para evitar problemas de parsing
                             val errorMsg = accion.mensaje ?: "No se pudo ejecutar la acción"
-                            return Result.success("❌ $errorMsg")
+                            return Result.success("Error: $errorMsg")
                         }
                     },
                     onFailure = { error ->
                         logger.error("Error al ejecutar acción", error)
-                        return Result.success("❌ Error al ejecutar la acción: ${error.message}")
+                        return Result.success("Error al ejecutar la acción: ${error.message ?: "Error desconocido"}")
                     }
                 )
             }
