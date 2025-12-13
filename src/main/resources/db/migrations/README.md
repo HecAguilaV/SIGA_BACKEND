@@ -10,6 +10,23 @@ Los scripts deben ejecutarse en el siguiente orden:
 2. **002_create_siga_saas_tables.sql** - Crea todas las tablas del esquema operativo
 3. **003_create_siga_comercial_tables.sql** - Crea todas las tablas del esquema comercial
 4. **004_insert_initial_data.sql** - Inserta datos iniciales (métodos de pago, planes, categorías)
+5. **006_add_campos_usuarios_comerciales.sql** - Agrega campos de trial a usuarios comerciales
+6. **008_create_sistema_permisos.sql** - ⚠️ **CRÍTICO** - Crea sistema de permisos (PERMISOS, ROLES_PERMISOS, USUARIOS_PERMISOS)
+7. **012_add_nombre_empresa.sql** - Agrega campo nombre_empresa a usuarios comerciales
+
+### ⚠️ MIGRACIÓN CRÍTICA: 008_create_sistema_permisos.sql
+
+**Esta migración es OBLIGATORIA** - Sin ella, el backend fallará con errores como:
+- "Tabla siga_saas.permisos no existe"
+- "No property 'permiso' found"
+
+**Tablas creadas:**
+- `PERMISOS` - Catálogo de permisos (25 permisos base)
+- `ROLES_PERMISOS` - Permisos por defecto de cada rol
+- `USUARIOS_PERMISOS` - Permisos adicionales por usuario
+
+**Verificación:**
+Ejecutar `VERIFICACION_TABLAS.sql` para verificar que todas las tablas existan.
 
 ## 🚀 Cómo Ejecutar los Scripts
 
@@ -80,6 +97,9 @@ SELECT * FROM siga_saas.CATEGORIAS;
 - TURNOS_CAJA (POS)
 - TRANSACCIONES_POS (POS)
 - CARRITO_POS (POS)
+- **PERMISOS** ⬅️ CRÍTICO (migración 008)
+- **ROLES_PERMISOS** ⬅️ CRÍTICO (migración 008)
+- **USUARIOS_PERMISOS** ⬅️ CRÍTICO (migración 008)
 
 ### Esquema `siga_comercial` (Portal Comercial)
 - USUARIOS
