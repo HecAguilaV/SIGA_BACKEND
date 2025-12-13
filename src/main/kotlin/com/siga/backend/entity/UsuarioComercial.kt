@@ -28,6 +28,9 @@ data class UsuarioComercial(
     @Column(length = 20)
     val telefono: String? = null,
     
+    @Column(name = "nombre_empresa", length = 255)
+    val nombreEmpresa: String? = null,
+    
     @Column(nullable = false)
     val activo: Boolean = true,
     

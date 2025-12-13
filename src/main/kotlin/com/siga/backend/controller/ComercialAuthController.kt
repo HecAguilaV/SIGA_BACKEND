@@ -28,11 +28,21 @@ data class ComercialRegisterRequest(
     @field:NotBlank val nombre: String,
     val apellido: String? = null,
     val rut: String? = null,
-    val telefono: String? = null
+    val telefono: String? = null,
+    val nombreEmpresa: String? = null
 )
 
 data class ComercialRefreshTokenRequest(
     @field:NotBlank val refreshToken: String
+)
+
+data class ResetPasswordRequest(
+    @field:NotBlank @field:Email val email: String
+)
+
+data class ChangePasswordRequest(
+    @field:NotBlank val token: String,
+    @field:NotBlank val newPassword: String
 )
 
 data class ComercialAuthResponse(
@@ -49,7 +59,8 @@ data class ComercialUserInfo(
     val nombre: String,
     val apellido: String?,
     val rut: String?,
-    val telefono: String?
+    val telefono: String?,
+    val nombreEmpresa: String? = null
 )
 
 @RestController
@@ -146,7 +157,8 @@ class ComercialAuthController(
                     nombre = savedUser.nombre,
                     apellido = savedUser.apellido,
                     rut = savedUser.rut,
-                    telefono = savedUser.telefono
+                    telefono = savedUser.telefono,
+                    nombreEmpresa = savedUser.nombreEmpresa
                 )
             )
         )
@@ -245,6 +257,73 @@ class ComercialAuthController(
                 "apellido" to usuarioOperativo.apellido,
                 "rol" to usuarioOperativo.rol.name
             )
+        ))
+    }
+    
+    @PostMapping("/reset-password")
+    @Operation(
+        summary = "Solicitar Reset de Contraseña",
+        description = "Solicita un token para resetear la contraseña. Envía email al usuario (por ahora solo devuelve token en respuesta para testing)."
+    )
+    fun solicitarResetPassword(@Valid @RequestBody request: ResetPasswordRequest): ResponseEntity<Map<String, Any>> {
+        val user = usuarioComercialRepository.findByEmail(request.email.lowercase()).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Email no encontrado"))
+        
+        if (!user.activo) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "Usuario inactivo"))
+        }
+        
+        // Generar token de reset (válido por 1 hora)
+        val resetToken = jwtService.generateAccessToken(user.id, user.email, "RESET")
+        
+        // TODO: En producción, enviar email con el token
+        // Por ahora, devolvemos el token en la respuesta (solo para testing)
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Token de reset generado. En producción se enviará por email.",
+            "resetToken" to resetToken, // ⚠️ Solo para testing, quitar en producción
+            "expiresIn" to 3600 // 1 hora
+        ))
+    }
+    
+    @PostMapping("/change-password")
+    @Operation(
+        summary = "Cambiar Contraseña con Token",
+        description = "Cambia la contraseña usando el token de reset recibido por email."
+    )
+    fun cambiarPassword(@Valid @RequestBody request: ChangePasswordRequest): ResponseEntity<Map<String, Any>> {
+        val decodedJWT = jwtService.verifyToken(request.token)
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "Token inválido o expirado"))
+        
+        val userId = decodedJWT.subject.toIntOrNull()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "Token inválido"))
+        
+        val user = usuarioComercialRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        if (!user.activo) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "Usuario inactivo"))
+        }
+        
+        // Actualizar contraseña
+        val newPasswordHash = passwordService.hashPassword(request.newPassword)
+        val updatedUser = user.copy(
+            passwordHash = newPasswordHash,
+            fechaActualizacion = Instant.now()
+        )
+        
+        usuarioComercialRepository.save(updatedUser)
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Contraseña actualizada exitosamente"
         ))
     }
 }
