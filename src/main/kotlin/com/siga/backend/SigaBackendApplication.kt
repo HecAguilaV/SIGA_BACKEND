@@ -3,7 +3,12 @@ package com.siga.backend
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
-@SpringBootApplication
+@SpringBootApplication(
+    exclude = [
+        // Excluir validación de BD al inicio para permitir healthcheck rápido
+        // org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration::class
+    ]
+)
 class SigaBackendApplication
 
 fun main(args: Array<String>) {
