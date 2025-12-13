@@ -28,8 +28,8 @@
 - ✅ `POST /api/comercial/auth/obtener-token-operativo` - Obtener token para WebApp (SSO)
 
 #### 🔐 Autenticación Operativa (`/api/auth`)
-- ✅ `POST /api/auth/login` - Login usuarios operativos
-- ✅ `POST /api/auth/register` - Registro usuarios operativos
+- ✅ `POST /api/auth/login` - Login usuarios operativos (ADMINISTRADOR, OPERADOR, CAJERO)
+- ✅ `POST /api/auth/register` - Registro usuarios operativos (solo para testing, en producción se crean desde WebApp)
 
 #### 💬 Asistente IA
 - ✅ `POST /api/comercial/chat` - Chat comercial (público, NO requiere auth)
@@ -37,13 +37,16 @@
 
 #### 📦 Gestión Operativa (`/api/saas`)
 - ✅ `GET /api/saas/productos` - Listar productos
-- ✅ `POST /api/saas/productos` - Crear producto (requiere permiso)
-- ✅ `PUT /api/saas/productos/{id}` - Actualizar producto (requiere permiso)
-- ✅ `DELETE /api/saas/productos/{id}` - Eliminar producto (requiere permiso)
-- ✅ `GET /api/saas/locales` - Listar locales
-- ✅ `POST /api/saas/locales` - Crear local (requiere permiso)
+- ✅ `POST /api/saas/productos` - Crear producto (requiere permiso `PRODUCTOS_CREAR` - OPERADOR y ADMINISTRADOR tienen)
+- ✅ `PUT /api/saas/productos/{id}` - Actualizar producto (requiere permiso `PRODUCTOS_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
+- ✅ `DELETE /api/saas/productos/{id}` - Eliminar producto (requiere permiso `PRODUCTOS_ELIMINAR` - solo ADMINISTRADOR)
+- ✅ `GET /api/saas/locales` - Listar locales (todos los usuarios operativos pueden ver)
+- ✅ `GET /api/saas/locales/{id}` - Obtener local por ID
+- ✅ `POST /api/saas/locales` - Crear local (requiere permiso `LOCALES_CREAR` - solo ADMINISTRADOR)
 - ✅ `GET /api/saas/categorias` - Listar categorías
-- ✅ `GET /api/saas/stock` - Ver stock
+- ✅ `GET /api/saas/stock` - Ver stock (puede filtrar por `?localId={id}`)
+- ✅ `GET /api/saas/stock/{productoId}/{localId}` - Obtener stock específico
+- ✅ `PUT /api/saas/stock/{productoId}/{localId}` - Actualizar stock (requiere permiso `STOCK_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
 - ✅ `GET /api/saas/usuarios` - Listar usuarios operativos
 - ✅ `GET /api/saas/usuarios/{id}/permisos` - Ver permisos de usuario
 - ✅ `POST /api/saas/usuarios/{id}/permisos` - Asignar permiso a usuario
@@ -214,15 +217,37 @@
 1. **Login operativo**
    - Endpoint: `POST /api/auth/login`
    - Credenciales: email + password de usuario operativo
+   - Roles soportados: ADMINISTRADOR, OPERADOR, CAJERO
 
-2. **Consultar permisos**
+2. **Selección de local (CRÍTICO)**
+   - Listar locales disponibles: `GET /api/saas/locales`
+   - Mostrar selector de locales al usuario (ADMINISTRADOR y OPERADOR)
+   - Guardar local seleccionado en estado de la app
+   - Todas las operaciones deben usar el `localId` seleccionado
+
+3. **Consultar permisos**
    - Endpoint: `GET /api/saas/usuarios/{id}/permisos`
    - Validar permisos antes de mostrar acciones
+   - ⚠️ ADMINISTRADOR tiene todos los permisos automáticamente
 
-3. **Gestión básica**
+4. **Gestión de productos**
    - Listar productos: `GET /api/saas/productos`
-   - Ver stock: `GET /api/saas/stock`
-   - Crear ventas: `POST /api/saas/ventas` (si existe)
+   - Crear productos: `POST /api/saas/productos` (OPERADOR y ADMINISTRADOR pueden)
+   - Actualizar productos: `PUT /api/saas/productos/{id}` (OPERADOR y ADMINISTRADOR pueden)
+
+5. **Gestión de stock**
+   - Ver stock de un local: `GET /api/saas/stock?localId={id}`
+   - Ver stock de todos los locales: `GET /api/saas/stock` (sin parámetro)
+   - Actualizar stock: `PUT /api/saas/stock/{productoId}/{localId}` (requiere permiso)
+
+6. **Gestión de ventas**
+   - Crear ventas: `POST /api/saas/ventas` (CAJERO y otros con permiso)
+
+#### ⚠️ Notas Importantes
+- **OPERADOR puede crear productos** (tiene permiso `PRODUCTOS_CREAR`)
+- **ADMINISTRADOR y OPERADOR deben poder seleccionar local** desde la app
+- El local seleccionado se usa para filtrar stock y operaciones
+- El backend NO valida qué locales puede ver cada usuario (todos ven todos los locales)
 
 #### ❌ NO Debe Implementar
 - ❌ Login comercial (solo operativo)
@@ -252,15 +277,22 @@
 - [ ] Login directo funcionando (`POST /api/auth/login`)
 - [ ] SSO desde Web Comercial (opcional para ADMINISTRADOR)
 - [ ] Intercambio de token operativo (si usa SSO)
+- [ ] Selector de locales (mostrar lista de locales disponibles)
+- [ ] Filtrar operaciones por local seleccionado
 - [ ] Validación de permisos (ADMINISTRADOR tiene todos)
-- [ ] CRUD de productos con validación de permisos
+- [ ] CRUD de productos con validación de permisos (OPERADOR puede crear/actualizar)
 - [ ] Crear usuarios OPERADOR/CAJERO desde WebApp
 - [ ] Asistente IA usando `/api/saas/chat`
 
 ### Para App Móvil
-- [ ] Login operativo funcionando
+- [ ] Login operativo funcionando (ADMINISTRADOR, OPERADOR, CAJERO)
+- [ ] Selector de locales (mostrar lista de locales disponibles)
+- [ ] Guardar local seleccionado en estado de la app
+- [ ] Filtrar operaciones por local seleccionado (stock, productos, etc.)
 - [ ] Consulta de permisos
 - [ ] Validación de permisos antes de acciones
+- [ ] OPERADOR puede crear productos (verificar permiso)
+- [ ] OPERADOR puede actualizar stock (verificar permiso)
 
 ---
 
