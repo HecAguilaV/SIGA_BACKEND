@@ -1,5 +1,6 @@
 package com.siga.backend.controller
 
+import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.siga.backend.entity.Stock
 import com.siga.backend.repository.StockRepository
@@ -16,10 +17,20 @@ import jakarta.validation.constraints.Min
 import java.time.Instant
 
 data class StockRequest(
-    @field:Min(1) @JsonProperty("producto_id") val productoId: Int,
-    @field:Min(1) @JsonProperty("local_id") val localId: Int,
-    @field:Min(0) val cantidad: Int,
-    @field:Min(0) @JsonProperty("cantidad_minima") val cantidadMinima: Int = 0
+    @field:Min(1) 
+    @JsonAlias("producto_id")  // Acepta tanto productoId (nombre del campo) como producto_id
+    val productoId: Int,
+    
+    @field:Min(1) 
+    @JsonAlias("local_id")  // Acepta tanto localId (nombre del campo) como local_id
+    val localId: Int,
+    
+    @field:Min(0) 
+    val cantidad: Int,
+    
+    @field:Min(0) 
+    @JsonAlias("cantidad_minima", "min_stock")  // Acepta cantidadMinima (nombre del campo), cantidad_minima o min_stock
+    val cantidadMinima: Int = 0
 )
 
 data class StockResponse(

@@ -480,8 +480,17 @@ data class StockItem(
 - ✅ `GET /api/saas/stock/{productoId}/{localId}` - Obtener stock específico
 - ✅ `POST /api/saas/stock` - Actualizar stock
 
-**Nota:** El request body también acepta snake_case para mantener consistencia:
+**Nota:** El request body acepta AMBOS formatos (camelCase y snake_case) para mantener compatibilidad con WebApp y App Móvil:
 ```json
+// Formato camelCase (WebApp)
+{
+  "productoId": 1,
+  "localId": 1,
+  "cantidad": 100,
+  "cantidadMinima": 10
+}
+
+// Formato snake_case (App Móvil)
 {
   "producto_id": 1,
   "local_id": 1,
