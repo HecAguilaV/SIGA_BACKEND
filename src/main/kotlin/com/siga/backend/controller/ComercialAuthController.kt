@@ -268,7 +268,7 @@ class ComercialAuthController(
     @PostMapping("/reset-password")
     @Operation(
         summary = "Solicitar Reset de Contraseña",
-        description = "Solicita un token para resetear la contraseña. Envía email al usuario (por ahora solo devuelve token en respuesta para testing)."
+        description = "Solicita un token para resetear la contraseña. Actualmente retorna el token en la respuesta (MVP). Cuando se implemente servicio de email, se enviará por correo."
     )
     fun solicitarResetPassword(@Valid @RequestBody request: ResetPasswordRequest): ResponseEntity<Map<String, Any>> {
         val user = usuarioComercialRepository.findByEmail(request.email.lowercase()).orElse(null)
@@ -283,13 +283,13 @@ class ComercialAuthController(
         // Generar token de reset (válido por 1 hora)
         val resetToken = jwtService.generateAccessToken(user.id, user.email, "RESET")
         
-        // TODO: En producción, enviar email con el token
-        // Por ahora, devolvemos el token en la respuesta (solo para testing)
+        // MVP: Retornar token en respuesta (no hay servicio de email contratado)
+        // TODO: Cuando se implemente servicio de mensajería, enviar token por email y NO retornarlo
         
         return ResponseEntity.ok(mapOf(
             "success" to true,
-            "message" to "Token de reset generado. En producción se enviará por email.",
-            "resetToken" to resetToken, // ⚠️ Solo para testing, quitar en producción
+            "message" to "Token de reset generado",
+            "resetToken" to resetToken,
             "expiresIn" to 3600 // 1 hora
         ))
     }
@@ -297,7 +297,7 @@ class ComercialAuthController(
     @PostMapping("/change-password")
     @Operation(
         summary = "Cambiar Contraseña con Token",
-        description = "Cambia la contraseña usando el token de reset recibido por email."
+        description = "Cambia la contraseña usando el token de reset. En MVP, el token se obtiene de la respuesta de reset-password. Cuando se implemente email, el token se recibirá por correo."
     )
     fun cambiarPassword(@Valid @RequestBody request: ChangePasswordRequest): ResponseEntity<Map<String, Any>> {
         val decodedJWT = jwtService.verifyToken(request.token)
