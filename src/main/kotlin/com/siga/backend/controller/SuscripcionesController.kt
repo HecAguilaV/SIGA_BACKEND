@@ -1,5 +1,6 @@
 package com.siga.backend.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.siga.backend.entity.EstadoSuscripcion
 import com.siga.backend.entity.PeriodoSuscripcion
 import com.siga.backend.entity.Rol
@@ -43,7 +44,8 @@ class SuscripcionesController(
     private val suscripcionRepository: SuscripcionRepository,
     private val usuarioComercialRepository: UsuarioComercialRepository,
     private val planRepository: PlanRepository,
-    private val usuarioSaasRepository: UsuarioSaasRepository
+    private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val objectMapper: ObjectMapper
 ) {
     
     @GetMapping
@@ -100,6 +102,36 @@ class SuscripcionesController(
         val fechaFin = when (periodo) {
             PeriodoSuscripcion.MENSUAL -> hoy.plusMonths(1)
             PeriodoSuscripcion.ANUAL -> hoy.plusYears(1)
+        }
+        
+        // Verificar si el plan permite trial y si el usuario es elegible
+        var permiteTrial = false
+        try {
+            if (plan.caracteristicas != null) {
+                val jsonNode = objectMapper.readTree(plan.caracteristicas)
+                permiteTrial = jsonNode.has("trial_gratis") && jsonNode.get("trial_gratis").asBoolean()
+            }
+        } catch (e: Exception) {
+            // Si no se puede parsear, asumir que no permite trial
+        }
+        
+        val puedeUsarTrial = !usuario.enTrial && (usuario.fechaFinTrial == null || Instant.now().isAfter(usuario.fechaFinTrial))
+        
+        // Si permite trial y el usuario no ha usado trial antes, activar trial de 14 días
+        val activarTrial = permiteTrial && puedeUsarTrial
+        
+        var usuarioActualizado = usuario
+        if (activarTrial) {
+            val ahora = Instant.now()
+            val finTrial = ahora.plusSeconds(14 * 24 * 60 * 60) // 14 días
+            
+            usuarioActualizado = usuario.copy(
+                enTrial = true,
+                fechaInicioTrial = ahora,
+                fechaFinTrial = finTrial,
+                fechaActualizacion = ahora
+            )
+            usuarioComercialRepository.save(usuarioActualizado)
         }
         
         val nuevaSuscripcion = Suscripcion(

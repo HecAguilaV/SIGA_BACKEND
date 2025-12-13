@@ -18,39 +18,29 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- Nota: Ajustar precios y características según necesidades reales
 
+-- NOTA: Plan Kiosco (gratis) fue eliminado. Solo planes de pago con trial de 14 días.
 INSERT INTO siga_comercial.PLANES (nombre, descripcion, precio_mensual, precio_anual, limite_bodegas, limite_usuarios, limite_productos, caracteristicas, orden) VALUES
     (
-        'Emprendedor',
-        'Plan ideal para emprendedores que comienzan. Gestión básica de inventario.',
-        0.5, -- 0.5 UF mensual
-        5.0, -- 5 UF anual (2 meses gratis)
-        1,   -- 1 bodega
-        1,   -- 1 usuario
-        100, -- 100 productos
-        '{"trial_gratis": true, "soporte": "email", "asistente_ia": true}'::jsonb,
-        1
-    ),
-    (
         'Emprendedor Pro',
-        'Para negocios en crecimiento. Más bodegas y usuarios.',
+        'Para negocios en crecimiento. Más bodegas y usuarios. Incluye trial de 14 días.',
         0.9, -- 0.9 UF mensual
         9.0, -- 9 UF anual
-        3,   -- 3 bodegas
+        2,   -- 2 bodegas
         3,   -- 3 usuarios
         500, -- 500 productos
         '{"trial_gratis": true, "soporte": "prioritario", "asistente_ia": true, "reportes_avanzados": true}'::jsonb,
-        2
+        1
     ),
     (
         'Crecimiento',
-        'Para empresas establecidas. Sin límites prácticos.',
-        1.5, -- 1.5 UF mensual
-        15.0, -- 15 UF anual
-        10,  -- 10 bodegas
-        10,  -- 10 usuarios
+        'Para empresas establecidas. Sin límites prácticos. Incluye trial de 14 días.',
+        1.9, -- 1.9 UF mensual
+        19.0, -- 19 UF anual
+        NULL, -- Bodegas ilimitadas
+        NULL, -- Usuarios ilimitados
         NULL, -- Sin límite de productos
         '{"trial_gratis": true, "soporte": "prioritario", "asistente_ia": true, "reportes_avanzados": true, "api_access": true}'::jsonb,
-        3
+        2
     )
 ON CONFLICT (nombre) DO NOTHING;
 
