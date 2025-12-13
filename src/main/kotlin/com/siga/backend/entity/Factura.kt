@@ -6,10 +6,9 @@ import java.time.Instant
 
 enum class EstadoFactura {
     PENDIENTE,
-    pagada,
-    cancelada,
-    reembolsada,
-    VENCIDA
+    PAGADA,
+    VENCIDA,
+    ANULADA
 }
 
 @Entity
@@ -54,7 +53,7 @@ data class Factura(
     
     @Column(nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    val estado: EstadoFactura = EstadoFactura.pagada,
+    val estado: EstadoFactura = EstadoFactura.PAGADA,
     
     @Column(name = "metodo_pago", length = 100)
     val metodoPago: String? = null,

@@ -121,7 +121,7 @@ class FacturasController(
                 unidad = factura.unidad,
                 fechaCompra = factura.fechaCompra.toString(),
                 fechaVencimiento = factura.fechaVencimiento?.toString(),
-                estado = factura.estado.name,
+                estado = factura.estado.name.lowercase(),
                 metodoPago = factura.metodoPago,
                 ultimos4Digitos = factura.ultimos4Digitos
             )
@@ -172,7 +172,7 @@ class FacturasController(
                         unidad = factura.unidad,
                         fechaCompra = factura.fechaCompra.toString(),
                         fechaVencimiento = factura.fechaVencimiento?.toString(),
-                        estado = factura.estado.name,
+                        estado = factura.estado.name.lowercase(),
                         metodoPago = factura.metodoPago,
                         ultimos4Digitos = factura.ultimos4Digitos
                     )
@@ -229,7 +229,7 @@ class FacturasController(
                 unidad = factura.unidad,
                 fechaCompra = factura.fechaCompra.toString(),
                 fechaVencimiento = factura.fechaVencimiento?.toString(),
-                estado = factura.estado.name,
+                estado = factura.estado.name.lowercase(),
                 metodoPago = factura.metodoPago,
                 ultimos4Digitos = factura.ultimos4Digitos
             )
@@ -285,7 +285,7 @@ class FacturasController(
                 unidad = factura.unidad,
                 fechaCompra = factura.fechaCompra.toString(),
                 fechaVencimiento = factura.fechaVencimiento?.toString(),
-                estado = factura.estado.name,
+                estado = factura.estado.name.lowercase(),
                 metodoPago = factura.metodoPago,
                 ultimos4Digitos = factura.ultimos4Digitos
             )

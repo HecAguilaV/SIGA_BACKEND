@@ -96,7 +96,7 @@ class FacturaService(
             unidad = unidad,
             fechaCompra = Instant.now(),
             fechaVencimiento = fechaVencimiento,
-            estado = EstadoFactura.pagada,
+            estado = EstadoFactura.PAGADA,
             metodoPago = metodoPago,
             ultimos4Digitos = ultimos4Digitos,
             suscripcionId = suscripcionId,
