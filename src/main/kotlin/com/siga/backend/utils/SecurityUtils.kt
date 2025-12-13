@@ -15,7 +15,9 @@ object SecurityUtils {
     fun getUserEmail(): String? {
         val authentication = SecurityContextHolder.getContext().authentication
         val details = authentication?.details as? Map<*, *>
-        return details?.get("email") as? String
+        val email = details?.get("email") as? String
+        // Retornar null si el email está vacío (no solo null)
+        return if (email.isNullOrBlank()) null else email
     }
     
     fun getUserRol(): String? {

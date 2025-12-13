@@ -292,4 +292,129 @@ val mensaje = chatResponse.response  // Ya es String, no necesita parseo adicion
 
 ---
 
+## 7. Error "No tiene email registrado" al procesar pago
+
+### Problema
+Después de registrarse, al intentar procesar el pago, el sistema dice "No tiene email registrado" o "Usuario no encontrado".
+
+### Causa
+1. El token JWT puede no contener el email correctamente
+2. El email puede estar vacío en los detalles de autenticación
+3. El token puede haber expirado
+
+### Solución (Backend - Ya implementada)
+✅ **Actualizado:**
+- `SecurityUtils.getUserEmail()` ahora retorna `null` si el email está vacío (no solo si es null)
+- Mensajes de error mejorados en `crearSuscripcion` para indicar claramente el problema
+
+### Solución (Frontend Web Comercial)
+**Verificar que:**
+1. El token JWT se está enviando correctamente en el header `Authorization: Bearer <token>`
+2. El token no haya expirado (verificar `exp` claim)
+3. Después del registro, se guarda el `accessToken` y se usa para todas las peticiones autenticadas
+
+**Ejemplo de petición correcta:**
+```javascript
+const response = await fetch('https://siga-backend-production.up.railway.app/api/comercial/suscripciones', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken}` // ⬅️ IMPORTANTE
+  },
+  body: JSON.stringify({
+    planId: 1,
+    periodo: 'MENSUAL'
+  })
+});
+```
+
+---
+
+## 8. Error 404 en endpoint update-email
+
+### Problema
+```
+PUT https://siga-backend-production.up.railway.app/api/comercial/auth/update-email 404 (Not Found)
+```
+
+### Causa
+El frontend puede estar usando el método HTTP incorrecto (POST en lugar de PUT) o la URL está mal formada.
+
+### Solución (Backend - Ya implementada)
+✅ **El endpoint existe y está correctamente configurado:**
+- Método: `PUT` (NO POST)
+- Ruta: `/api/comercial/auth/update-email`
+- Requiere autenticación (token JWT)
+
+### Solución (Frontend Web Comercial)
+**Usar el método HTTP correcto:**
+
+```javascript
+// CORRECTO - PUT
+const response = await fetch('https://siga-backend-production.up.railway.app/api/comercial/auth/update-email', {
+  method: 'PUT', // ⬅️ IMPORTANTE: Debe ser PUT, no POST
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${accessToken}`
+  },
+  body: JSON.stringify({
+    newEmail: 'nuevo@email.com',
+    password: 'contraseñaActual'
+  })
+});
+```
+
+**Verificar:**
+- Método: `PUT` (no POST)
+- URL completa: `/api/comercial/auth/update-email`
+- Header `Authorization` con token válido
+- Body con `newEmail` y `password`
+
+---
+
+## 9. Campo nombreEmpresa no se guarda en el registro
+
+### Problema
+Al registrarse, el campo `nombreEmpresa` no se guarda en la base de datos, aunque se envíe desde el frontend.
+
+### Causa
+El backend no estaba guardando `nombreEmpresa` en el método de registro.
+
+### Solución (Backend - Ya implementada)
+✅ **Actualizado:** El registro ahora guarda `nombreEmpresa` correctamente:
+
+```kotlin
+val newUser = UsuarioComercial(
+    email = request.email.lowercase(),
+    passwordHash = passwordHash,
+    nombre = request.nombre,
+    apellido = request.apellido,
+    rut = request.rut,
+    telefono = request.telefono,
+    nombreEmpresa = request.nombreEmpresa, // ⬅️ Ahora se guarda
+    // ...
+)
+```
+
+### Solución (Frontend Web Comercial)
+**Asegurarse de enviar `nombreEmpresa` en el registro:**
+
+```javascript
+const response = await fetch('https://siga-backend-production.up.railway.app/api/comercial/auth/register', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    email: 'usuario@ejemplo.com',
+    password: 'contraseña123',
+    nombre: 'Juan',
+    apellido: 'Pérez',
+    nombreEmpresa: 'Mi Empresa S.A.' // ⬅️ Incluir este campo
+  })
+});
+```
+
+---
+
 **Última actualización:** 2025-01-XX

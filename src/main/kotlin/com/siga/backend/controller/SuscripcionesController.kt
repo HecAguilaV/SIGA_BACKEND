@@ -81,11 +81,11 @@ class SuscripcionesController(
     fun crearSuscripcion(@Valid @RequestBody request: SuscripcionRequest): ResponseEntity<Map<String, Any>> {
         val email = SecurityUtils.getUserEmail()
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(mapOf("success" to false, "message" to "No autenticado"))
+                .body(mapOf("success" to false, "message" to "No autenticado. Por favor, inicia sesión nuevamente."))
         
         val usuario = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado. Por favor, verifica que tu email esté registrado correctamente."))
         
         val plan = planRepository.findById(request.planId).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)

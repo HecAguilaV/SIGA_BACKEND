@@ -139,6 +139,7 @@ class ComercialAuthController(
             apellido = request.apellido,
             rut = request.rut,
             telefono = request.telefono,
+            nombreEmpresa = request.nombreEmpresa,
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()
