@@ -16,20 +16,24 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.Min
 import java.time.Instant
 
+// StockRequest acepta tanto camelCase (WebApp) como snake_case (App Móvil)
 data class StockRequest(
     @field:Min(1) 
-    @JsonAlias("producto_id")  // Acepta tanto productoId (nombre del campo) como producto_id
+    @JsonProperty("productoId")  // Nombre principal: productoId
+    @JsonAlias("producto_id")    // También acepta: producto_id
     val productoId: Int,
     
     @field:Min(1) 
-    @JsonAlias("local_id")  // Acepta tanto localId (nombre del campo) como local_id
+    @JsonProperty("localId")     // Nombre principal: localId
+    @JsonAlias("local_id")        // También acepta: local_id
     val localId: Int,
     
     @field:Min(0) 
     val cantidad: Int,
     
     @field:Min(0) 
-    @JsonAlias("cantidad_minima", "min_stock")  // Acepta cantidadMinima (nombre del campo), cantidad_minima o min_stock
+    @JsonProperty("cantidadMinima")           // Nombre principal: cantidadMinima
+    @JsonAlias("cantidad_minima", "min_stock") // También acepta: cantidad_minima o min_stock
     val cantidadMinima: Int = 0
 )
 
