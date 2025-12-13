@@ -160,7 +160,7 @@
    - Endpoint: `POST /api/comercial/suscripciones`
 
 #### ❌ NO Debe Implementar
-- ❌ Login para WebApp (se hace automáticamente vía SSO)
+- ❌ Login operativo (solo comercial)
 - ❌ Llamadas directas a Gemini API
 - ❌ Plan gratis (no existe)
 
@@ -169,10 +169,14 @@
 ### 🖥️ WebApp
 
 #### ✅ Debe Implementar
-1. **SSO desde Web Comercial**
-   - Usuario viene desde Web Comercial con token comercial
-   - Intercambiar token: `POST /api/comercial/auth/obtener-token-operativo`
-   - Usar token operativo para todas las peticiones
+1. **Login de usuarios operativos**
+   - **ADMINISTRADOR (dueño):** Puede usar SSO desde Web Comercial O login directo
+     - SSO: `POST /api/comercial/auth/obtener-token-operativo` (intercambia token comercial)
+     - Login directo: `POST /api/auth/login` (email + password)
+   - **OPERADOR / CAJERO (empleados):** Login directo obligatorio
+     - Endpoint: `POST /api/auth/login`
+     - Estos usuarios NO tienen cuenta comercial, solo operativa
+     - Son creados por el ADMINISTRADOR desde WebApp: `POST /api/saas/usuarios`
 
 2. **Sistema de permisos**
    - Consultar permisos: `GET /api/saas/usuarios/{id}/permisos`
@@ -189,13 +193,18 @@
    - Listar: `GET /api/saas/locales`
    - Crear: `POST /api/saas/locales` (requiere permiso)
 
-5. **Asistente IA operativo**
+5. **Gestión de usuarios operativos**
+   - Listar: `GET /api/saas/usuarios`
+   - Crear: `POST /api/saas/usuarios` (solo ADMINISTRADOR puede crear OPERADOR/CAJERO)
+   - Asignar permisos: `POST /api/saas/usuarios/{id}/permisos`
+
+6. **Asistente IA operativo**
    - Endpoint: `POST /api/saas/chat`
    - Requiere: auth + suscripción activa
 
 #### ❌ NO Debe Implementar
-- ❌ Login directo (solo SSO desde Web Comercial)
 - ❌ Asumir que ADMINISTRADOR necesita permisos explícitos (el backend ya lo maneja)
+- ❌ Asumir que OPERADOR/CAJERO pueden usar SSO (solo tienen login directo)
 
 ---
 
@@ -240,10 +249,12 @@
 - [ ] Mostrar solo 2 planes (sin plan gratis)
 
 ### Para WebApp
-- [ ] SSO desde Web Comercial funcionando
-- [ ] Intercambio de token operativo
+- [ ] Login directo funcionando (`POST /api/auth/login`)
+- [ ] SSO desde Web Comercial (opcional para ADMINISTRADOR)
+- [ ] Intercambio de token operativo (si usa SSO)
 - [ ] Validación de permisos (ADMINISTRADOR tiene todos)
 - [ ] CRUD de productos con validación de permisos
+- [ ] Crear usuarios OPERADOR/CAJERO desde WebApp
 - [ ] Asistente IA usando `/api/saas/chat`
 
 ### Para App Móvil
