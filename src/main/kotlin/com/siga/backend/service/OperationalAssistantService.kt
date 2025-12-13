@@ -83,29 +83,52 @@ class OperationalAssistantService(
         
         context.add("=== INFORMACIÓN DEL USUARIO ===\nUsuario: ${user.nombre} (${user.email})\nRol: $userRol")
         
-        // Si es ADMINISTRADOR, puede ver todo el inventario
-        if (userRol == "ADMINISTRADOR") {
-            val productos = jdbcTemplate.queryForList(
-                "SELECT id, nombre, precio_unitario FROM siga_saas.PRODUCTOS WHERE activo = true LIMIT 50"
-            )
-            if (productos.isNotEmpty()) {
-                context.add("\n=== PRODUCTOS ===")
-                productos.forEach { producto ->
-                    context.add("${producto["nombre"]} (ID: ${producto["id"]}) - Precio: $${producto["precio_unitario"]}")
-                }
+        // Todos los usuarios operativos pueden ver productos y stock (según sus permisos)
+        val productos = jdbcTemplate.queryForList(
+            "SELECT id, nombre, precio_unitario FROM siga_saas.PRODUCTOS WHERE activo = true ORDER BY nombre LIMIT 100"
+        )
+        if (productos.isNotEmpty()) {
+            context.add("\n=== PRODUCTOS DISPONIBLES ===")
+            productos.forEach { producto ->
+                val precio = producto["precio_unitario"] ?: "N/A"
+                context.add("${producto["nombre"]} (ID: ${producto["id"]}) - Precio: $${precio}")
             }
-            
-            val stock = jdbcTemplate.queryForList(
-                "SELECT p.nombre, s.cantidad, l.nombre as local FROM siga_saas.STOCK s " +
-                "JOIN siga_saas.PRODUCTOS p ON s.producto_id = p.id " +
-                "JOIN siga_saas.LOCALES l ON s.local_id = l.id " +
-                "LIMIT 50"
-            )
-            if (stock.isNotEmpty()) {
-                context.add("\n=== STOCK ===")
-                stock.forEach { item ->
-                    context.add("${item["nombre"]} en ${item["local"]}: ${item["cantidad"]} unidades")
-                }
+        } else {
+            context.add("\n=== PRODUCTOS ===")
+            context.add("No hay productos registrados aún")
+        }
+        
+        val stock = jdbcTemplate.queryForList(
+            "SELECT p.nombre, s.cantidad, l.nombre as local FROM siga_saas.STOCK s " +
+            "JOIN siga_saas.PRODUCTOS p ON s.producto_id = p.id " +
+            "JOIN siga_saas.LOCALES l ON s.local_id = l.id " +
+            "WHERE p.activo = true " +
+            "ORDER BY p.nombre, l.nombre " +
+            "LIMIT 100"
+        )
+        if (stock.isNotEmpty()) {
+            context.add("\n=== STOCK ACTUAL ===")
+            stock.forEach { item ->
+                val cantidad = item["cantidad"] ?: 0
+                context.add("${item["nombre"]} en ${item["local"]}: $cantidad unidades")
+            }
+        } else {
+            context.add("\n=== STOCK ===")
+            context.add("No hay stock registrado. Los productos existen pero no tienen stock asignado.")
+        }
+        
+        // Agregar información sobre productos sin stock
+        val productosSinStock = jdbcTemplate.queryForList(
+            "SELECT p.id, p.nombre FROM siga_saas.PRODUCTOS p " +
+            "WHERE p.activo = true " +
+            "AND NOT EXISTS (SELECT 1 FROM siga_saas.STOCK s WHERE s.producto_id = p.id) " +
+            "ORDER BY p.nombre " +
+            "LIMIT 50"
+        )
+        if (productosSinStock.isNotEmpty()) {
+            context.add("\n=== PRODUCTOS SIN STOCK (existen pero no tienen stock asignado) ===")
+            productosSinStock.forEach { producto ->
+                context.add("${producto["nombre"]} (ID: ${producto["id"]}) - Sin stock")
             }
         }
         
