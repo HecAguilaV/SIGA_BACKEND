@@ -45,6 +45,11 @@ data class ChangePasswordRequest(
     @field:NotBlank val newPassword: String
 )
 
+data class UpdateEmailRequest(
+    @field:NotBlank @field:Email val newEmail: String,
+    @field:NotBlank val password: String  // Confirmar con contraseña actual
+)
+
 data class ComercialAuthResponse(
     val success: Boolean,
     val message: String? = null,
@@ -324,6 +329,77 @@ class ComercialAuthController(
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "message" to "Contraseña actualizada exitosamente"
+        ))
+    }
+    
+    @PutMapping("/update-email")
+    @Operation(
+        summary = "Actualizar Email",
+        description = "Actualiza el email del usuario autenticado. Requiere confirmar con contraseña actual. Requiere autenticación.",
+        security = [io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")]
+    )
+    fun actualizarEmail(@Valid @RequestBody request: UpdateEmailRequest): ResponseEntity<Map<String, Any>> {
+        val userId = SecurityUtils.getUserId()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        val user = usuarioComercialRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        // Verificar contraseña actual
+        if (!passwordService.verifyPassword(request.password, user.passwordHash)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "Contraseña incorrecta"))
+        }
+        
+        // Verificar que el nuevo email no esté en uso
+        val nuevoEmailLower = request.newEmail.lowercase()
+        if (nuevoEmailLower == user.email.lowercase()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapOf("success" to false, "message" to "El nuevo email es igual al actual"))
+        }
+        
+        if (usuarioComercialRepository.existsByEmail(nuevoEmailLower)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(mapOf("success" to false, "message" to "El email ya está en uso por otro usuario"))
+        }
+        
+        // Actualizar email en usuario comercial
+        val updatedUser = user.copy(
+            email = nuevoEmailLower,
+            fechaActualizacion = Instant.now()
+        )
+        usuarioComercialRepository.save(updatedUser)
+        
+        // Actualizar email en usuario operativo si existe (para mantener sincronización)
+        val usuarioOperativo = usuarioSaasRepository.findByEmail(user.email.lowercase()).orElse(null)
+        if (usuarioOperativo != null) {
+            val updatedOperativo = usuarioOperativo.copy(
+                email = nuevoEmailLower,
+                fechaActualizacion = Instant.now()
+            )
+            usuarioSaasRepository.save(updatedOperativo)
+        }
+        
+        // Generar nuevos tokens con el email actualizado
+        val newAccessToken = jwtService.generateAccessToken(updatedUser.id, updatedUser.email, null)
+        val newRefreshToken = jwtService.generateRefreshToken(updatedUser.id)
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Email actualizado exitosamente",
+            "accessToken" to newAccessToken,
+            "refreshToken" to newRefreshToken,
+            "user" to ComercialUserInfo(
+                id = updatedUser.id,
+                email = updatedUser.email,
+                nombre = updatedUser.nombre,
+                apellido = updatedUser.apellido,
+                rut = updatedUser.rut,
+                telefono = updatedUser.telefono,
+                nombreEmpresa = updatedUser.nombreEmpresa
+            )
         ))
     }
 }
