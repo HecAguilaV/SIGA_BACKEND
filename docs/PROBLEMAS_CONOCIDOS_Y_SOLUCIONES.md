@@ -417,4 +417,79 @@ const response = await fetch('https://siga-backend-production.up.railway.app/api
 
 ---
 
+## 10. Error de Serialización en Endpoint de Stock - Campos faltantes (App Móvil)
+
+### Problema
+```
+Illegal input: Fields [producto_id, local_id, min_stock] are required for type ... StockItem, but they were missing at path: $.stock[0]
+```
+
+### Causa
+El backend estaba retornando los campos en camelCase (`productoId`, `localId`, `cantidadMinima`), pero la app móvil espera snake_case (`producto_id`, `local_id`, `min_stock`).
+
+### Solución (Backend - Ya implementada)
+✅ **Actualizado:** El backend ahora retorna los campos en snake_case usando `@JsonProperty`:
+
+```kotlin
+data class StockResponse(
+    val id: Int,
+    @JsonProperty("producto_id") val productoId: Int,
+    @JsonProperty("local_id") val localId: Int,
+    val cantidad: Int,
+    @JsonProperty("min_stock") val cantidadMinima: Int,
+    @JsonProperty("fecha_actualizacion") val fechaActualizacion: String
+)
+```
+
+**Formato de respuesta actualizado:**
+```json
+{
+  "success": true,
+  "stock": [
+    {
+      "id": 1,
+      "producto_id": 1,        // ✅ Ahora en snake_case
+      "local_id": 1,            // ✅ Ahora en snake_case
+      "cantidad": 100,
+      "min_stock": 10,          // ✅ Ahora en snake_case (antes era cantidadMinima)
+      "fecha_actualizacion": "2025-01-XX..."
+    }
+  ],
+  "total": 1
+}
+```
+
+### Solución (Frontend App Móvil)
+**Ya no es necesario el parche temporal.** El backend ahora retorna todos los campos requeridos en el formato correcto:
+
+```kotlin
+// Modelo correcto (ya no necesita campos opcionales)
+@Serializable
+data class StockItem(
+    val id: Int,
+    val producto_id: Int,      // ✅ Ahora siempre presente
+    val local_id: Int,          // ✅ Ahora siempre presente
+    val cantidad: Int,
+    val min_stock: Int,         // ✅ Ahora siempre presente
+    val fecha_actualizacion: String
+)
+```
+
+### Endpoints Afectados
+- ✅ `GET /api/saas/stock` - Listar stock
+- ✅ `GET /api/saas/stock/{productoId}/{localId}` - Obtener stock específico
+- ✅ `POST /api/saas/stock` - Actualizar stock
+
+**Nota:** El request body también acepta snake_case para mantener consistencia:
+```json
+{
+  "producto_id": 1,
+  "local_id": 1,
+  "cantidad": 100,
+  "cantidad_minima": 10
+}
+```
+
+---
+
 **Última actualización:** 2025-01-XX

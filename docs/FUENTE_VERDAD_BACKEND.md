@@ -183,12 +183,8 @@
 
 2. **Sistema de permisos**
    - Consultar permisos: `GET /api/saas/usuarios/{id}/permisos`
-   - ⚠️ **CRÍTICO:** ADMINISTRADOR tiene todos los permisos automáticamente en el backend
-   - ⚠️ **NO hacer validaciones especiales en frontend para ADMINISTRADOR**
-   - ⚠️ **NO hacer workarounds cuando falla obtener permisos**
-   - ⚠️ **El endpoint de permisos SÍ funciona para ADMINISTRADOR y retorna todos los permisos**
-   - Validar permisos antes de mostrar acciones: `permisos.includes('PERMISO_X')`
-   - Ver documento completo: `INSTRUCCIONES_WEBAPP_PERMISOS_ADMINISTRADOR.md`
+   - ⚠️ ADMINISTRADOR tiene todos los permisos (no validar en frontend)
+   - Validar permisos antes de mostrar acciones
 
 3. **Gestión de productos**
    - Listar: `GET /api/saas/productos`
