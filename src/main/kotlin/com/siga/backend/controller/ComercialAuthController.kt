@@ -50,6 +50,14 @@ data class UpdateEmailRequest(
     @field:NotBlank val password: String  // Confirmar con contraseña actual
 )
 
+data class UpdatePerfilRequest(
+    val nombre: String? = null,
+    val apellido: String? = null,
+    val rut: String? = null,
+    val telefono: String? = null,
+    val nombreEmpresa: String? = null
+)
+
 data class ComercialAuthResponse(
     val success: Boolean,
     val message: String? = null,
@@ -392,6 +400,47 @@ class ComercialAuthController(
             "message" to "Email actualizado exitosamente",
             "accessToken" to newAccessToken,
             "refreshToken" to newRefreshToken,
+            "user" to ComercialUserInfo(
+                id = updatedUser.id,
+                email = updatedUser.email,
+                nombre = updatedUser.nombre,
+                apellido = updatedUser.apellido,
+                rut = updatedUser.rut,
+                telefono = updatedUser.telefono,
+                nombreEmpresa = updatedUser.nombreEmpresa
+            )
+        ))
+    }
+    
+    @PutMapping("/perfil")
+    @Operation(
+        summary = "Actualizar Perfil",
+        description = "Actualiza el perfil del usuario comercial (nombre, apellido, rut, teléfono, nombreEmpresa). Requiere autenticación.",
+        security = [io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")]
+    )
+    fun actualizarPerfil(@Valid @RequestBody request: UpdatePerfilRequest): ResponseEntity<Map<String, Any>> {
+        val email = SecurityUtils.getUserEmail()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        val user = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        val updatedUser = user.copy(
+            nombre = request.nombre ?: user.nombre,
+            apellido = request.apellido ?: user.apellido,
+            rut = request.rut ?: user.rut,
+            telefono = request.telefono ?: user.telefono,
+            nombreEmpresa = request.nombreEmpresa ?: user.nombreEmpresa,
+            fechaActualizacion = Instant.now()
+        )
+        
+        usuarioComercialRepository.save(updatedUser)
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Perfil actualizado exitosamente",
             "user" to ComercialUserInfo(
                 id = updatedUser.id,
                 email = updatedUser.email,

@@ -4,6 +4,7 @@ import com.siga.backend.entity.Rol
 import com.siga.backend.entity.UsuarioSaas
 import com.siga.backend.repository.UsuarioSaasRepository
 import com.siga.backend.repository.UsuarioComercialRepository
+import com.siga.backend.repository.LocalRepository
 import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
 import java.time.Instant
@@ -46,7 +47,15 @@ data class UserInfo(
     val email: String,
     val nombre: String,
     val apellido: String?,
-    val rol: String
+    val rol: String,
+    val nombreEmpresa: String? = null,
+    val localPorDefecto: LocalInfo? = null
+)
+
+data class LocalInfo(
+    val id: Int,
+    val nombre: String,
+    val ciudad: String?
 )
 
 @RestController
@@ -55,6 +64,7 @@ data class UserInfo(
 class AuthController(
     private val usuarioSaasRepository: UsuarioSaasRepository,
     private val usuarioComercialRepository: UsuarioComercialRepository,
+    private val localRepository: LocalRepository,
     private val passwordService: PasswordService,
     private val jwtService: JWTService
 ) {
@@ -78,8 +88,14 @@ class AuthController(
         
         // AUTO-ASIGNAR EMPRESA si no tiene
         var usuarioActualizado = user
-        if (user.usuarioComercialId == null) {
-            val usuarioComercial = usuarioComercialRepository.findByEmail(user.email.lowercase()).orElse(null)
+        var usuarioComercial = if (user.usuarioComercialId != null) {
+            usuarioComercialRepository.findById(user.usuarioComercialId).orElse(null)
+        } else {
+            null
+        }
+        
+        if (user.usuarioComercialId == null || usuarioComercial == null) {
+            usuarioComercial = usuarioComercialRepository.findByEmail(user.email.lowercase()).orElse(null)
             if (usuarioComercial != null) {
                 usuarioActualizado = user.copy(
                     usuarioComercialId = usuarioComercial.id,
@@ -87,6 +103,13 @@ class AuthController(
                 )
                 usuarioSaasRepository.save(usuarioActualizado)
             }
+        }
+        
+        // Obtener local por defecto (primer local activo de la empresa)
+        val localPorDefecto = usuarioActualizado.usuarioComercialId?.let { comercialId ->
+            localRepository.findByActivoTrueAndUsuarioComercialId(comercialId)
+                .firstOrNull()
+                ?.let { LocalInfo(id = it.id, nombre = it.nombre, ciudad = it.ciudad) }
         }
         
         val accessToken = jwtService.generateAccessToken(usuarioActualizado.id, usuarioActualizado.email, usuarioActualizado.rol.name)
@@ -102,7 +125,9 @@ class AuthController(
                     email = usuarioActualizado.email,
                     nombre = usuarioActualizado.nombre,
                     apellido = usuarioActualizado.apellido,
-                    rol = usuarioActualizado.rol.name
+                    rol = usuarioActualizado.rol.name,
+                    nombreEmpresa = usuarioComercial?.nombreEmpresa,
+                    localPorDefecto = localPorDefecto
                 )
             )
         )
