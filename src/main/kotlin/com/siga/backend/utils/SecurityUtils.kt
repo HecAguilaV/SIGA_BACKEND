@@ -99,8 +99,21 @@ object SecurityUtils {
         val logger = org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java)
         return try {
             val userId = getUserId()
+            logger.debug("getUsuarioComercialId: userId=$userId")
             if (userId == null) {
-                logger.warn("getUsuarioComercialId: userId es null")
+                logger.warn("getUsuarioComercialId: userId es null - verificando por email")
+                // Fallback: intentar por email
+                val email = getUserEmail()
+                if (email != null) {
+                    logger.debug("getUsuarioComercialId: buscando por email=$email")
+                    val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+                    val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+                    if (usuarioComercial != null) {
+                        logger.info("getUsuarioComercialId: encontrado por email, usuario_comercial_id=${usuarioComercial.id}")
+                        return usuarioComercial.id
+                    }
+                }
+                logger.warn("getUsuarioComercialId: no se pudo determinar userId ni email")
                 return null
             }
             
@@ -108,6 +121,16 @@ object SecurityUtils {
             val usuario = usuarioSaasRepository.findById(userId).orElse(null)
             if (usuario == null) {
                 logger.warn("getUsuarioComercialId: usuario operativo no encontrado para userId=$userId")
+                // Fallback: intentar por email
+                val email = getUserEmail()
+                if (email != null) {
+                    val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+                    val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+                    if (usuarioComercial != null) {
+                        logger.info("getUsuarioComercialId: encontrado por email (fallback), usuario_comercial_id=${usuarioComercial.id}")
+                        return usuarioComercial.id
+                    }
+                }
                 return null
             }
             
@@ -139,6 +162,7 @@ object SecurityUtils {
             null
         } catch (e: Exception) {
             logger.error("Error al obtener usuario_comercial_id", e)
+            e.printStackTrace()
             null
         }
     }
