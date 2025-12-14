@@ -128,7 +128,7 @@ class FacturasController(
             return ResponseEntity.status(HttpStatus.CREATED).body(mapOf(
                 "success" to true,
                 "message" to "Factura creada exitosamente",
-                "data" to response
+                "factura" to response
             ))
         } catch (e: Exception) {
             logger.error("Error al crear factura", e)
