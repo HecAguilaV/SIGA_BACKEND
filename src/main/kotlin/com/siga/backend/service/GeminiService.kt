@@ -73,10 +73,16 @@ class GeminiService(
                 val statusCode = e.statusCode
                 logger.error("Error HTTP de Gemini: $statusCode")
                 
-                // Para 503, retornar mensaje amigable en lugar de fallar
+                // Para 503, retornar mensaje amigable
                 if (statusCode.value() == 503) {
                     logger.error("Gemini API retornó 503 Service Unavailable - puede ser temporal o el modelo no está disponible")
                     return Result.failure(GeminiApiException("El servicio de IA está temporalmente no disponible. Por favor, intenta más tarde."))
+                }
+                
+                // Para 429, retornar mensaje amigable (Too Many Requests)
+                if (statusCode.value() == 429) {
+                    logger.error("Gemini API retornó 429 Too Many Requests - límite de rate excedido")
+                    return Result.failure(GeminiApiException("Se han realizado demasiadas solicitudes. Por favor, espera unos momentos antes de intentar nuevamente."))
                 }
                 
                 logger.error("Cuerpo de error: ${e.responseBodyAsString}")
