@@ -186,6 +186,13 @@
 - `GET /api/comercial/planes` - Listar planes disponibles
 - `GET /api/comercial/planes/{id}` - Obtener plan por ID
 
+### Chat/Asistente IA (Público)
+- `POST /api/comercial/chat` - Chat comercial público (consultas sobre planes, precios, características)
+  - **⚠️ NO requiere autenticación**
+  - **Request:** `{ "message": "string" }`
+  - **Response:** `{ "success": true, "response": "string" }`
+  - **Diferencia con `/api/saas/chat`:** Este es público y para consultas comerciales, el otro es operativo y requiere autenticación
+
 ---
 
 ## 🔧 OTROS
