@@ -3,6 +3,7 @@ package com.siga.backend.controller
 import com.siga.backend.entity.Rol
 import com.siga.backend.entity.UsuarioSaas
 import com.siga.backend.repository.UsuarioSaasRepository
+import com.siga.backend.repository.UsuarioComercialRepository
 import com.siga.backend.service.PermisosService
 import com.siga.backend.service.PasswordService
 import com.siga.backend.utils.SecurityUtils
@@ -47,9 +48,10 @@ data class AsignarPermisoRequest(
 
 @RestController
 @RequestMapping("/api/saas/usuarios")
-@Tag(name = "4. Gestión Operativa", description = "Gestión de usuarios operativos y permisos. Requiere autenticación + suscripción activa")
+@Tag(name = "4. Gesti?n Operativa", description = "Gesti?n de usuarios operativos y permisos. Requiere autenticaci?n + suscripci?n activa")
 class UsuariosController(
     private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val usuarioComercialRepository: UsuarioComercialRepository,
     private val permisosService: PermisosService,
     private val passwordService: PasswordService
 ) {
@@ -57,7 +59,7 @@ class UsuariosController(
     @GetMapping
     @Operation(
         summary = "Listar Usuarios Operativos",
-        description = "Lista todos los usuarios operativos. Solo administradores. Requiere autenticación y suscripción activa.",
+        description = "Lista todos los usuarios operativos. Solo administradores. Requiere autenticaci?n y suscripci?n activa.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun listarUsuarios(): ResponseEntity<Map<String, Any>> {
@@ -66,7 +68,37 @@ class UsuariosController(
                 .body(mapOf("success" to false, "message" to "No tienes permiso para ver usuarios"))
         }
         
-        val usuarios = usuarioSaasRepository.findAll().map { usuario ->
+        // Obtener usuario operativo actual
+        val userId = SecurityUtils.getUserId()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        val usuarioActual = usuarioSaasRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        // Filtrar usuarios por empresa (usuario_comercial_id)
+        // Solo mostrar usuarios de la misma empresa que el usuario actual
+        val usuarios = if (usuarioActual.usuarioComercialId != null) {
+            // Usuario tiene empresa asignada, filtrar por empresa
+            usuarioSaasRepository.findByUsuarioComercialId(usuarioActual.usuarioComercialId)
+        } else {
+            // Usuario legacy sin empresa, buscar por email en usuarios comerciales
+            val email = SecurityUtils.getUserEmail()
+            val usuarioComercial = email?.let { 
+                usuarioComercialRepository.findByEmail(it.lowercase()).orElse(null)
+            }
+            
+            if (usuarioComercial != null) {
+                // Encontr? usuario comercial, filtrar por su ID
+                usuarioSaasRepository.findByUsuarioComercialId(usuarioComercial.id)
+            } else {
+                // No encontr? usuario comercial, retornar solo el usuario actual (legacy)
+                listOf(usuarioActual)
+            }
+        }
+        
+        val usuariosResponse = usuarios.map { usuario ->
             val permisos = permisosService.obtenerPermisosUsuario(usuario.id)
             UsuarioResponse(
                 id = usuario.id,
@@ -81,15 +113,15 @@ class UsuariosController(
         
         return ResponseEntity.ok(mapOf(
             "success" to true,
-            "usuarios" to usuarios,
-            "total" to usuarios.size
+            "usuarios" to usuariosResponse,
+            "total" to usuariosResponse.size
         ))
     }
     
     @GetMapping("/{id}")
     @Operation(
         summary = "Obtener Usuario",
-        description = "Obtiene información de un usuario operativo específico. Solo administradores.",
+        description = "Obtiene informaci?n de un usuario operativo espec?fico. Solo administradores.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun obtenerUsuario(@PathVariable id: Int): ResponseEntity<Map<String, Any>> {
@@ -121,7 +153,7 @@ class UsuariosController(
     @PostMapping
     @Operation(
         summary = "Crear Usuario Operativo",
-        description = "Crea un nuevo usuario operativo. Solo administradores. Requiere autenticación y suscripción activa.",
+        description = "Crea un nuevo usuario operativo. Solo administradores. Requiere autenticaci?n y suscripci?n activa.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun crearUsuario(@Valid @RequestBody request: CrearUsuarioRequest): ResponseEntity<Map<String, Any>> {
@@ -134,12 +166,29 @@ class UsuariosController(
             Rol.valueOf(request.rol.uppercase())
         } catch (e: Exception) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(mapOf("success" to false, "message" to "Rol inválido. Debe ser: ADMINISTRADOR, OPERADOR o CAJERO"))
+                .body(mapOf("success" to false, "message" to "Rol inv?lido. Debe ser: ADMINISTRADOR, OPERADOR o CAJERO"))
         }
         
         if (usuarioSaasRepository.existsByEmail(request.email.lowercase())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(mapOf("success" to false, "message" to "El email ya está registrado"))
+                .body(mapOf("success" to false, "message" to "El email ya est? registrado"))
+        }
+        
+        // Obtener usuario actual para asignar la misma empresa
+        val userId = SecurityUtils.getUserId()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        val usuarioActual = usuarioSaasRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario actual no encontrado"))
+        
+        // Obtener usuario_comercial_id del usuario actual (o buscarlo por email si es legacy)
+        val usuarioComercialId = usuarioActual.usuarioComercialId ?: run {
+            val email = SecurityUtils.getUserEmail()
+            email?.let { 
+                usuarioComercialRepository.findByEmail(it.lowercase()).orElse(null)?.id
+            }
         }
         
         val passwordHash = passwordService.hashPassword(request.password)
@@ -149,6 +198,7 @@ class UsuariosController(
             nombre = request.nombre,
             apellido = request.apellido,
             rol = rol,
+            usuarioComercialId = usuarioComercialId, // Asignar la misma empresa que el usuario actual
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()
@@ -175,7 +225,7 @@ class UsuariosController(
     @PutMapping("/{id}")
     @Operation(
         summary = "Actualizar Usuario",
-        description = "Actualiza información de un usuario operativo. Solo administradores.",
+        description = "Actualiza informaci?n de un usuario operativo. Solo administradores.",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
     fun actualizarUsuario(

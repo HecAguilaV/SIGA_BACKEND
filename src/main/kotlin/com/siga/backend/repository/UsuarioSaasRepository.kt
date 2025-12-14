@@ -9,5 +9,6 @@ import java.util.Optional
 interface UsuarioSaasRepository : JpaRepository<UsuarioSaas, Int> {
     fun findByEmail(email: String): Optional<UsuarioSaas>
     fun existsByEmail(email: String): Boolean
+    fun findByUsuarioComercialId(usuarioComercialId: Int): List<UsuarioSaas>
 }
 

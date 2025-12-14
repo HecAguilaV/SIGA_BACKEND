@@ -155,6 +155,7 @@ class SuscripcionesController(
                 nombre = usuario.nombre,
                 apellido = usuario.apellido,
                 rol = Rol.ADMINISTRADOR, // Primer usuario es administrador
+                usuarioComercialId = usuario.id, // Relacionar con usuario comercial (empresa)
                 activo = true,
                 fechaCreacion = Instant.now(),
                 fechaActualizacion = Instant.now()
