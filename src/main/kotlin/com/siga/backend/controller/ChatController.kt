@@ -4,6 +4,8 @@ import com.siga.backend.service.CommercialAssistantService
 import com.siga.backend.service.OperationalAssistantService
 import com.siga.backend.service.SubscriptionService
 import com.siga.backend.utils.SecurityUtils
+import com.siga.backend.exception.GeminiApiException
+import org.slf4j.LoggerFactory
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -68,6 +70,7 @@ class SaasChatController(
     private val operationalAssistantService: OperationalAssistantService,
     private val subscriptionService: SubscriptionService
 ) {
+    private val logger = LoggerFactory.getLogger(SaasChatController::class.java)
     
     @PostMapping("/chat")
     @Operation(
@@ -126,10 +129,33 @@ class SaasChatController(
                 ResponseEntity.ok(ChatResponse(success = true, response = response, action = actionInfo))
             },
             onFailure = { error ->
-                // Convertir Throwable a Exception para que GlobalExceptionHandler lo maneje
+                logger.error("Error en chat operativo", error)
+                // Retornar respuesta amigable en lugar de lanzar excepción
                 when (error) {
-                    is Exception -> throw error
-                    else -> throw RuntimeException("Error al procesar la solicitud", error)
+                    is GeminiApiException -> {
+                        ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+                            ChatResponse(
+                                success = false,
+                                message = error.message ?: "El asistente IA está temporalmente no disponible. Por favor, intenta más tarde."
+                            )
+                        )
+                    }
+                    is Exception -> {
+                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ChatResponse(
+                                success = false,
+                                message = "Error al procesar la solicitud. Por favor, intenta más tarde."
+                            )
+                        )
+                    }
+                    else -> {
+                        ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                            ChatResponse(
+                                success = false,
+                                message = "Error inesperado. Por favor, intenta más tarde."
+                            )
+                        )
+                    }
                 }
             }
         )

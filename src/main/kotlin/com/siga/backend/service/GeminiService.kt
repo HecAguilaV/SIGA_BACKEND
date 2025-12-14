@@ -36,7 +36,9 @@ class GeminiService(
 ) {
     private val logger = LoggerFactory.getLogger(GeminiService::class.java)
     private val baseUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent"
-    private val webClient = WebClient.builder().build()
+    private val webClient = WebClient.builder()
+        .codecs { it.defaultCodecs().maxInMemorySize(10 * 1024 * 1024) } // 10MB
+        .build()
     
     fun generateContent(prompt: String): Result<String> {
         if (apiKey.isBlank()) {
@@ -58,26 +60,33 @@ class GeminiService(
             logger.debug("Enviando solicitud a Gemini API: $baseUrl")
             logger.debug("Prompt length: ${prompt.length} caracteres")
             
-            val response = runBlocking {
-                try {
+            val response = try {
+                runBlocking {
                     webClient.post()
                         .uri("$baseUrl?key=$apiKey")
                         .bodyValue(request)
                         .retrieve()
                         .bodyToMono<GeminiResponse>()
                         .awaitSingle()
-                } catch (e: org.springframework.web.reactive.function.client.WebClientResponseException) {
-                    val statusCode = e.statusCode
-                    logger.error("Error HTTP de Gemini: $statusCode")
-                    
-                    // Para 503, log adicional
-                    if (statusCode.value() == 503) {
-                        logger.error("Gemini API retornó 503 Service Unavailable - puede ser temporal o el modelo no está disponible")
-                    }
-                    
-                    logger.error("Cuerpo de error: ${e.responseBodyAsString}")
-                    throw e
                 }
+            } catch (e: org.springframework.web.reactive.function.client.WebClientResponseException) {
+                val statusCode = e.statusCode
+                logger.error("Error HTTP de Gemini: $statusCode")
+                
+                // Para 503, retornar mensaje amigable en lugar de fallar
+                if (statusCode.value() == 503) {
+                    logger.error("Gemini API retornó 503 Service Unavailable - puede ser temporal o el modelo no está disponible")
+                    return Result.failure(GeminiApiException("El servicio de IA está temporalmente no disponible. Por favor, intenta más tarde."))
+                }
+                
+                logger.error("Cuerpo de error: ${e.responseBodyAsString}")
+                return Result.failure(GeminiApiException("Error al comunicarse con Gemini API: ${e.message}", e))
+            } catch (e: java.util.concurrent.TimeoutException) {
+                logger.error("Timeout al llamar a Gemini API")
+                return Result.failure(GeminiApiException("El servicio de IA está tardando demasiado. Por favor, intenta más tarde."))
+            } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
+                logger.error("Timeout de corrutina al llamar a Gemini API")
+                return Result.failure(GeminiApiException("El servicio de IA está tardando demasiado. Por favor, intenta más tarde."))
             }
             
             logger.debug("Respuesta recibida de Gemini, procesando...")
