@@ -60,9 +60,10 @@ SET usuario_comercial_id = (
     FROM siga_comercial.USUARIOS uc
     INNER JOIN siga_saas.USUARIOS u ON u.email = uc.email
     WHERE u.id IN (
-        SELECT DISTINCT usuario_id 
-        FROM siga_saas.VENTAS 
-        WHERE producto_id = p.id
+        SELECT DISTINCT v.usuario_id 
+        FROM siga_saas.VENTAS v
+        INNER JOIN siga_saas.DETALLES_VENTA dv ON dv.venta_id = v.id
+        WHERE dv.producto_id = p.id
         LIMIT 1
     )
     LIMIT 1
