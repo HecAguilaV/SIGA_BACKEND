@@ -12,7 +12,7 @@
 
 **Síntoma:** Los productos se muestran con precio $0 aunque tengan precio asignado.
 
-**Causa:** El frontend no está parseando correctamente el campo `precioUnitario` del backend.
+**Causa Identificada por App Móvil:** El frontend está buscando un campo `precio` que **NO existe** en la respuesta del backend.
 
 **Backend retorna:**
 ```json
@@ -22,7 +22,7 @@
     {
       "id": 1,
       "nombre": "Fanta",
-      "precioUnitario": "1500",  // ⬅️ Campo correcto (String)
+      "precioUnitario": "1500",  // ⬅️ Campo REAL (String)
       "activo": true,
       ...
     }
@@ -30,12 +30,14 @@
 }
 ```
 
+**⚠️ IMPORTANTE:** El backend retorna `precioUnitario` (no `precio`). El frontend debe usar este campo.
+
 **Solución Frontend:**
-1. Verificar que el modelo de datos use `precioUnitario` (no `precio`)
+1. **Cambiar modelo de datos:** Usar `precioUnitario` en lugar de `precio`
 2. Parsear el String a número antes de mostrar
 3. Si el precio es `null`, mostrar "Sin precio" o "N/A"
 
-**Ejemplo Kotlin:**
+**Ejemplo Kotlin (CORRECTO):**
 ```kotlin
 @Serializable
 data class Product(
@@ -49,6 +51,13 @@ data class Product(
 // Al mostrar:
 val precio = producto.precioUnitario?.toDoubleOrNull() ?: 0.0
 textView.text = "$${precio.toInt()}"
+```
+
+**❌ INCORRECTO (lo que probablemente tienen ahora):**
+```kotlin
+data class Product(
+    val precio: String?  // ❌ Este campo NO existe en la respuesta
+)
 ```
 
 ---
@@ -125,17 +134,23 @@ val productosActivos = productos.filter { it.activo }
 Error al procesar con Gemini API: 429 Too Many Request
 ```
 
-**Causa:** 
-- Límite de rate de la API de Gemini excedido
-- Demasiadas solicitudes en poco tiempo
+**Causa Identificada por App Móvil:**
+- El backend está usando directamente la API de Google Gemini y **ha excedido la cuota gratuita**
+- NO es problema del frontend. El frontend solo muestra el error que le devuelve el backend.
 
 **Solución Backend (implementada):**
 - ✅ Manejo de error 429 con mensaje amigable
 - ✅ Retorna: "Se han realizado demasiadas solicitudes. Por favor, espera unos momentos antes de intentar nuevamente."
 
+**Soluciones Adicionales Recomendadas (Backend):**
+1. **Habilitar Billing en Google Cloud** para Gemini API (si se quiere seguir usando Gemini)
+2. **Implementar Rate Limiting**: Limitar requests por usuario/minuto
+3. **Implementar Caching**: Guardar respuestas comunes
+4. **Usar otro modelo**: Si Gemini es costoso, cambiar a alternativa
+
 **Solución Frontend:**
-1. Mostrar mensaje amigable al usuario
-2. Deshabilitar botón de enviar por unos segundos
+1. Mostrar mensaje amigable al usuario (ya lo hace el backend)
+2. Deshabilitar botón de enviar por unos segundos después de error 429
 3. Implementar rate limiting en el frontend (esperar 2-3 segundos entre mensajes)
 
 ---
@@ -219,5 +234,28 @@ GET /api/saas/productos
 
 ---
 
+---
+
+## 📊 COMPARACIÓN CON DOCUMENTO PREVIO DE APP MÓVIL
+
+**Documento previo:** `CHALLA/ISSUES_BACKEND.md.resolved`
+
+### Coincidencias:
+- ✅ **Precios $0**: Ambos identifican que el problema es el campo de precio
+- ✅ **Error 429**: Ambos identifican que es límite de cuota de Gemini
+- ✅ **Eliminar categorías**: App Móvil ya lo implementó, backend funciona correctamente
+
+### Diferencias:
+- **Precios**: App Móvil dice que backend NO envía `precio`. **Realidad:** Backend SÍ envía `precioUnitario` (no `precio`)
+- **Productos eliminados**: App Móvil dice que probablemente ya está resuelto. **Realidad:** Usuario reporta que sigue pasando
+
+### Estado Actual:
+- ✅ Backend retorna `precioUnitario` correctamente
+- ✅ Backend maneja error 429 con mensaje amigable
+- ✅ Endpoint de eliminar categorías funciona
+- ❌ Frontend necesita cambiar `precio` → `precioUnitario` en modelo de datos
+
+---
+
 **Última actualización:** 2025-01-XX  
-**Estado:** 🔍 REQUIERE ACCIONES DEL FRONTEND
+**Estado:** 🔍 REQUIERE ACCIONES DEL FRONTEND (cambio de campo `precio` → `precioUnitario`)
