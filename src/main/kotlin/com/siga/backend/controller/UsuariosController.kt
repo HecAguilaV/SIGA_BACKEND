@@ -246,6 +246,13 @@ class UsuariosController(
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
         
+        // Verificar que el usuario pertenece a la empresa del usuario actual
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && usuario.usuarioComercialId != null && usuario.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este usuario"))
+        }
+        
         val usuarioActualizado = usuario.copy(
             nombre = request.nombre ?: usuario.nombre,
             apellido = request.apellido ?: usuario.apellido,
