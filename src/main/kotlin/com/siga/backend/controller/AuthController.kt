@@ -9,6 +9,7 @@ import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
 import java.time.Instant
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
+import com.siga.backend.utils.SecurityUtils
 
 data class LoginRequest(
     @field:NotBlank @field:Email val email: String,
@@ -219,6 +221,52 @@ class AuthController(
                 refreshToken = newRefreshToken
             )
         )
+    }
+    
+    @GetMapping("/me")
+    @Operation(
+        summary = "Obtener Perfil Actual",
+        description = "Obtiene la información del usuario autenticado, incluyendo nombre de empresa y local por defecto.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun obtenerPerfil(): ResponseEntity<Map<String, Any>> {
+        val userId = SecurityUtils.getUserId()
+            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado"))
+        
+        val user = usuarioSaasRepository.findById(userId).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        if (!user.activo) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "Usuario inactivo"))
+        }
+        
+        // Obtener información de la empresa
+        val usuarioComercial = user.usuarioComercialId?.let {
+            usuarioComercialRepository.findById(it).orElse(null)
+        }
+        
+        // Obtener local por defecto (primer local activo de la empresa)
+        val localPorDefecto = user.usuarioComercialId?.let { comercialId ->
+            localRepository.findByActivoTrueAndUsuarioComercialId(comercialId)
+                .firstOrNull()
+                ?.let { LocalInfo(id = it.id, nombre = it.nombre, ciudad = it.ciudad) }
+        }
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "user" to UserInfo(
+                id = user.id,
+                email = user.email,
+                nombre = user.nombre,
+                apellido = user.apellido,
+                rol = user.rol.name,
+                nombreEmpresa = usuarioComercial?.nombreEmpresa,
+                localPorDefecto = localPorDefecto
+            )
+        ))
     }
     
 }
