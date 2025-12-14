@@ -107,67 +107,48 @@ object SecurityUtils {
                 return usuarioComercialIdFromToken
             }
             
-            val userId = getUserId()
-            logger.debug("getUsuarioComercialId: userId=$userId")
-            if (userId == null) {
-                logger.warn("getUsuarioComercialId: userId es null - verificando por email")
-                // Fallback: intentar por email
-                val email = getUserEmail()
-                if (email != null) {
-                    logger.debug("getUsuarioComercialId: buscando por email=$email")
-                    val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
-                    val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
-                    if (usuarioComercial != null) {
-                        logger.info("getUsuarioComercialId: encontrado por email, usuario_comercial_id=${usuarioComercial.id}")
-                        return usuarioComercial.id
-                    }
-                }
-                logger.warn("getUsuarioComercialId: no se pudo determinar userId ni email")
-                return null
-            }
-            
-            val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
-            val usuario = usuarioSaasRepository.findById(userId).orElse(null)
-            if (usuario == null) {
-                logger.warn("getUsuarioComercialId: usuario operativo no encontrado para userId=$userId")
-                // Fallback: intentar por email
-                val email = getUserEmail()
-                if (email != null) {
-                    val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
-                    val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
-                    if (usuarioComercial != null) {
-                        logger.info("getUsuarioComercialId: encontrado por email (fallback), usuario_comercial_id=${usuarioComercial.id}")
-                        return usuarioComercial.id
-                    }
-                }
-                return null
-            }
-            
-            // Si tiene usuario_comercial_id asignado, retornarlo
-            if (usuario.usuarioComercialId != null) {
-                logger.debug("getUsuarioComercialId: encontrado en usuario operativo: ${usuario.usuarioComercialId}")
-                return usuario.usuarioComercialId
-            }
-            
-            // Si no tiene, buscar por email en usuarios comerciales
+            // Obtener email (siempre disponible en el token)
             val email = getUserEmail()
-            if (email == null) {
-                logger.warn("getUsuarioComercialId: email es null para userId=$userId")
-                return null
+            if (email != null) {
+                logger.debug("getUsuarioComercialId: buscando por email=$email")
+                
+                // Intentar obtener userId para buscar en usuario operativo
+                val userId = getUserId()
+                if (userId != null) {
+                    val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
+                    val usuario = usuarioSaasRepository.findById(userId).orElse(null)
+                    if (usuario != null && usuario.usuarioComercialId != null) {
+                        logger.debug("getUsuarioComercialId: encontrado en usuario operativo: ${usuario.usuarioComercialId}")
+                        return usuario.usuarioComercialId
+                    }
+                }
+                
+                // Fallback: buscar por email en usuarios comerciales (SIEMPRE funciona)
+                val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+                val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+                if (usuarioComercial != null) {
+                    logger.info("getUsuarioComercialId: encontrado por email, usuario_comercial_id=${usuarioComercial.id}")
+                    
+                    // Si tenemos userId, actualizar el usuario operativo para futuras llamadas
+                    if (userId != null) {
+                        try {
+                            val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
+                            val usuario = usuarioSaasRepository.findById(userId).orElse(null)
+                            if (usuario != null && usuario.usuarioComercialId == null) {
+                                val usuarioActualizado = usuario.copy(usuarioComercialId = usuarioComercial.id)
+                                usuarioSaasRepository.save(usuarioActualizado)
+                                logger.info("getUsuarioComercialId: actualizado usuario operativo $userId con usuario_comercial_id=${usuarioComercial.id}")
+                            }
+                        } catch (e: Exception) {
+                            logger.warn("getUsuarioComercialId: no se pudo actualizar usuario operativo, pero retornando usuario_comercial_id", e)
+                        }
+                    }
+                    
+                    return usuarioComercial.id
+                }
             }
             
-            val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
-            val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
-            
-            if (usuarioComercial != null) {
-                // Actualizar el usuario operativo con el usuario_comercial_id encontrado
-                val usuarioActualizado = usuario.copy(usuarioComercialId = usuarioComercial.id)
-                usuarioSaasRepository.save(usuarioActualizado)
-                logger.info("getUsuarioComercialId: actualizado usuario operativo $userId con usuario_comercial_id=${usuarioComercial.id}")
-                return usuarioComercial.id
-            }
-            
-            logger.warn("getUsuarioComercialId: no se encontró usuario comercial para email=$email")
+            logger.warn("getUsuarioComercialId: no se pudo determinar - email=$email, userId=$userId")
             null
         } catch (e: Exception) {
             logger.error("Error al obtener usuario_comercial_id", e)
