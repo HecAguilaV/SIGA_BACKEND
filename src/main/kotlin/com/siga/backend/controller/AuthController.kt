@@ -112,7 +112,13 @@ class AuthController(
                 ?.let { LocalInfo(id = it.id, nombre = it.nombre, ciudad = it.ciudad) }
         }
         
-        val accessToken = jwtService.generateAccessToken(usuarioActualizado.id, usuarioActualizado.email, usuarioActualizado.rol.name)
+        val accessToken = jwtService.generateAccessToken(
+            usuarioActualizado.id, 
+            usuarioActualizado.email, 
+            usuarioActualizado.rol.name,
+            usuarioActualizado.usuarioComercialId,
+            usuarioComercial?.nombreEmpresa
+        )
         val refreshToken = jwtService.generateRefreshToken(usuarioActualizado.id)
         
         return ResponseEntity.ok(

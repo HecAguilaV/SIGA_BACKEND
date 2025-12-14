@@ -30,6 +30,8 @@ class JwtAuthenticationFilter(
                     val userId = decodedJWT.subject
                     val email = decodedJWT.getClaim("email")?.asString()
                     val rol = decodedJWT.getClaim("rol")?.asString() // Puede ser null para usuarios comerciales
+                    val usuarioComercialId = decodedJWT.getClaim("usuario_comercial_id")?.asInt()
+                    val nombreEmpresa = decodedJWT.getClaim("nombre_empresa")?.asString()
                     
                     // Crear autenticación
                     val authorities = if (rol != null) {
@@ -45,7 +47,9 @@ class JwtAuthenticationFilter(
                     ).apply {
                         details = mapOf(
                             "email" to (email ?: ""),
-                            "rol" to (rol ?: "")
+                            "rol" to (rol ?: ""),
+                            "usuario_comercial_id" to (usuarioComercialId ?: ""),
+                            "nombre_empresa" to (nombreEmpresa ?: "")
                         )
                     }
                     

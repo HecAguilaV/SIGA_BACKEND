@@ -16,7 +16,7 @@ class JWTService(
 ) {
     private val algorithm: Algorithm = Algorithm.HMAC256(secret)
     
-    fun generateAccessToken(userId: Int, email: String, rol: String? = null): String {
+    fun generateAccessToken(userId: Int, email: String, rol: String? = null, usuarioComercialId: Int? = null, nombreEmpresa: String? = null): String {
         return JWT.create()
             .withIssuer(issuer)
             .withSubject(userId.toString())
@@ -25,6 +25,12 @@ class JWTService(
             .apply {
                 if (rol != null) {
                     withClaim("rol", rol)
+                }
+                if (usuarioComercialId != null) {
+                    withClaim("usuario_comercial_id", usuarioComercialId)
+                }
+                if (nombreEmpresa != null) {
+                    withClaim("nombre_empresa", nombreEmpresa)
                 }
             }
             .withExpiresAt(Date(System.currentTimeMillis() + accessTokenExpiry))

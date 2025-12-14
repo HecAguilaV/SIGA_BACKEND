@@ -219,16 +219,44 @@ class ComercialAuthController(
         )
     }
     
+    data class TokenOperativoRequest(
+        val token: String? = null  // Opcional: token en body (para WebApp SSO)
+    )
+    
     @PostMapping("/obtener-token-operativo")
     @Operation(
         summary = "Obtener Token Operativo para WebApp",
-        description = "Intercambia token comercial por token operativo para acceder a WebApp. Requiere autenticación comercial y suscripción activa.",
+        description = "Intercambia token comercial por token operativo para acceder a WebApp. Acepta token en header Authorization o en body. Requiere suscripción activa.",
         security = [io.swagger.v3.oas.annotations.security.SecurityRequirement(name = "bearerAuth")]
     )
-    fun obtenerTokenOperativo(): ResponseEntity<Map<String, Any>> {
-        val email = SecurityUtils.getUserEmail()
-            ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(mapOf("success" to false, "message" to "No autenticado"))
+    fun obtenerTokenOperativo(@RequestBody(required = false) request: TokenOperativoRequest? = null): ResponseEntity<Map<String, Any>> {
+        // Intentar obtener email del contexto de seguridad (header Authorization)
+        var email = SecurityUtils.getUserEmail()
+        
+        // Si no hay email en contexto, intentar validar token del body (para WebApp SSO)
+        if (email == null && request?.token != null) {
+            val decodedJWT = jwtService.verifyToken(request.token)
+            if (decodedJWT != null && decodedJWT.getClaim("type").asString() == "access") {
+                email = decodedJWT.getClaim("email")?.asString()
+                // Establecer autenticación temporal para que SecurityUtils funcione
+                val userId = decodedJWT.subject.toIntOrNull()
+                if (userId != null && email != null) {
+                    val authentication = org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
+                        userId.toString(),
+                        null,
+                        emptyList()
+                    ).apply {
+                        details = mapOf("email" to email)
+                    }
+                    org.springframework.security.core.context.SecurityContextHolder.getContext().authentication = authentication
+                }
+            }
+        }
+        
+        if (email == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(mapOf("success" to false, "message" to "No autenticado. Proporciona token en header Authorization o en body."))
+        }
         
         // Verificar que el usuario comercial existe
         val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
@@ -254,11 +282,13 @@ class ComercialAuthController(
                 .body(mapOf("success" to false, "message" to "Usuario operativo inactivo"))
         }
         
-        // Generar token operativo
+        // Generar token operativo con información de empresa
         val accessToken = jwtService.generateAccessToken(
             usuarioOperativo.id,
             usuarioOperativo.email,
-            usuarioOperativo.rol.name
+            usuarioOperativo.rol.name,
+            usuarioOperativo.usuarioComercialId,
+            usuarioComercial.nombreEmpresa
         )
         
         return ResponseEntity.ok(mapOf(

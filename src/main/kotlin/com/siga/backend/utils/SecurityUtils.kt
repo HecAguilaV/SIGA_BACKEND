@@ -98,6 +98,15 @@ object SecurityUtils {
     fun getUsuarioComercialId(): Int? {
         val logger = org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java)
         return try {
+            // Primero intentar leer del token JWT si está disponible
+            val authentication = SecurityContextHolder.getContext().authentication
+            val details = authentication?.details as? Map<*, *>
+            val usuarioComercialIdFromToken = details?.get("usuario_comercial_id") as? Int
+            if (usuarioComercialIdFromToken != null) {
+                logger.debug("getUsuarioComercialId: encontrado en token: $usuarioComercialIdFromToken")
+                return usuarioComercialIdFromToken
+            }
+            
             val userId = getUserId()
             logger.debug("getUsuarioComercialId: userId=$userId")
             if (userId == null) {
