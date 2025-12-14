@@ -102,13 +102,25 @@ object SecurityUtils {
             val usuario = usuarioSaasRepository.findById(userId).orElse(null) ?: return null
             
             // Si tiene usuario_comercial_id asignado, retornarlo
-            usuario.usuarioComercialId ?: run {
-                // Si no tiene, buscar por email en usuarios comerciales
-                val email = getUserEmail() ?: return null
-                val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
-                usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)?.id
+            if (usuario.usuarioComercialId != null) {
+                return usuario.usuarioComercialId
             }
+            
+            // Si no tiene, buscar por email en usuarios comerciales
+            val email = getUserEmail() ?: return null
+            val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+            val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+            
+            if (usuarioComercial != null) {
+                // Actualizar el usuario operativo con el usuario_comercial_id encontrado
+                val usuarioActualizado = usuario.copy(usuarioComercialId = usuarioComercial.id)
+                usuarioSaasRepository.save(usuarioActualizado)
+                return usuarioComercial.id
+            }
+            
+            null
         } catch (e: Exception) {
+            org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java).error("Error al obtener usuario_comercial_id", e)
             null
         }
     }
