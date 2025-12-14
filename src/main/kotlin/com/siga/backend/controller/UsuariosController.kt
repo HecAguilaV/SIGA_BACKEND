@@ -46,6 +46,11 @@ data class AsignarPermisoRequest(
     @field:NotBlank val codigoPermiso: String
 )
 
+data class AsignarEmpresaRequest(
+    val usuarioComercialId: Int? = null,
+    val emailComercial: String? = null  // Opcional: buscar por email si no se proporciona ID
+)
+
 @RestController
 @RequestMapping("/api/saas/usuarios")
 @Tag(name = "4. Gesti?n Operativa", description = "Gesti?n de usuarios operativos y permisos. Requiere autenticaci?n + suscripci?n activa")
@@ -419,6 +424,107 @@ class UsuariosController(
             ) },
             "permisosPorCategoria" to permisosPorCategoria,
             "total" to permisos.size
+        ))
+    }
+    
+    @PutMapping("/{id}/empresa")
+    @Operation(
+        summary = "Asignar Empresa a Usuario",
+        description = "Asigna un usuario_comercial_id a un usuario operativo. Puede usar usuarioComercialId o emailComercial. Solo administradores. URGENTE: Usar para solucionar 'no se determinó la empresa'.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun asignarEmpresa(
+        @PathVariable id: Int,
+        @RequestBody request: AsignarEmpresaRequest
+    ): ResponseEntity<Map<String, Any>> {
+        if (!SecurityUtils.puedeCrearUsuarios()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes permiso para asignar empresa"))
+        }
+        
+        val usuario = usuarioSaasRepository.findById(id).orElse(null)
+            ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(mapOf("success" to false, "message" to "Usuario no encontrado"))
+        
+        // Determinar usuario_comercial_id
+        val usuarioComercialId = when {
+            request.usuarioComercialId != null -> {
+                // Verificar que existe
+                val comercial = usuarioComercialRepository.findById(request.usuarioComercialId).orElse(null)
+                    ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(mapOf("success" to false, "message" to "Usuario comercial no encontrado"))
+                request.usuarioComercialId
+            }
+            request.emailComercial != null -> {
+                // Buscar por email
+                val comercial = usuarioComercialRepository.findByEmail(request.emailComercial.lowercase()).orElse(null)
+                    ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(mapOf("success" to false, "message" to "Usuario comercial no encontrado con email: ${request.emailComercial}"))
+                comercial.id
+            }
+            else -> {
+                // Auto-asignar: buscar por email del usuario operativo
+                val comercial = usuarioComercialRepository.findByEmail(usuario.email.lowercase()).orElse(null)
+                    ?: return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(mapOf(
+                            "success" to false, 
+                            "message" to "No se pudo determinar la empresa. Proporciona usuarioComercialId o emailComercial.",
+                            "sugerencia" to "Usa el email del usuario comercial o su ID"
+                        ))
+                comercial.id
+            }
+        }
+        
+        val usuarioActualizado = usuario.copy(
+            usuarioComercialId = usuarioComercialId,
+            fechaActualizacion = Instant.now()
+        )
+        usuarioSaasRepository.save(usuarioActualizado)
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "message" to "Empresa asignada exitosamente",
+            "usuario" to mapOf(
+                "id" to usuarioActualizado.id,
+                "email" to usuarioActualizado.email,
+                "usuarioComercialId" to usuarioActualizado.usuarioComercialId
+            )
+        ))
+    }
+    
+    @GetMapping("/sin-empresa")
+    @Operation(
+        summary = "Listar Usuarios Sin Empresa",
+        description = "Lista usuarios operativos que no tienen usuario_comercial_id asignado. Solo administradores.",
+        security = [SecurityRequirement(name = "bearerAuth")]
+    )
+    fun listarUsuariosSinEmpresa(): ResponseEntity<Map<String, Any>> {
+        if (!SecurityUtils.puedeCrearUsuarios()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes permiso"))
+        }
+        
+        val usuarios = usuarioSaasRepository.findAll()
+            .filter { it.usuarioComercialId == null }
+            .map { usuario ->
+                // Buscar si existe usuario comercial con mismo email
+                val comercial = usuarioComercialRepository.findByEmail(usuario.email.lowercase()).orElse(null)
+                mapOf(
+                    "id" to usuario.id,
+                    "email" to usuario.email,
+                    "nombre" to usuario.nombre,
+                    "rol" to usuario.rol.toString(),
+                    "usuarioComercialId" to null,
+                    "usuarioComercialEncontrado" to (comercial?.let { 
+                        mapOf("id" to it.id, "email" to it.email, "nombre" to it.nombre)
+                    })
+                )
+            }
+        
+        return ResponseEntity.ok(mapOf(
+            "success" to true,
+            "usuarios" to usuarios,
+            "total" to usuarios.size
         ))
     }
 }

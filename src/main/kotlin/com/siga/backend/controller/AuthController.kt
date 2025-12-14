@@ -3,8 +3,10 @@ package com.siga.backend.controller
 import com.siga.backend.entity.Rol
 import com.siga.backend.entity.UsuarioSaas
 import com.siga.backend.repository.UsuarioSaasRepository
+import com.siga.backend.repository.UsuarioComercialRepository
 import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
+import java.time.Instant
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
@@ -52,12 +54,13 @@ data class UserInfo(
 @Tag(name = "2. Autenticación", description = "Registro y login de usuarios operativos")
 class AuthController(
     private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val usuarioComercialRepository: UsuarioComercialRepository,
     private val passwordService: PasswordService,
     private val jwtService: JWTService
 ) {
     
     @PostMapping("/login")
-    @Operation(summary = "Iniciar Sesión", description = "Autentica un usuario operativo (ADMINISTRADOR, OPERADOR, CAJERO) y obtiene tokens JWT")
+    @Operation(summary = "Iniciar Sesión", description = "Autentica un usuario operativo (ADMINISTRADOR, OPERADOR, CAJERO) y obtiene tokens JWT. Auto-asigna empresa si no tiene.")
     fun login(@Valid @RequestBody request: LoginRequest): ResponseEntity<AuthResponse> {
         val user = usuarioSaasRepository.findByEmail(request.email.lowercase()).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -73,8 +76,21 @@ class AuthController(
                 .body(AuthResponse(success = false, message = "Credenciales inválidas"))
         }
         
-        val accessToken = jwtService.generateAccessToken(user.id, user.email, user.rol.name)
-        val refreshToken = jwtService.generateRefreshToken(user.id)
+        // AUTO-ASIGNAR EMPRESA si no tiene
+        var usuarioActualizado = user
+        if (user.usuarioComercialId == null) {
+            val usuarioComercial = usuarioComercialRepository.findByEmail(user.email.lowercase()).orElse(null)
+            if (usuarioComercial != null) {
+                usuarioActualizado = user.copy(
+                    usuarioComercialId = usuarioComercial.id,
+                    fechaActualizacion = Instant.now()
+                )
+                usuarioSaasRepository.save(usuarioActualizado)
+            }
+        }
+        
+        val accessToken = jwtService.generateAccessToken(usuarioActualizado.id, usuarioActualizado.email, usuarioActualizado.rol.name)
+        val refreshToken = jwtService.generateRefreshToken(usuarioActualizado.id)
         
         return ResponseEntity.ok(
             AuthResponse(
@@ -82,11 +98,11 @@ class AuthController(
                 accessToken = accessToken,
                 refreshToken = refreshToken,
                 user = UserInfo(
-                    id = user.id,
-                    email = user.email,
-                    nombre = user.nombre,
-                    apellido = user.apellido,
-                    rol = user.rol.name
+                    id = usuarioActualizado.id,
+                    email = usuarioActualizado.email,
+                    nombre = usuarioActualizado.nombre,
+                    apellido = usuarioActualizado.apellido,
+                    rol = usuarioActualizado.rol.name
                 )
             )
         )
