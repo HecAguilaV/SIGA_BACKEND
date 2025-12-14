@@ -164,11 +164,20 @@ class LocalesController(
         // Obtener usuario_comercial_id para asignar empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         
+        // VALIDACIÓN CRÍTICA: Si no se puede determinar la empresa, rechazar la creación
+        if (usuarioComercialId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapOf(
+                    "success" to false, 
+                    "message" to "No se pudo determinar la empresa. Por favor, contacta al administrador."
+                ))
+        }
+        
         val nuevoLocal = Local(
             nombre = request.nombre,
             direccion = request.direccion,
             ciudad = request.ciudad,
-            usuarioComercialId = usuarioComercialId, // Asignar empresa
+            usuarioComercialId = usuarioComercialId, // Asignar empresa (NUNCA null)
             activo = true,
             fechaCreacion = Instant.now()
         )

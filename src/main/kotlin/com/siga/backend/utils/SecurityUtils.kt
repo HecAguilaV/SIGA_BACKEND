@@ -96,18 +96,34 @@ object SecurityUtils {
      * Retorna null si no se puede determinar
      */
     fun getUsuarioComercialId(): Int? {
+        val logger = org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java)
         return try {
-            val userId = getUserId() ?: return null
+            val userId = getUserId()
+            if (userId == null) {
+                logger.warn("getUsuarioComercialId: userId es null")
+                return null
+            }
+            
             val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
-            val usuario = usuarioSaasRepository.findById(userId).orElse(null) ?: return null
+            val usuario = usuarioSaasRepository.findById(userId).orElse(null)
+            if (usuario == null) {
+                logger.warn("getUsuarioComercialId: usuario operativo no encontrado para userId=$userId")
+                return null
+            }
             
             // Si tiene usuario_comercial_id asignado, retornarlo
             if (usuario.usuarioComercialId != null) {
+                logger.debug("getUsuarioComercialId: encontrado en usuario operativo: ${usuario.usuarioComercialId}")
                 return usuario.usuarioComercialId
             }
             
             // Si no tiene, buscar por email en usuarios comerciales
-            val email = getUserEmail() ?: return null
+            val email = getUserEmail()
+            if (email == null) {
+                logger.warn("getUsuarioComercialId: email es null para userId=$userId")
+                return null
+            }
+            
             val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
             val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
             
@@ -115,12 +131,14 @@ object SecurityUtils {
                 // Actualizar el usuario operativo con el usuario_comercial_id encontrado
                 val usuarioActualizado = usuario.copy(usuarioComercialId = usuarioComercial.id)
                 usuarioSaasRepository.save(usuarioActualizado)
+                logger.info("getUsuarioComercialId: actualizado usuario operativo $userId con usuario_comercial_id=${usuarioComercial.id}")
                 return usuarioComercial.id
             }
             
+            logger.warn("getUsuarioComercialId: no se encontró usuario comercial para email=$email")
             null
         } catch (e: Exception) {
-            org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java).error("Error al obtener usuario_comercial_id", e)
+            logger.error("Error al obtener usuario_comercial_id", e)
             null
         }
     }

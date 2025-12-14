@@ -150,13 +150,22 @@ class ProductosController(
         // Obtener usuario_comercial_id para asignar empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         
+        // VALIDACIÓN CRÍTICA: Si no se puede determinar la empresa, rechazar la creación
+        if (usuarioComercialId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(mapOf(
+                    "success" to false, 
+                    "message" to "No se pudo determinar la empresa. Por favor, contacta al administrador."
+                ))
+        }
+        
         val nuevoProducto = Producto(
             nombre = request.nombre,
             descripcion = request.descripcion,
             categoriaId = request.categoriaId,
             codigoBarras = request.codigoBarras,
             precioUnitario = precioUnitario,
-            usuarioComercialId = usuarioComercialId, // Asignar empresa
+            usuarioComercialId = usuarioComercialId, // Asignar empresa (NUNCA null)
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()

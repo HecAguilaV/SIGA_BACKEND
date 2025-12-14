@@ -294,12 +294,17 @@ class OperationalAssistantService(
         // Obtener usuario_comercial_id para asignar empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         
+        // VALIDACIÓN CRÍTICA: Si no se puede determinar la empresa, rechazar la creación
+        if (usuarioComercialId == null) {
+            return Result.success(AccionEjecutada(false, "CREATE_PRODUCT", null, "No se pudo determinar la empresa. Por favor, contacta al administrador."))
+        }
+        
         val producto = Producto(
             nombre = nombre,
             descripcion = descripcion,
             categoriaId = categoriaId,
             precioUnitario = precio,
-            usuarioComercialId = usuarioComercialId, // Asignar empresa
+            usuarioComercialId = usuarioComercialId, // Asignar empresa (NUNCA null)
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()
@@ -512,11 +517,16 @@ class OperationalAssistantService(
         // Obtener usuario_comercial_id para asignar empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         
+        // VALIDACIÓN CRÍTICA: Si no se puede determinar la empresa, rechazar la creación
+        if (usuarioComercialId == null) {
+            return Result.success(AccionEjecutada(false, "CREATE_LOCAL", null, "No se pudo determinar la empresa. Por favor, contacta al administrador."))
+        }
+        
         val local = Local(
             nombre = nombre,
             direccion = params["direccion"] as? String,
             ciudad = params["ciudad"] as? String,
-            usuarioComercialId = usuarioComercialId, // Asignar empresa
+            usuarioComercialId = usuarioComercialId, // Asignar empresa (NUNCA null)
             activo = true,
             fechaCreacion = Instant.now()
         )
@@ -545,12 +555,13 @@ class OperationalAssistantService(
         // Obtener usuario_comercial_id para asignar empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         
+        // VALIDACIÓN CRÍTICA: Si no se puede determinar la empresa, rechazar la creación
+        if (usuarioComercialId == null) {
+            return Result.success(AccionEjecutada(false, "CREATE_CATEGORIA", null, "No se pudo determinar la empresa. Por favor, contacta al administrador."))
+        }
+        
         // Verificar que no exista categoría con mismo nombre en la misma empresa
-        if (usuarioComercialId != null && categoriaRepository.existsByNombreAndUsuarioComercialId(nombre, usuarioComercialId)) {
-            return Result.success(
-                AccionEjecutada(false, "CREATE_CATEGORIA", null, "Ya existe una categoría con ese nombre")
-            )
-        } else if (usuarioComercialId == null && categoriaRepository.existsByNombre(nombre)) {
+        if (categoriaRepository.existsByNombreAndUsuarioComercialId(nombre, usuarioComercialId)) {
             return Result.success(
                 AccionEjecutada(false, "CREATE_CATEGORIA", null, "Ya existe una categoría con ese nombre")
             )
@@ -559,7 +570,7 @@ class OperationalAssistantService(
         val categoria = Categoria(
             nombre = nombre,
             descripcion = params["descripcion"] as? String,
-            usuarioComercialId = usuarioComercialId, // Asignar empresa
+            usuarioComercialId = usuarioComercialId, // Asignar empresa (NUNCA null)
             activa = true,
             fechaCreacion = Instant.now()
         )
