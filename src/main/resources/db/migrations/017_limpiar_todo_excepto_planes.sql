@@ -29,6 +29,9 @@ DELETE FROM siga_saas.CATEGORIAS;
 -- Eliminar locales
 DELETE FROM siga_saas.LOCALES;
 
+-- Eliminar permisos asignados (antes de usuarios)
+DELETE FROM siga_saas.USUARIOS_PERMISOS;
+
 -- Eliminar usuarios operativos
 DELETE FROM siga_saas.USUARIOS;
 
@@ -63,6 +66,7 @@ ALTER SEQUENCE IF EXISTS siga_saas.STOCK_id_seq RESTART WITH 1;
 ALTER SEQUENCE IF EXISTS siga_saas.VENTAS_id_seq RESTART WITH 1;
 ALTER SEQUENCE IF EXISTS siga_saas.DETALLES_VENTA_id_seq RESTART WITH 1;
 ALTER SEQUENCE IF EXISTS siga_saas.USUARIOS_id_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS siga_saas.USUARIOS_PERMISOS_id_seq RESTART WITH 1;
 ALTER SEQUENCE IF EXISTS siga_saas.MOVIMIENTOS_id_seq RESTART WITH 1;
 
 -- Resetear secuencias de siga_comercial
