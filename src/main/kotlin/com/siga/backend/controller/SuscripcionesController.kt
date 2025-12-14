@@ -76,15 +76,21 @@ class SuscripcionesController(
         val tieneSuscripcionActiva = subscriptionService.hasActiveSubscription(email)
         val tieneTrialActivo = subscriptionService.tieneTrialActivo(email)
         
-        return ResponseEntity.ok(mapOf(
+        val responseMap = mutableMapOf<String, Any>(
             "success" to true,
             "suscripciones" to suscripciones,
             "total" to suscripciones.size,
             "tieneSuscripcionActiva" to tieneSuscripcionActiva,
             "tieneTrialActivo" to tieneTrialActivo,
-            "enTrial" to usuario.enTrial,
-            "fechaFinTrial" to usuario.fechaFinTrial?.toString()
-        ))
+            "enTrial" to usuario.enTrial
+        )
+        
+        // Agregar fechaFinTrial solo si no es null
+        usuario.fechaFinTrial?.let {
+            responseMap["fechaFinTrial"] = it.toString()
+        }
+        
+        return ResponseEntity.ok(responseMap)
     }
     
     @PostMapping
