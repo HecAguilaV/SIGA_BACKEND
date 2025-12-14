@@ -10,6 +10,7 @@ import com.siga.backend.repository.PlanRepository
 import com.siga.backend.repository.SuscripcionRepository
 import com.siga.backend.repository.UsuarioComercialRepository
 import com.siga.backend.repository.UsuarioSaasRepository
+import com.siga.backend.service.SubscriptionService
 import com.siga.backend.utils.SecurityUtils
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -45,6 +46,7 @@ class SuscripcionesController(
     private val usuarioComercialRepository: UsuarioComercialRepository,
     private val planRepository: PlanRepository,
     private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val subscriptionService: SubscriptionService,
     private val objectMapper: ObjectMapper
 ) {
     
@@ -70,10 +72,18 @@ class SuscripcionesController(
             )
         }
         
+        // Verificar si tiene suscripción activa
+        val tieneSuscripcionActiva = subscriptionService.hasActiveSubscription(email)
+        val tieneTrialActivo = subscriptionService.tieneTrialActivo(email)
+        
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "suscripciones" to suscripciones,
-            "total" to suscripciones.size
+            "total" to suscripciones.size,
+            "tieneSuscripcionActiva" to tieneSuscripcionActiva,
+            "tieneTrialActivo" to tieneTrialActivo,
+            "enTrial" to usuario.enTrial,
+            "fechaFinTrial" to usuario.fechaFinTrial?.toString()
         ))
     }
     
