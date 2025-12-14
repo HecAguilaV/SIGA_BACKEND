@@ -90,5 +90,27 @@ object SecurityUtils {
     fun puedeUsarAsistente(): Boolean = tienePermiso("ASISTENTE_USAR")
     fun puedeAnalisisIA(): Boolean = tienePermiso("ANALISIS_IA")
     fun puedeCRUDporIA(): Boolean = tienePermiso("ASISTENTE_CRUD")
+    
+    /**
+     * Obtiene el usuario_comercial_id del usuario operativo actual
+     * Retorna null si no se puede determinar
+     */
+    fun getUsuarioComercialId(): Int? {
+        return try {
+            val userId = getUserId() ?: return null
+            val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
+            val usuario = usuarioSaasRepository.findById(userId).orElse(null) ?: return null
+            
+            // Si tiene usuario_comercial_id asignado, retornarlo
+            usuario.usuarioComercialId ?: run {
+                // Si no tiene, buscar por email en usuarios comerciales
+                val email = getUserEmail() ?: return null
+                val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+                usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)?.id
+            }
+        } catch (e: Exception) {
+            null
+        }
+    }
 }
 

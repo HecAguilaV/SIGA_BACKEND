@@ -14,5 +14,11 @@ interface StockRepository : JpaRepository<Stock, Int> {
     
     @Query("SELECT s FROM Stock s WHERE s.localId = :localId")
     fun findByLocalId(@Param("localId") localId: Int): List<Stock>
+    
+    @Query("SELECT s FROM Stock s JOIN Producto p ON s.productoId = p.id JOIN Local l ON s.localId = l.id WHERE p.usuarioComercialId = :usuarioComercialId AND l.usuarioComercialId = :usuarioComercialId")
+    fun findByUsuarioComercialId(@Param("usuarioComercialId") usuarioComercialId: Int): List<Stock>
+    
+    @Query("SELECT s FROM Stock s JOIN Producto p ON s.productoId = p.id JOIN Local l ON s.localId = l.id WHERE s.localId = :localId AND p.usuarioComercialId = :usuarioComercialId AND l.usuarioComercialId = :usuarioComercialId")
+    fun findByLocalIdAndUsuarioComercialId(@Param("localId") localId: Int, @Param("usuarioComercialId") usuarioComercialId: Int): List<Stock>
 }
 

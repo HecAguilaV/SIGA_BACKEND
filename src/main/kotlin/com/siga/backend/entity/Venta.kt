@@ -23,6 +23,9 @@ data class Venta(
     @Column(name = "usuario_id")
     val usuarioId: Int? = null,
     
+    @Column(name = "usuario_comercial_id")
+    val usuarioComercialId: Int? = null,  // ID del usuario comercial (dueño) al que pertenece
+    
     @Column(nullable = false)
     val fecha: Instant = Instant.now(),
     

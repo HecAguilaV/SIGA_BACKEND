@@ -59,7 +59,13 @@ class CategoriasController(
             }
             
             logger.debug("Listando categorías para usuario: $email")
-            val categorias = categoriaRepository.findByActivaTrue().map { categoria ->
+            // Filtrar categorías por empresa
+            val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+            val categorias = if (usuarioComercialId != null) {
+                categoriaRepository.findByActivaTrueAndUsuarioComercialId(usuarioComercialId)
+            } else {
+                categoriaRepository.findByActivaTrue() // Fallback para usuarios legacy
+            }.map { categoria ->
                 CategoriaResponse(
                     id = categoria.id,
                     nombre = categoria.nombre,
@@ -114,6 +120,13 @@ class CategoriasController(
                 .body(mapOf("success" to false, "message" to "Categoría no encontrada"))
         }
         
+        // Verificar que la categoría pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && categoria.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a esta categoría"))
+        }
+        
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "categoria" to CategoriaResponse(
@@ -144,7 +157,14 @@ class CategoriasController(
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
         }
         
-        if (categoriaRepository.existsByNombre(request.nombre)) {
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
+        // Verificar que no exista categoría con mismo nombre en la misma empresa
+        if (usuarioComercialId != null && categoriaRepository.existsByNombreAndUsuarioComercialId(request.nombre, usuarioComercialId)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(mapOf("success" to false, "message" to "Ya existe una categoría con ese nombre"))
+        } else if (usuarioComercialId == null && categoriaRepository.existsByNombre(request.nombre)) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(mapOf("success" to false, "message" to "Ya existe una categoría con ese nombre"))
         }
@@ -152,6 +172,7 @@ class CategoriasController(
         val nuevaCategoria = Categoria(
             nombre = request.nombre,
             descripcion = request.descripcion,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activa = true,
             fechaCreacion = Instant.now()
         )
@@ -190,10 +211,22 @@ class CategoriasController(
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Categoría no encontrada"))
         
-        // Verificar si el nombre ya existe en otra categoría
-        if (request.nombre != categoria.nombre && categoriaRepository.existsByNombre(request.nombre)) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(mapOf("success" to false, "message" to "Ya existe una categoría con ese nombre"))
+        // Verificar que la categoría pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && categoria.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a esta categoría"))
+        }
+        
+        // Verificar si el nombre ya existe en otra categoría de la misma empresa
+        if (request.nombre != categoria.nombre) {
+            if (usuarioComercialId != null && categoriaRepository.existsByNombreAndUsuarioComercialId(request.nombre, usuarioComercialId)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(mapOf("success" to false, "message" to "Ya existe una categoría con ese nombre"))
+            } else if (usuarioComercialId == null && categoriaRepository.existsByNombre(request.nombre)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(mapOf("success" to false, "message" to "Ya existe una categoría con ese nombre"))
+            }
         }
         
         val categoriaActualizada = categoria.copy(
@@ -231,6 +264,13 @@ class CategoriasController(
         val categoria = categoriaRepository.findById(id).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Categoría no encontrada"))
+        
+        // Verificar que la categoría pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && categoria.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a esta categoría"))
+        }
         
         val categoriaEliminada = categoria.copy(activa = false)
         categoriaRepository.save(categoriaEliminada)

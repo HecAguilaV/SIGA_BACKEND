@@ -26,6 +26,9 @@ data class Producto(
     @Column(name = "precio_unitario", precision = 10, scale = 2)
     val precioUnitario: BigDecimal? = null,
     
+    @Column(name = "usuario_comercial_id")
+    val usuarioComercialId: Int? = null,  // ID del usuario comercial (dueño) al que pertenece
+    
     @Column(nullable = false)
     val activo: Boolean = true,
     

@@ -19,6 +19,9 @@ data class Local(
     @Column(length = 100)
     val ciudad: String? = null,
     
+    @Column(name = "usuario_comercial_id")
+    val usuarioComercialId: Int? = null,  // ID del usuario comercial (dueño) al que pertenece
+    
     @Column(nullable = false)
     val activo: Boolean = true,
     

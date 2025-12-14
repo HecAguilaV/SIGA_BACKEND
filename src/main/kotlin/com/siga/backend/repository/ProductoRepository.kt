@@ -7,5 +7,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface ProductoRepository : JpaRepository<Producto, Int> {
     fun findByActivoTrue(): List<Producto>
+    fun findByActivoTrueAndUsuarioComercialId(usuarioComercialId: Int): List<Producto>
+    fun findByUsuarioComercialId(usuarioComercialId: Int): List<Producto>
 }
 

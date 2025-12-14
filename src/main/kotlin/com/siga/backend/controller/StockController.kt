@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonAlias
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.siga.backend.entity.Stock
 import com.siga.backend.repository.StockRepository
+import com.siga.backend.repository.ProductoRepository
+import com.siga.backend.repository.LocalRepository
 import com.siga.backend.service.SubscriptionService
 import com.siga.backend.utils.SecurityUtils
 import io.swagger.v3.oas.annotations.Operation
@@ -51,6 +53,8 @@ data class StockResponse(
 @Tag(name = "4. Gestión Operativa", description = "Requiere autenticación + suscripción activa")
 class StockController(
     private val stockRepository: StockRepository,
+    private val productoRepository: ProductoRepository,
+    private val localRepository: LocalRepository,
     private val subscriptionService: SubscriptionService
 ) {
     
@@ -68,10 +72,21 @@ class StockController(
                 .body(mapOf("success" to false, "stock" to emptyList<StockResponse>(), "total" to 0))
         }
         
-        val stockList = if (localId != null) {
-            stockRepository.findByLocalId(localId)
+        // Filtrar stock por empresa (a través de productos y locales)
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        val stockList = if (usuarioComercialId != null) {
+            if (localId != null) {
+                stockRepository.findByLocalIdAndUsuarioComercialId(localId, usuarioComercialId)
+            } else {
+                stockRepository.findByUsuarioComercialId(usuarioComercialId)
+            }
         } else {
-            stockRepository.findAll()
+            // Fallback para usuarios legacy
+            if (localId != null) {
+                stockRepository.findByLocalId(localId)
+            } else {
+                stockRepository.findAll()
+            }
         }
         
         val stock = stockList.map { s ->
@@ -113,6 +128,23 @@ class StockController(
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Stock no encontrado"))
         
+        // Verificar que producto y local pertenecen a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null) {
+            val producto = productoRepository.findById(productoId).orElse(null)
+            val local = localRepository.findById(localId).orElse(null)
+            
+            if (producto == null || producto.usuarioComercialId != usuarioComercialId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes acceso a este producto"))
+            }
+            
+            if (local == null || local.usuarioComercialId != usuarioComercialId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes acceso a este local"))
+            }
+        }
+        
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "stock" to StockResponse(
@@ -142,6 +174,23 @@ class StockController(
         if (email == null || !subscriptionService.hasActiveSubscription(email)) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
+        }
+        
+        // Verificar que producto y local pertenecen a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null) {
+            val producto = productoRepository.findById(request.productoId).orElse(null)
+            val local = localRepository.findById(request.localId).orElse(null)
+            
+            if (producto == null || producto.usuarioComercialId != usuarioComercialId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes acceso a este producto"))
+            }
+            
+            if (local == null || local.usuarioComercialId != usuarioComercialId) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes acceso a este local"))
+            }
         }
         
         val stockExistente = stockRepository.findByProductoIdAndLocalId(request.productoId, request.localId)

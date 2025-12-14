@@ -57,7 +57,13 @@ class ProductosController(
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
         }
         
-        val productos = productoRepository.findByActivoTrue().map { producto ->
+        // Filtrar productos por empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        val productos = if (usuarioComercialId != null) {
+            productoRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
+        } else {
+            productoRepository.findByActivoTrue() // Fallback para usuarios legacy
+        }.map { producto ->
             ProductoResponse(
                 id = producto.id,
                 nombre = producto.nombre,
@@ -101,6 +107,13 @@ class ProductosController(
                 .body(mapOf("success" to false, "message" to "Producto no encontrado"))
         }
         
+        // Verificar que el producto pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && producto.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este producto"))
+        }
+        
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "producto" to ProductoResponse(
@@ -134,12 +147,16 @@ class ProductosController(
             try { BigDecimal(it) } catch (e: Exception) { null }
         }
         
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
         val nuevoProducto = Producto(
             nombre = request.nombre,
             descripcion = request.descripcion,
             categoriaId = request.categoriaId,
             codigoBarras = request.codigoBarras,
             precioUnitario = precioUnitario,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()
@@ -177,6 +194,13 @@ class ProductosController(
         val producto = productoRepository.findById(id).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Producto no encontrado"))
+        
+        // Verificar que el producto pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && producto.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este producto"))
+        }
         
         val precioUnitario = request.precioUnitario?.let { 
             try { BigDecimal(it) } catch (e: Exception) { null }
@@ -220,6 +244,13 @@ class ProductosController(
         val producto = productoRepository.findById(id).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Producto no encontrado"))
+        
+        // Verificar que el producto pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && producto.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este producto"))
+        }
         
         val productoEliminado = producto.copy(activo = false, fechaActualizacion = Instant.now())
         productoRepository.save(productoEliminado)

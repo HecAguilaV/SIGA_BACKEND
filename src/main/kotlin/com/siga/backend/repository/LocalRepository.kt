@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface LocalRepository : JpaRepository<Local, Int> {
     fun findByActivoTrue(): List<Local>
+    fun findByActivoTrueAndUsuarioComercialId(usuarioComercialId: Int): List<Local>
+    fun findByUsuarioComercialId(usuarioComercialId: Int): List<Local>
 }

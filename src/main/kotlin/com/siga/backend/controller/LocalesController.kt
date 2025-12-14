@@ -61,7 +61,13 @@ class LocalesController(
             }
             
             logger.debug("Listando locales para usuario: $email")
-            val locales = localRepository.findByActivoTrue().map { local ->
+            // Filtrar locales por empresa
+            val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+            val locales = if (usuarioComercialId != null) {
+                localRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
+            } else {
+                localRepository.findByActivoTrue() // Fallback para usuarios legacy
+            }.map { local ->
                 LocalResponse(
                     id = local.id,
                     nombre = local.nombre,
@@ -117,6 +123,13 @@ class LocalesController(
                 .body(mapOf("success" to false, "message" to "Local no encontrado"))
         }
         
+        // Verificar que el local pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && local.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este local"))
+        }
+        
         return ResponseEntity.ok(mapOf(
             "success" to true,
             "local" to LocalResponse(
@@ -148,10 +161,14 @@ class LocalesController(
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
         }
         
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
         val nuevoLocal = Local(
             nombre = request.nombre,
             direccion = request.direccion,
             ciudad = request.ciudad,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activo = true,
             fechaCreacion = Instant.now()
         )
@@ -228,6 +245,13 @@ class LocalesController(
         val local = localRepository.findById(id).orElse(null)
             ?: return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(mapOf("success" to false, "message" to "Local no encontrado"))
+        
+        // Verificar que el local pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && local.usuarioComercialId != usuarioComercialId) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes acceso a este local"))
+        }
         
         val localEliminado = local.copy(activo = false)
         localRepository.save(localEliminado)

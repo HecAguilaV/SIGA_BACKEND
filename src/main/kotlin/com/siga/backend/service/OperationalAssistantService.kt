@@ -3,6 +3,7 @@ package com.siga.backend.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.siga.backend.entity.*
 import com.siga.backend.repository.*
+import com.siga.backend.config.ApplicationContextProvider
 import com.siga.backend.utils.SecurityUtils
 import org.slf4j.LoggerFactory
 import org.springframework.jdbc.core.JdbcTemplate
@@ -85,10 +86,20 @@ class OperationalAssistantService(
         
         context.add("=== INFORMACIÓN DEL USUARIO ===\nUsuario: ${user.nombre} (${user.email})\nRol: $userRol")
         
-        // Todos los usuarios operativos pueden ver productos y stock (según sus permisos)
-        val productos = jdbcTemplate.queryForList(
+        // Obtener usuario_comercial_id para filtrar por empresa
+        val usuarioComercialId = user.usuarioComercialId ?: run {
+            // Si no tiene, buscar por email
+            val usuarioComercialRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioComercialRepository::class.java)
+            usuarioComercialRepository.findByEmail(user.email.lowercase()).orElse(null)?.id
+        }
+        
+        // Filtrar productos por empresa
+        val productosQuery = if (usuarioComercialId != null) {
+            "SELECT id, nombre, precio_unitario FROM siga_saas.PRODUCTOS WHERE activo = true AND usuario_comercial_id = $usuarioComercialId ORDER BY nombre LIMIT 100"
+        } else {
             "SELECT id, nombre, precio_unitario FROM siga_saas.PRODUCTOS WHERE activo = true ORDER BY nombre LIMIT 100"
-        )
+        }
+        val productos = jdbcTemplate.queryForList(productosQuery)
         if (productos.isNotEmpty()) {
             context.add("\n=== PRODUCTOS DISPONIBLES ===")
             productos.forEach { producto ->
@@ -100,14 +111,23 @@ class OperationalAssistantService(
             context.add("No hay productos registrados aún")
         }
         
-        val stock = jdbcTemplate.queryForList(
+        // Filtrar stock por empresa
+        val stockQuery = if (usuarioComercialId != null) {
+            "SELECT p.nombre, s.cantidad, l.nombre as local FROM siga_saas.STOCK s " +
+            "JOIN siga_saas.PRODUCTOS p ON s.producto_id = p.id " +
+            "JOIN siga_saas.LOCALES l ON s.local_id = l.id " +
+            "WHERE p.activo = true AND p.usuario_comercial_id = $usuarioComercialId AND l.usuario_comercial_id = $usuarioComercialId " +
+            "ORDER BY p.nombre, l.nombre " +
+            "LIMIT 100"
+        } else {
             "SELECT p.nombre, s.cantidad, l.nombre as local FROM siga_saas.STOCK s " +
             "JOIN siga_saas.PRODUCTOS p ON s.producto_id = p.id " +
             "JOIN siga_saas.LOCALES l ON s.local_id = l.id " +
             "WHERE p.activo = true " +
             "ORDER BY p.nombre, l.nombre " +
             "LIMIT 100"
-        )
+        }
+        val stock = jdbcTemplate.queryForList(stockQuery)
         if (stock.isNotEmpty()) {
             context.add("\n=== STOCK ACTUAL ===")
             stock.forEach { item ->
@@ -119,14 +139,21 @@ class OperationalAssistantService(
             context.add("No hay stock registrado. Los productos existen pero no tienen stock asignado.")
         }
         
-        // Agregar información sobre productos sin stock
-        val productosSinStock = jdbcTemplate.queryForList(
+        // Agregar información sobre productos sin stock (filtrado por empresa)
+        val productosSinStockQuery = if (usuarioComercialId != null) {
+            "SELECT p.id, p.nombre FROM siga_saas.PRODUCTOS p " +
+            "WHERE p.activo = true AND p.usuario_comercial_id = $usuarioComercialId " +
+            "AND NOT EXISTS (SELECT 1 FROM siga_saas.STOCK s WHERE s.producto_id = p.id) " +
+            "ORDER BY p.nombre " +
+            "LIMIT 50"
+        } else {
             "SELECT p.id, p.nombre FROM siga_saas.PRODUCTOS p " +
             "WHERE p.activo = true " +
             "AND NOT EXISTS (SELECT 1 FROM siga_saas.STOCK s WHERE s.producto_id = p.id) " +
             "ORDER BY p.nombre " +
             "LIMIT 50"
-        )
+        }
+        val productosSinStock = jdbcTemplate.queryForList(productosSinStockQuery)
         if (productosSinStock.isNotEmpty()) {
             context.add("\n=== PRODUCTOS SIN STOCK (existen pero no tienen stock asignado) ===")
             productosSinStock.forEach { producto ->
@@ -264,11 +291,15 @@ class OperationalAssistantService(
         val categoriaId = (params["categoria_id"] as? Number)?.toInt() ?: (params["categoriaId"] as? Number)?.toInt()
         val descripcion = params["descripcion"] as? String
         
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
         val producto = Producto(
             nombre = nombre,
             descripcion = descripcion,
             categoriaId = categoriaId,
             precioUnitario = precio,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activo = true,
             fechaCreacion = Instant.now(),
             fechaActualizacion = Instant.now()
@@ -301,6 +332,12 @@ class OperationalAssistantService(
         
         val producto = productoRepository.findById(id).orElse(null)
             ?: return Result.success(AccionEjecutada(false, "UPDATE_PRODUCT", null, "Producto no encontrado"))
+        
+        // Verificar que el producto pertenece a la empresa del usuario
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId != null && producto.usuarioComercialId != usuarioComercialId) {
+            return Result.success(AccionEjecutada(false, "UPDATE_PRODUCT", null, "No tienes acceso a este producto"))
+        }
         
         val nombre = params["nombre"] as? String ?: producto.nombre
         val precioStr = params["precio"] as? String ?: params["precio_unitario"] as? String
@@ -335,10 +372,17 @@ class OperationalAssistantService(
             return Result.success(AccionEjecutada(false, "DELETE_PRODUCT", null, "No tienes permiso para eliminar productos"))
         }
         
+        // Obtener usuario_comercial_id para filtrar por empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
         val id = (params["id"] as? Number)?.toInt()
             ?: (params["nombre"] as? String)?.let { nombre ->
-                productoRepository.findByActivoTrue()
-                    .firstOrNull { it.nombre.equals(nombre, ignoreCase = true) }?.id
+                val productos = if (usuarioComercialId != null) {
+                    productoRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
+                } else {
+                    productoRepository.findByActivoTrue()
+                }
+                productos.firstOrNull { it.nombre.equals(nombre, ignoreCase = true) }?.id
             }
             ?: return Result.success(
                 AccionEjecutada(false, "DELETE_PRODUCT", null, "Se requiere el ID o nombre del producto")
@@ -346,6 +390,11 @@ class OperationalAssistantService(
         
         val producto = productoRepository.findById(id).orElse(null)
             ?: return Result.success(AccionEjecutada(false, "DELETE_PRODUCT", null, "Producto no encontrado"))
+        
+        // Verificar que el producto pertenece a la empresa del usuario
+        if (usuarioComercialId != null && producto.usuarioComercialId != usuarioComercialId) {
+            return Result.success(AccionEjecutada(false, "DELETE_PRODUCT", null, "No tienes acceso a este producto"))
+        }
         
         val productoEliminado = producto.copy(activo = false, fechaActualizacion = Instant.now())
         productoRepository.save(productoEliminado)
@@ -372,9 +421,16 @@ class OperationalAssistantService(
                 AccionEjecutada(false, "UPDATE_STOCK", null, "Se requiere la cantidad")
             )
         
-        // Buscar producto por nombre (búsqueda flexible)
+        // Obtener usuario_comercial_id para filtrar por empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
+        // Buscar producto por nombre (búsqueda flexible, filtrado por empresa)
         val producto = productoNombre?.let { nombreBuscar ->
-            val productos = productoRepository.findByActivoTrue()
+            val productos = if (usuarioComercialId != null) {
+                productoRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
+            } else {
+                productoRepository.findByActivoTrue()
+            }
             // Primero intentar coincidencia exacta (case-insensitive)
             productos.firstOrNull { it.nombre.equals(nombreBuscar, ignoreCase = true) }
                 // Si no encuentra, buscar que contenga el nombre
@@ -390,9 +446,13 @@ class OperationalAssistantService(
             )
         )
         
-        // Buscar local por nombre (búsqueda flexible)
+        // Buscar local por nombre (búsqueda flexible, filtrado por empresa)
         val local = localNombre?.let { nombreBuscar ->
-            val locales = localRepository.findByActivoTrue()
+            val locales = if (usuarioComercialId != null) {
+                localRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
+            } else {
+                localRepository.findByActivoTrue()
+            }
             // Primero intentar coincidencia exacta (case-insensitive)
             locales.firstOrNull { it.nombre.equals(nombreBuscar, ignoreCase = true) }
                 // Si no encuentra, buscar que contenga el nombre
@@ -449,10 +509,14 @@ class OperationalAssistantService(
             AccionEjecutada(false, "CREATE_LOCAL", null, "Se requiere el nombre del local")
         )
         
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
         val local = Local(
             nombre = nombre,
             direccion = params["direccion"] as? String,
             ciudad = params["ciudad"] as? String,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activo = true,
             fechaCreacion = Instant.now()
         )
@@ -478,7 +542,15 @@ class OperationalAssistantService(
             AccionEjecutada(false, "CREATE_CATEGORIA", null, "Se requiere el nombre de la categoría")
         )
         
-        if (categoriaRepository.existsByNombre(nombre)) {
+        // Obtener usuario_comercial_id para asignar empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        
+        // Verificar que no exista categoría con mismo nombre en la misma empresa
+        if (usuarioComercialId != null && categoriaRepository.existsByNombreAndUsuarioComercialId(nombre, usuarioComercialId)) {
+            return Result.success(
+                AccionEjecutada(false, "CREATE_CATEGORIA", null, "Ya existe una categoría con ese nombre")
+            )
+        } else if (usuarioComercialId == null && categoriaRepository.existsByNombre(nombre)) {
             return Result.success(
                 AccionEjecutada(false, "CREATE_CATEGORIA", null, "Ya existe una categoría con ese nombre")
             )
@@ -487,6 +559,7 @@ class OperationalAssistantService(
         val categoria = Categoria(
             nombre = nombre,
             descripcion = params["descripcion"] as? String,
+            usuarioComercialId = usuarioComercialId, // Asignar empresa
             activa = true,
             fechaCreacion = Instant.now()
         )

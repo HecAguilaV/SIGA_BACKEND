@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.security.core.Authentication
+import com.siga.backend.utils.SecurityUtils
 import org.springframework.web.bind.annotation.*
 import java.math.BigDecimal
 import java.time.Instant
@@ -59,8 +59,7 @@ class FacturasController(
     @PostMapping
     @Operation(summary = "Crear Factura", description = "Crea una nueva factura. Requiere autenticación.")
     fun crearFactura(
-        @RequestBody request: CrearFacturaRequest,
-        authentication: Authentication
+        @RequestBody request: CrearFacturaRequest
     ): ResponseEntity<Map<String, Any>> {
         try {
             logger.debug("Creando factura para usuario ${request.usuarioId}")
@@ -142,12 +141,16 @@ class FacturasController(
     
     @GetMapping
     @Operation(summary = "Listar Facturas", description = "Obtiene todas las facturas del usuario autenticado. Requiere autenticación.")
-    fun listarFacturas(authentication: Authentication): ResponseEntity<Map<String, Any>> {
+    fun listarFacturas(): ResponseEntity<Map<String, Any>> {
         try {
-            // Obtener ID del usuario desde el token (asumiendo que está en el authentication)
-            // Por ahora, necesitamos obtener el email y buscar el usuario
-            val email = authentication.name
-            val usuario = usuarioComercialRepository.findByEmail(email)
+            // Obtener email del usuario desde el token JWT
+            val email = SecurityUtils.getUserEmail()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf(
+                    "success" to false,
+                    "message" to "No autenticado"
+                ))
+            
+            val usuario = usuarioComercialRepository.findByEmail(email.lowercase())
                 .orElse(null)
             
             if (usuario == null) {
@@ -194,8 +197,7 @@ class FacturasController(
     @GetMapping("/{id}")
     @Operation(summary = "Obtener Factura por ID", description = "Obtiene una factura específica por ID. Requiere autenticación.")
     fun obtenerFacturaPorId(
-        @PathVariable id: Int,
-        authentication: Authentication
+        @PathVariable id: Int
     ): ResponseEntity<Map<String, Any>> {
         try {
             val factura = facturaService.obtenerFacturaPorId(id)
@@ -205,8 +207,13 @@ class FacturasController(
                 ))
             
             // Verificar que la factura pertenece al usuario autenticado
-            val email = authentication.name
-            val usuario = usuarioComercialRepository.findByEmail(email)
+            val email = SecurityUtils.getUserEmail()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf(
+                    "success" to false,
+                    "message" to "No autenticado"
+                ))
+            
+            val usuario = usuarioComercialRepository.findByEmail(email.lowercase())
                 .orElse(null)
             
             if (usuario == null || factura.usuarioId != usuario.id) {
@@ -250,8 +257,7 @@ class FacturasController(
     @GetMapping("/numero/{numero}")
     @Operation(summary = "Obtener Factura por Número", description = "Obtiene una factura específica por número. Requiere autenticación.")
     fun obtenerFacturaPorNumero(
-        @PathVariable numero: String,
-        authentication: Authentication
+        @PathVariable numero: String
     ): ResponseEntity<Map<String, Any>> {
         try {
             val factura = facturaService.obtenerFacturaPorNumero(numero)
@@ -261,8 +267,13 @@ class FacturasController(
                 ))
             
             // Verificar que la factura pertenece al usuario autenticado
-            val email = authentication.name
-            val usuario = usuarioComercialRepository.findByEmail(email)
+            val email = SecurityUtils.getUserEmail()
+                ?: return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(mapOf(
+                    "success" to false,
+                    "message" to "No autenticado"
+                ))
+            
+            val usuario = usuarioComercialRepository.findByEmail(email.lowercase())
                 .orElse(null)
             
             if (usuario == null || factura.usuarioId != usuario.id) {
