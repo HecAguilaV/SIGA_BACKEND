@@ -14,6 +14,24 @@
 
 ---
 
+## 🏢 SEPARACIÓN POR EMPRESA (NUEVO - 2025-01-XX)
+
+**✅ IMPLEMENTADO:** Separación completa de datos por empresa. Cada dueño tiene sus propios datos completamente aislados.
+
+- ✅ Usuarios operativos separados por empresa
+- ✅ Productos separados por empresa
+- ✅ Locales separados por empresa
+- ✅ Categorías separadas por empresa
+- ✅ Stock separado por empresa
+- ✅ Ventas separadas por empresa
+- ✅ Asistente IA filtra por empresa
+
+**Los frontends NO requieren cambios** - El filtrado es automático en el backend. Los endpoints funcionan igual, pero ahora solo retornan datos de la empresa del usuario autenticado.
+
+**Ver:** `docs/CAMBIOS_SEPARACION_EMPRESA.md` para detalles completos.
+
+---
+
 ## 📋 ¿QUÉ TIENE EL BACKEND?
 
 ### ✅ Endpoints Implementados y Funcionando
