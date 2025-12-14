@@ -109,11 +109,12 @@ object SecurityUtils {
             
             // Obtener email (siempre disponible en el token)
             val email = getUserEmail()
+            val userId = getUserId()
+            
             if (email != null) {
-                logger.debug("getUsuarioComercialId: buscando por email=$email")
+                logger.debug("getUsuarioComercialId: buscando por email=$email, userId=$userId")
                 
                 // Intentar obtener userId para buscar en usuario operativo
-                val userId = getUserId()
                 if (userId != null) {
                     val usuarioSaasRepository = ApplicationContextProvider.getBean(com.siga.backend.repository.UsuarioSaasRepository::class.java)
                     val usuario = usuarioSaasRepository.findById(userId).orElse(null)
