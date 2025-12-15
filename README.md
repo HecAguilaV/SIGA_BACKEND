@@ -2,11 +2,19 @@
 
 Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Mini ERP para PYMES chilenas.
 
-## Descripción
+## 🚀 Enlaces Rápidos
+
+- **API Backend:** `https://siga-backend-production.up.railway.app`
+- **Swagger UI:** `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
+- **Web Comercial:** `https://siga-webcomercial.vercel.app`
+- **WebApp Operativa:** `https://siga-webapp.vercel.app`
+- **App Móvil:** Disponible en Google Play Store
+
+## 📋 Descripción
 
 SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporciona servicios para la gestión de inventario, ventas, suscripciones y asistentes de inteligencia artificial conversacionales.
 
-## Tecnologías
+## 🛠️ Tecnologías
 
 - **Lenguaje**: Kotlin 1.9.22
 - **Framework**: Spring Boot 3.2.0
@@ -18,14 +26,28 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **Build**: Gradle 8.5
 - **Deployment**: Docker + Railway
 
-## Requisitos Previos
+## 📚 Documentación
+
+### Documentación Principal
+
+- **[Endpoints Completos por Equipo](./docs/ENDPOINTS_COMPLETOS_POR_EQUIPO.md)** - Referencia completa de todos los endpoints por frontend
+- **[Fuente de Verdad Backend](./docs/FUENTE_VERDAD_BACKEND.md)** - Documento maestro que define el estado actual del backend
+- **[Sincronización App Móvil ↔ WebApp](./docs/SINCRONIZACION_APPMOVIL_WEBAPP.md)** - Guía de sincronización entre aplicaciones
+- **[Plan de Acción Sincronización](./docs/PLAN_ACCION_SINCRONIZACION_PERFECTA.md)** - Plan detallado para sincronización perfecta
+
+### Documentación Interactiva
+
+- **Swagger UI**: `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
+- **OpenAPI Spec**: `https://siga-backend-production.up.railway.app/api-docs`
+
+## ⚙️ Requisitos Previos
 
 - **JDK 21** o superior
 - **Gradle 8.5** (incluido en el proyecto via `gradlew`)
 - **PostgreSQL** (local o remoto)
 - **Git**
 
-## Instalación
+## 🚀 Instalación
 
 ### 1. Clonar el Repositorio
 
@@ -36,23 +58,15 @@ cd SIGA_Backend
 
 ### 2. Configurar Variables de Entorno
 
-Crear archivo `src/main/resources/application.yml` o configurar variables de entorno del sistema:
+Crear archivo `.env` o configurar variables de entorno:
 
-```yaml
-spring:
-  datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/siga_db}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:password}
-    
-jwt:
-  secret: ${JWT_SECRET:tu_secret_key_super_seguro}
-  
-gemini:
-  api-key: ${GEMINI_API_KEY:tu_api_key_gemini}
-
-cors:
-  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
+```bash
+DATABASE_URL=jdbc:postgresql://localhost:5432/siga_db
+DB_USER=postgres
+DB_PASSWORD=password
+JWT_SECRET=tu_secret_key_super_seguro
+GEMINI_API_KEY=tu_api_key_gemini
+ALLOWED_ORIGINS=https://siga-webcomercial.vercel.app,https://siga-webapp.vercel.app
 ```
 
 **Variables de entorno requeridas**:
@@ -65,42 +79,14 @@ cors:
 
 ### 3. Configurar Base de Datos
 
-La base de datos está alojada en **Always Data** (PostgreSQL remoto). La conexión se configura mediante variables de entorno:
-
-```yaml
-DATABASE_URL=jdbc:postgresql://postgresql-hector.alwaysdata.net:5432/hector_siga_db
-DB_USER=hector
-DB_PASSWORD=tu_password_alwaysdata
-```
-
-**Importante**: 
-- Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación
-- Las tablas dentro de cada esquema deben crearse manualmente mediante scripts SQL
-- Si prefieres usar PostgreSQL local para desarrollo, cambia `DATABASE_URL` a `jdbc:postgresql://localhost:5432/siga_db`
-
-### 4. Crear Tablas
-
 Las tablas deben crearse manualmente ejecutando los scripts SQL que se encuentran en:
 ```
 src/main/resources/db/migrations/
 ```
 
-**Scripts disponibles** (ejecutar en orden):
-1. `001_create_schemas.sql` - Crea los esquemas (ya se crean automáticamente, pero por si acaso)
-2. `002_create_siga_saas_tables.sql` - Crea tablas del sistema operativo
-3. `003_create_siga_comercial_tables.sql` - Crea tablas del portal comercial
-4. `004_insert_initial_data.sql` - Inserta datos iniciales (planes, categorías, etc.)
-
-**Cómo ejecutar**:
-- Desde Always Data: Panel → Bases de datos → PostgreSQL → phpPgAdmin
-- Desde terminal: `psql -h postgresql-hector.alwaysdata.net -U hector -d hector_siga_db`
-- Desde IntelliJ IDEA: Database tool window → Ejecutar cada script
-
 **Ver instrucciones detalladas**: `src/main/resources/db/migrations/README.md`
 
-**Nota**: Los esquemas (`siga_saas` y `siga_comercial`) se crean automáticamente al iniciar la aplicación Spring Boot mediante `DatabaseInitializer`, pero las tablas deben crearse manualmente con estos scripts.
-
-## Ejecución
+## ▶️ Ejecución
 
 ### Desarrollo Local
 
@@ -125,44 +111,14 @@ curl http://localhost:8080/health
 # {"status":"healthy","database":"connected","timestamp":"..."}
 ```
 
-## Documentación API
-
-### Swagger UI
-
-Acceder a la interfaz interactiva de Swagger:
-
-**Ruta principal (recomendada)**:
-```
-http://localhost:8080/swagger-ui/index.html
-```
-
-**Rutas alternativas** (requieren reiniciar el servidor después de los cambios):
-```
-http://localhost:8080/swagger-ui.html
-http://localhost:8080/swagger-ui/
-```
-
-**Nota**: En la interfaz de Swagger UI puedes:
-- Ver todos los endpoints disponibles
-- Probar los endpoints directamente desde el navegador
-- Ver la documentación de cada endpoint
-- Autenticarte con JWT usando el botón "Authorize"
-
-### API Docs (JSON)
-
-Documentación OpenAPI en formato JSON:
-```
-http://localhost:8080/api-docs
-```
-
-
-## Endpoints Principales
+## 📡 Endpoints Principales
 
 ### Autenticación
 
-- `POST /api/auth/register` - Registrar nuevo usuario
 - `POST /api/auth/login` - Iniciar sesión
+- `POST /api/auth/register` - Registrar nuevo usuario
 - `POST /api/auth/refresh` - Renovar token de acceso
+- `GET /api/auth/me` - Obtener perfil actual
 
 ### Productos (Requiere autenticación + suscripción activa)
 
@@ -175,7 +131,13 @@ http://localhost:8080/api-docs
 ### Stock (Requiere autenticación + suscripción activa)
 
 - `GET /api/saas/stock` - Listar stock
-- `POST /api/saas/stock` - Actualizar stock
+- `POST /api/saas/stock` - Crear o actualizar stock
+
+### Locales (Requiere autenticación + suscripción activa)
+
+- `GET /api/saas/locales` - Listar locales
+- `POST /api/saas/locales` - Crear local (solo ADMIN)
+- `PUT /api/saas/locales/{id}` - Actualizar local (solo ADMIN)
 
 ### Ventas (Requiere autenticación + suscripción activa)
 
@@ -201,63 +163,41 @@ http://localhost:8080/api-docs
 
 - `GET /health` - Estado del servidor y base de datos
 
-## Autenticación
+## 🔐 Autenticación
 
 ### Obtener Token
 
 ```bash
 # Login
-curl -X POST http://localhost:8080/api/auth/login \
+curl -X POST https://siga-backend-production.up.railway.app/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "usuario@example.com",
     "password": "password123"
   }'
-
-# Respuesta:
-# {
-#   "success": true,
-#   "accessToken": "eyJhbGc...",
-#   "refreshToken": "eyJhbGc...",
-#   "user": { ... }
-# }
 ```
 
 ### Usar Token
 
 ```bash
 # Incluir en header Authorization
-curl -X GET http://localhost:8080/api/saas/productos \
+curl -X GET https://siga-backend-production.up.railway.app/api/saas/productos \
   -H "Authorization: Bearer eyJhbGc..."
 ```
 
-## Testing
+## 🧪 Testing
 
-### Ejecutar Todos los Tests
+### Ejecutar Tests
 
 ```bash
+# Todos los tests
 ./gradlew test
+
+# Sin tests (más rápido para build)
+./gradlew build -x test
 ```
 
-### Ejecutar Test Específico
-
-```bash
-# Tests de servicios
-./gradlew test --tests "com.siga.backend.service.JWTServiceTest"
-./gradlew test --tests "com.siga.backend.service.PasswordServiceTest"
-
-# Tests de controllers
-./gradlew test --tests "com.siga.backend.controller.AuthControllerTest"
-./gradlew test --tests "com.siga.backend.controller.ProductosControllerTest"
-```
-
-### Cobertura de Tests
-
-- **21 tests pasando** (81% de cobertura)
-- 13 tests de servicios (JWT, Password)
-- 8 tests de controllers (Auth, Productos)
-
-## Docker
+## 🐳 Docker
 
 ### Construir Imagen
 
@@ -279,7 +219,7 @@ docker run -d \
   siga-backend
 ```
 
-## Despliegue en Railway
+## 🚂 Despliegue en Railway
 
 ### Pasos Rápidos
 
@@ -304,7 +244,7 @@ docker run -d \
 
 Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 
-## Comandos
+## 📝 Comandos Útiles
 
 ```bash
 # Compilar proyecto
@@ -319,21 +259,40 @@ Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 # Limpiar build
 ./gradlew clean
 
-# Ver dependencias
-./gradlew dependencies
-
 # Construir sin tests (más rápido)
 ./gradlew build -x test
 ```
 
-## Licencia
+## 🏗️ Arquitectura
+
+### Separación por Empresa
+
+El backend implementa separación completa de datos por empresa. Cada usuario comercial tiene sus propios datos completamente aislados:
+
+- ✅ Usuarios operativos separados por empresa
+- ✅ Productos separados por empresa
+- ✅ Locales separados por empresa
+- ✅ Categorías separadas por empresa
+- ✅ Stock separado por empresa
+- ✅ Ventas separadas por empresa
+
+El filtrado es automático en el backend basado en el token JWT del usuario autenticado.
+
+### Multi-tenancy
+
+- Cada empresa tiene su propio `usuario_comercial_id`
+- Todos los datos operativos están asociados a una empresa
+- Los endpoints filtran automáticamente por empresa del usuario
+
+## 📄 Licencia
 
 Copyright (c) 2025 Héctor Aguila - All Rights Reserved
 
 Este software es propiedad privada. No se permite su uso comercial sin autorización.
 
 ---
-## Autor
 
->**Héctor Aguila**
->>Un Soñasor con Poca RAM 
+## 👤 Autor
+
+> **Héctor Aguila**  
+> Un Soñasor con Poca RAM

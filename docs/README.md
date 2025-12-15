@@ -1,70 +1,82 @@
 # Documentación SIGA Backend
 
-Este directorio contiene toda la documentación técnica del backend de SIGA.
+Este directorio contiene la documentación técnica esencial del backend de SIGA.
 
-## Documentos Disponibles
+## 📚 Documentos Principales
+
+### Documentación de Referencia
+
+1. **[Endpoints Completos por Equipo](./ENDPOINTS_COMPLETOS_POR_EQUIPO.md)**
+   - Referencia completa de todos los endpoints organizados por frontend
+   - Especificaciones de request/response
+   - Problemas conocidos y soluciones
+
+2. **[Fuente de Verdad Backend](./FUENTE_VERDAD_BACKEND.md)**
+   - Documento maestro que define el estado actual del backend
+   - Separación por empresa (multi-tenancy)
+   - Arquitectura y decisiones técnicas
+
+3. **[Sincronización App Móvil ↔ WebApp](./SINCRONIZACION_APPMOVIL_WEBAPP.md)**
+   - Guía de sincronización entre aplicaciones operativas
+   - Endpoints compartidos
+   - Principios de sincronización automática
+
+4. **[Plan de Acción Sincronización](./PLAN_ACCION_SINCRONIZACION_PERFECTA.md)**
+   - Plan detallado para lograr sincronización perfecta
+   - Fases de implementación
+   - Checklist y validaciones
 
 ### Documentación Técnica
 
-1. **API_DOCUMENTACION.md**
+5. **[API Documentación](./API_DOCUMENTACION.md)**
    - Documentación completa de todos los endpoints
-   - Especificaciones de request/response
    - Códigos de estado HTTP
    - Validaciones y reglas de negocio
 
-2. **APIS_INTEGRACION.md**
+6. **[APIs Integración](./APIS_INTEGRACION.md)**
    - Guía de integración para frontends
    - Ejemplos de código (JavaScript, TypeScript, Kotlin)
    - Clientes API reutilizables
    - Mejores prácticas de integración
 
-3. **COBERTURA_TESTING.md**
-   - Resumen de la suite de tests
-   - Estadísticas de cobertura
-   - Estrategia de testing
-   - Guía de ejecución
+7. **[Esquemas Database](./ESQUEMAS_DATABASE.md)**
+   - Estructura de la base de datos
+   - Relaciones entre tablas
+   - Esquemas y migraciones
 
-### Documentación de APIs Frontend
-
-4. **API_FRONTEND_APP.md**
-   - Endpoints específicos para la app móvil Android
-
-5. **API_FRONTEND_APPWEB.md**
-   - Endpoints específicos para la aplicación web operativa
-
-6. **API_FRONTEND_COMERCIAL.md**
-   - Endpoints específicos para el portal comercial
-
-## Documentación Interactiva
+## 🔗 Documentación Interactiva
 
 ### Swagger UI
 Documentación interactiva disponible en:
-- Producción: `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
-- Local: `http://localhost:8080/swagger-ui/index.html`
+- **Producción**: `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
+- **Local**: `http://localhost:8080/swagger-ui/index.html`
 
 ### OpenAPI Spec
 Especificación OpenAPI disponible en:
-- JSON: `/api-docs`
-- YAML: `/openapi.yaml`
+- **JSON**: `https://siga-backend-production.up.railway.app/api-docs`
+- **YAML**: `/openapi.yaml`
 
-## Estructura de Documentación
+## 📖 Uso Rápido
+
+- **Para desarrolladores frontend**: Comenzar con `ENDPOINTS_COMPLETOS_POR_EQUIPO.md`
+- **Para entender el sistema**: Leer `FUENTE_VERDAD_BACKEND.md`
+- **Para integración**: Usar `APIS_INTEGRACION.md`
+- **Para referencia de API**: Usar `API_DOCUMENTACION.md` o Swagger UI
+
+## 🏗️ Estructura
 
 ```
 docs/
 ├── README.md (este archivo)
+├── ENDPOINTS_COMPLETOS_POR_EQUIPO.md
+├── FUENTE_VERDAD_BACKEND.md
+├── SINCRONIZACION_APPMOVIL_WEBAPP.md
+├── PLAN_ACCION_SINCRONIZACION_PERFECTA.md
 ├── API_DOCUMENTACION.md
 ├── APIS_INTEGRACION.md
-├── COBERTURA_TESTING.md
-├── API_FRONTEND_APP.md
-├── API_FRONTEND_APPWEB.md
-└── API_FRONTEND_COMERCIAL.md
+└── ESQUEMAS_DATABASE.md
 ```
 
-**Nota**: Documentación de desarrollo interno (instrucciones para equipos, guías de migración, análisis de consistencia, validaciones internas) se encuentra en el directorio `CHALLA/` (excluido del repositorio).
+---
 
-## Uso Rápido
-
-- **Para desarrolladores frontend**: Comenzar con `APIS_INTEGRACION.md`
-- **Para testing**: Ver `COBERTURA_TESTING.md`
-- **Para referencia de API**: Usar `API_DOCUMENTACION.md` o Swagger UI
-
+**Nota**: Documentación de desarrollo interno y verificaciones temporales se encuentra en el directorio `CHALLA/` (excluido del repositorio público).
