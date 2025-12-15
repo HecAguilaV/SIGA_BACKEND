@@ -2,7 +2,7 @@
 
 Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Mini ERP para PYMES chilenas.
 
-## 🚀 Enlaces Rápidos
+## Enlaces Rápidos
 
 - **API Backend:** `https://siga-backend-production.up.railway.app`
 - **Swagger UI:** `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
@@ -10,11 +10,11 @@ Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Min
 - **WebApp Operativa:** `https://siga-webapp.vercel.app`
 - **App Móvil:** Disponible en Google Play Store
 
-## 📋 Descripción
+## Descripción
 
 SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporciona servicios para la gestión de inventario, ventas, suscripciones y asistentes de inteligencia artificial conversacionales.
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 - **Lenguaje**: Kotlin 1.9.22
 - **Framework**: Spring Boot 3.2.0
@@ -26,11 +26,11 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **Build**: Gradle 8.5
 - **Deployment**: Docker + Railway
 
-## 📚 Documentación
+## Documentación
 
 ### Documentación Principal
 
-- **[Endpoints Completos por Equipo](./docs/ENDPOINTS_COMPLETOS_POR_EQUIPO.md)** - Referencia completa de todos los endpoints por frontend
+- **[API Endpoints](./docs/API_ENDPOINTS.md)** - Documentación completa de todos los endpoints del backend
 - **[Fuente de Verdad Backend](./docs/FUENTE_VERDAD_BACKEND.md)** - Documento maestro que define el estado actual del backend
 - **[Sincronización App Móvil ↔ WebApp](./docs/SINCRONIZACION_APPMOVIL_WEBAPP.md)** - Guía de sincronización entre aplicaciones
 - **[Plan de Acción Sincronización](./docs/PLAN_ACCION_SINCRONIZACION_PERFECTA.md)** - Plan detallado para sincronización perfecta
@@ -40,14 +40,14 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 - **Swagger UI**: `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
 - **OpenAPI Spec**: `https://siga-backend-production.up.railway.app/api-docs`
 
-## ⚙️ Requisitos Previos
+## Requisitos Previos
 
 - **JDK 21** o superior
 - **Gradle 8.5** (incluido en el proyecto via `gradlew`)
 - **PostgreSQL** (local o remoto)
 - **Git**
 
-## 🚀 Instalación
+## Instalación
 
 ### 1. Clonar el Repositorio
 
@@ -86,7 +86,7 @@ src/main/resources/db/migrations/
 
 **Ver instrucciones detalladas**: `src/main/resources/db/migrations/README.md`
 
-## ▶️ Ejecución
+## Ejecución
 
 ### Desarrollo Local
 
@@ -111,7 +111,7 @@ curl http://localhost:8080/health
 # {"status":"healthy","database":"connected","timestamp":"..."}
 ```
 
-## 📡 Endpoints Principales
+## Endpoints Principales
 
 ### Autenticación
 
@@ -163,7 +163,9 @@ curl http://localhost:8080/health
 
 - `GET /health` - Estado del servidor y base de datos
 
-## 🔐 Autenticación
+Para documentación completa de todos los endpoints, ver [API_ENDPOINTS.md](./docs/API_ENDPOINTS.md)
+
+## Autenticación
 
 ### Obtener Token
 
@@ -185,7 +187,7 @@ curl -X GET https://siga-backend-production.up.railway.app/api/saas/productos \
   -H "Authorization: Bearer eyJhbGc..."
 ```
 
-## 🧪 Testing
+## Testing
 
 ### Ejecutar Tests
 
@@ -197,7 +199,7 @@ curl -X GET https://siga-backend-production.up.railway.app/api/saas/productos \
 ./gradlew build -x test
 ```
 
-## 🐳 Docker
+## Docker
 
 ### Construir Imagen
 
@@ -219,7 +221,7 @@ docker run -d \
   siga-backend
 ```
 
-## 🚂 Despliegue en Railway
+## Despliegue en Railway
 
 ### Pasos Rápidos
 
@@ -244,7 +246,7 @@ docker run -d \
 
 Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 
-## 📝 Comandos Útiles
+## Comandos Útiles
 
 ```bash
 # Compilar proyecto
@@ -263,18 +265,18 @@ Ver documentación completa en [RAILWAY.md](./RAILWAY.md)
 ./gradlew build -x test
 ```
 
-## 🏗️ Arquitectura
+## Arquitectura
 
 ### Separación por Empresa
 
 El backend implementa separación completa de datos por empresa. Cada usuario comercial tiene sus propios datos completamente aislados:
 
-- ✅ Usuarios operativos separados por empresa
-- ✅ Productos separados por empresa
-- ✅ Locales separados por empresa
-- ✅ Categorías separadas por empresa
-- ✅ Stock separado por empresa
-- ✅ Ventas separadas por empresa
+- Usuarios operativos separados por empresa
+- Productos separados por empresa
+- Locales separados por empresa
+- Categorías separadas por empresa
+- Stock separado por empresa
+- Ventas separadas por empresa
 
 El filtrado es automático en el backend basado en el token JWT del usuario autenticado.
 
@@ -284,7 +286,7 @@ El filtrado es automático en el backend basado en el token JWT del usuario aute
 - Todos los datos operativos están asociados a una empresa
 - Los endpoints filtran automáticamente por empresa del usuario
 
-## 📄 Licencia
+## Licencia
 
 Copyright (c) 2025 Héctor Aguila - All Rights Reserved
 
@@ -292,7 +294,7 @@ Este software es propiedad privada. No se permite su uso comercial sin autorizac
 
 ---
 
-## 👤 Autor
+## Autor
 
 > **Héctor Aguila**  
 > Un Soñasor con Poca RAM
