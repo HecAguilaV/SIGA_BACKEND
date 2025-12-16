@@ -1,0 +1,215 @@
+[33mcommit ca3e3f152865c356285097be2d216d64cdbad639[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 11:49:47 2025 -0300
+
+    fix: permisos transaccionales y debug
+
+[33mcommit dc6976fc593dad45465d7b4c4198307a270fd924[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 11:30:50 2025 -0300
+
+    fix: usar query explicita para verificar permisos por rol
+
+[33mcommit 9b705a9080a3001aec6b22744e60fc2cb3ab1bec[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 10:13:12 2025 -0300
+
+    chore: agregar logs de debug en PermisosService
+
+[33mcommit 63ef5d452cc3e9e15dae798a8811e75e118d29a0[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 09:32:28 2025 -0300
+
+    fix: correccion final permisos stock operador y duplicados
+
+[33mcommit 02d69444fd14bb66d9d2b82f2f62d26b63472d92[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 09:16:16 2025 -0300
+
+    fix: corregir declaraciones duplicadas y errores de permisos de operador
+
+[33mcommit 18ca357bb872c0e13365228900778ec9b18669ec[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 09:03:03 2025 -0300
+
+    fix: asignar usuarios a empresa
+
+[33mcommit aab9ca41afeea283ab965ae567a40cb2f8b4f8a3[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 08:26:15 2025 -0300
+
+    fix(build): remove duplicate variables and undefined references
+
+[33mcommit f7d56cb7f1f2ab7a63c6a611095346a934ed627f[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 08:05:07 2025 -0300
+
+    fix(subscription): validar suscripcion por Empresa (usuarioComercialId) en lugar de Email de operador
+
+[33mcommit 306c7d699833d21b42defca3d9dd70affe752bea[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 07:43:26 2025 -0300
+
+    feat(security): enforce VER permissions for Locales and Categorias
+
+[33mcommit 8116b3c418b16acf05067bca02b5fc495b7d4e15[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 07:28:47 2025 -0300
+
+    fix(auth): agregar import faltante de PermisosService
+
+[33mcommit 04620a9023dc0ff8b35ddc353755d71062099b7f[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 07:18:54 2025 -0300
+
+    Se activa la seguridad granular y envia los permisos al login
+
+[33mcommit 0990434d3535326c8d0ff40761ef6f446c1e7d5d[m
+Author: HecAguilaV <he.aguila@duocuc.cl>
+Date:   Tue Dec 16 03:15:23 2025 -0300
+
+    fix: Correcion de ffuncion faltante
+
+[33mcommit 6f63b8958cace4fe3ea31a3a1de688a7ff083d91[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Mon Dec 15 23:57:23 2025 -0300
+
+    docs: Consolidación de la documentación del Ecosistema
+
+[33mcommit 643e2a845019c7cf4c74128b1ac420f04517c5e6[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Mon Dec 15 21:30:20 2025 -0300
+
+    docs: consolidar documentación del backend
+
+[33mcommit ca97bc9420c8a7d1d2331e825cb6aed119c99de9[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Mon Dec 15 19:07:59 2025 -0300
+
+    docs: consolidar endpoints en un solo documento y actualizar README
+    
+    - Creado API_ENDPOINTS.md: documento único y completo con todos los endpoints
+    - Eliminados documentos redundantes:
+      - ENDPOINTS_COMPLETOS_POR_EQUIPO.md
+      - API_DOCUMENTACION.md
+      - APIS_INTEGRACION.md
+    - README.md: eliminados todos los emojis/iconos
+    - docs/README.md: actualizado para referenciar solo API_ENDPOINTS.md
+    - Documentación ahora centralizada y fácil de encontrar
+
+[33mcommit 19b09806cfab8a028d140a0b2185a00a83bd0927[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Mon Dec 15 19:05:19 2025 -0300
+
+    chore: limpiar scripts de migración - mantener solo esenciales
+    
+    - Eliminados 7 scripts temporales/de prueba/limpieza:
+      - 000_INICIALIZACION_COMPLETA.sql (resumen, no ejecutable)
+      - 009_insert_usuario_prueba.sql (datos de prueba)
+      - 011_limpiar_datos_prueba.sql (limpieza temporal)
+      - 015_asignar_empresas_datos_existentes.sql (migración ya ejecutada)
+      - 016_limpiar_datos_operativos.sql (limpieza temporal)
+      - 017_limpiar_todo_excepto_planes.sql (limpieza temporal)
+      - VERIFICACION_TABLAS.sql (verificación, no esencial)
+    
+    - Mantenidos 12 scripts esenciales para crear BD desde cero:
+      - 001-004: Creación de esquemas, tablas y datos iniciales
+      - 005-007: Actualizaciones de planes y facturas
+      - 008: Sistema de permisos (CRÍTICO)
+      - 010: Fix facturas
+      - 012-014: Separación por empresa
+    
+    - Actualizado README.md con orden correcto de ejecución
+    - Reducido de 19 a 12 scripts (solo esenciales)
+
+[33mcommit 3baf493513694e865fb1fed46477c39cb76f5ee9[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Mon Dec 15 19:03:01 2025 -0300
+
+    chore: limpieza masiva del repositorio
+    
+    - Eliminados ~40 archivos obsoletos y temporales
+    - CHALLA: Mantenidos solo documentos esenciales de verificación
+    - docs/: Reducido de ~30 a 8 documentos esenciales
+    - README.md: Actualizado con nuevos links (webcomercial y webapp)
+    - docs/README.md: Reestructurado y actualizado
+    
+    Archivos mantenidos en CHALLA:
+    - VERIFICACION_ENDPOINTS.md (WebComercial)
+    - VERIFICACION_ENDPOINTS_WEBAPP.md (WebApp)
+    - ANALISIS_ENDPOINTS_Y_SINCRONIZACION.md (App Móvil)
+    - ECOSISTEMA/ (especificaciones técnicas)
+    
+    Documentos mantenidos en docs/:
+    - ENDPOINTS_COMPLETOS_POR_EQUIPO.md
+    - FUENTE_VERDAD_BACKEND.md
+    - SINCRONIZACION_APPMOVIL_WEBAPP.md
+    - PLAN_ACCION_SINCRONIZACION_PERFECTA.md
+    - API_DOCUMENTACION.md
+    - APIS_INTEGRACION.md
+    - ESQUEMAS_DATABASE.md
+    - README.md
+    
+    Links actualizados:
+    - WebComercial: https://siga-webcomercial.vercel.app
+    - WebApp: https://siga-webapp.vercel.app
+
+[33mcommit b22ebf0dd355066ff36bd30be20bd646ce3ac23d[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Sun Dec 14 10:53:58 2025 -0300
+
+    docs: análisis de tests fallidos
+    
+    - 9 tests fallando por configuración desactualizada
+    - Tests no críticos para despliegue (código funciona en producción)
+    - Documentado análisis y recomendaciones
+
+[33mcommit 2d40a7261d99a8b40b5ddf3a6114e96fa5d2c1b6[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Sun Dec 14 10:49:47 2025 -0300
+
+    fix: corregir error de compilación en SuscripcionesController
+    
+    - Error: Type mismatch en fechaFinTrial (String? vs Any)
+    - Solución: Usar mutableMapOf para manejar valores nullable correctamente
+    - Build ahora compila exitosamente
+    - Tests fallan pero no afectan compilación
+
+[33mcommit 10b7072b77a3560ed6141ec88fc2edb136530fcf[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Sun Dec 14 10:36:20 2025 -0300
+
+    docs: resumen de limpieza de base de datos completada
+    
+    - Documentado resultados de la limpieza
+    - Próximos pasos para empezar desde cero
+    - Verificaciones realizadas
+    - Base de datos lista para nuevo inicio
+
+[33mcommit 5ddb1527541b55fb793ad0b19c82bea64c20409d[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Sun Dec 14 10:36:01 2025 -0300
+
+    fix: ejecutar limpieza completa de base de datos
+    
+    - Ejecutado script 017_limpiar_todo_excepto_planes.sql
+    - Eliminados todos los datos operativos y comerciales
+    - Mantenidos solo los planes (2 planes encontrados)
+    - Corregido script para eliminar USUARIOS_PERMISOS antes de USUARIOS
+    - Creado script Python para ejecutar limpieza
+    - Base de datos lista para empezar desde cero
+
+[33mcommit 7726345b27339b730feed68e0a7d1d06e110ed26[m
+Author: Héctor Aguila <he.aguila@duocuc.cl>
+Date:   Sun Dec 14 10:29:10 2025 -0300
+
+    fix: mejorar endpoint de suscripciones y crear script de limpieza completa
+    
+    - Agregar información de estado de suscripción (tieneSuscripcionActiva, tieneTrialActivo)
+    - Crear script 017_limpiar_todo_excepto_planes.sql para limpiar todo excepto planes
+    - Documentar problemas reportados y soluciones
+    - Backend retorna rol correctamente en login
+    - Precios y stock se retornan correctamente
+
+[33mcommit ecae255949cb16533ad8182b172e60cbdecd9c11[m
+Author: Héctor Aguila <he.aguila@
