@@ -42,7 +42,8 @@ class PermisosService(
         }
         
         // Verificar si el permiso está en el rol base
-        val tienePorRol = rolesPermisosRepository.existsById_RolAndId_PermisoId(
+        // Usar la query explícita para evitar problemas de convención de nombres JPA con claves compuestas
+        val tienePorRol = rolesPermisosRepository.existsByRolAndPermisoId(
             usuario.rol.name,
             permiso.id
         )
