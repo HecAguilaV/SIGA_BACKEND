@@ -109,6 +109,9 @@ class SecurityConfig(
                         "/openapi.yaml",
                         "/openapi.yml"
                     ).permitAll()
+                    .requestMatchers(
+                        "/api/saas/debug/**"
+                    ).permitAll()
                     // Endpoints administrativos requieren autenticación
                     .requestMatchers("/api/admin/**").authenticated()
                     // Todos los demás requieren autenticación
