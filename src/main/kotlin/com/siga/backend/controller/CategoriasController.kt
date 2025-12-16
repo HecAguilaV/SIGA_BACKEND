@@ -57,6 +57,11 @@ class CategoriasController(
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                     .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
             }
+
+            if (!SecurityUtils.puedeVerCategorias()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes permiso para ver categorías"))
+            }
             
             logger.debug("Listando categorías para usuario: $email")
             // Filtrar categorías por empresa

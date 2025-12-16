@@ -76,10 +76,12 @@ object SecurityUtils {
     fun puedeCrearLocales(): Boolean = tienePermiso("LOCALES_CREAR")
     fun puedeActualizarLocales(): Boolean = tienePermiso("LOCALES_ACTUALIZAR")
     fun puedeEliminarLocales(): Boolean = tienePermiso("LOCALES_ELIMINAR")
+    fun puedeVerLocales(): Boolean = tienePermiso("LOCALES_VER")
     
     fun puedeCrearCategorias(): Boolean = tienePermiso("CATEGORIAS_CREAR")
     fun puedeActualizarCategorias(): Boolean = tienePermiso("CATEGORIAS_ACTUALIZAR")
     fun puedeEliminarCategorias(): Boolean = tienePermiso("CATEGORIAS_ELIMINAR")
+    fun puedeVerCategorias(): Boolean = tienePermiso("CATEGORIAS_VER")
     
     fun puedeCrearUsuarios(): Boolean = tienePermiso("USUARIOS_CREAR")
     fun puedeAsignarPermisos(): Boolean = tienePermiso("USUARIOS_PERMISOS")

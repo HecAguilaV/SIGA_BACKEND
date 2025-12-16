@@ -59,6 +59,11 @@ class LocalesController(
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                     .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
             }
+
+            if (!SecurityUtils.puedeVerLocales()) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(mapOf("success" to false, "message" to "No tienes permiso para ver locales"))
+            }
             
             logger.debug("Listando locales para usuario: $email")
             // Filtrar locales por empresa
