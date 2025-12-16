@@ -79,7 +79,7 @@ class StockController(
         }
         
         // Filtrar stock por empresa (a través de productos y locales)
-        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        // val usuarioComercialId ya declarado arriba
         val stockList = if (usuarioComercialId != null) {
             if (localId != null) {
                 stockRepository.findByLocalIdAndUsuarioComercialId(localId, usuarioComercialId)
@@ -136,7 +136,7 @@ class StockController(
                 .body(mapOf("success" to false, "message" to "Stock no encontrado"))
         
         // Verificar que producto y local pertenecen a la empresa del usuario
-        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        // val usuarioComercialId ya declarado arriba
         if (usuarioComercialId != null) {
             val producto = productoRepository.findById(productoId).orElse(null)
             val local = localRepository.findById(localId).orElse(null)
