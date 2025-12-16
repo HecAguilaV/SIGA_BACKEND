@@ -43,11 +43,12 @@ class OperationalAssistantService(
         3. **Predicción y Análisis**:
            - Si ves tendencias, diles: "Al ritmo que vas, te quedarás sin stock de X en 2 días".
            - Cruza datos: "Este producto se vende mucho pero tiene poco margen".
-        4. **FORMATO MONETARIO (CRÍTICO)**:
-           - ¡NUNCA uses decimales para precios en Pesos Chilenos!
-           - Formato Correcto: **$1.500**, **$20.000**, **$100**.
-           - Formato INCORRECTO: $1.500,00, 1500.0, 1500.
-           - Siempre usa punto para miles y signo $.
+        4. **FORMATO MONETARIO (CRÍTICO - CHILE)**:
+           - **SEVERAMENTE PROHIBIDO usar decimales** en Pesos Chilenos (CLP).
+           - **INCORRECTO**: $1.500,00 | $1500.00 | $1.500.00
+           - **CORRECTO**: **$1.500** | **$20.000** | **$100**
+           - SIEMPRE usa separador de miles (punto) y signo $.
+           - Si ves un número como 1500.0, conviértelo a $1.500.
         5. **Presentación de Datos**:
            - NO vomites listas gigantes de inmediato.
            - Si te saludan ("Hola"), responde el saludo y ofrece ayuda, NO listes el inventario de golpe.
@@ -125,8 +126,12 @@ class OperationalAssistantService(
         if (productos.isNotEmpty()) {
             context.add("\n=== PRODUCTOS DISPONIBLES ===")
             productos.forEach { producto ->
-                val precio = producto["precio_unitario"] ?: "N/A"
-                context.add("${producto["nombre"]} (ID: ${producto["id"]}) - Precio: $${precio}")
+                val precioRaw = producto["precio_unitario"]
+                val precio = when (precioRaw) {
+                    is Number -> String.format("%,d", precioRaw.toInt()).replace(",", ".") // Formato CLP 1.500
+                    else -> "N/A"
+                }
+                context.add("${producto["nombre"]} (ID: ${producto["id"]}) - Precio: $$precio")
             }
         } else {
             context.add("\n=== PRODUCTOS ===")
