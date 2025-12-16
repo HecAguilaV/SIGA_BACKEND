@@ -63,9 +63,7 @@ class CategoriasController(
                     .body(mapOf("success" to false, "message" to "No tienes permiso para ver categorías"))
             }
             
-            logger.debug("Listando categorías para usuario: $email")
             // Filtrar categorías por empresa
-            val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
             val categorias = if (usuarioComercialId != null) {
                 categoriaRepository.findByActivaTrueAndUsuarioComercialId(usuarioComercialId)
             } else {

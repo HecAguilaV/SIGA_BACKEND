@@ -65,9 +65,7 @@ class LocalesController(
                     .body(mapOf("success" to false, "message" to "No tienes permiso para ver locales"))
             }
             
-            logger.debug("Listando locales para usuario: $email")
             // Filtrar locales por empresa
-            val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
             val locales = if (usuarioComercialId != null) {
                 localRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
             } else {

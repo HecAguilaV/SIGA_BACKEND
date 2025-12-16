@@ -63,7 +63,6 @@ class ProductosController(
         }
         
         // Filtrar productos por empresa
-        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
         val productos = if (usuarioComercialId != null) {
             productoRepository.findByActivoTrueAndUsuarioComercialId(usuarioComercialId)
         } else {
