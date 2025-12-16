@@ -984,7 +984,9 @@ Eliminar categoría (soft delete). Solo ADMINISTRADOR.
 
 ---
 
-## 7. Ventas
+## 7. Ventas *(en desarrollo)*
+
+> **Estado:** endpoints definidos pero aún no desplegados en producción. Disponibles a partir de Q1 2026.
 
 Base: `/api/saas/ventas`  
 Autenticación: Requerida + Suscripción activa  

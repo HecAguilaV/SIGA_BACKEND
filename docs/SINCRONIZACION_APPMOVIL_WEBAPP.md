@@ -52,9 +52,9 @@ Esto garantiza que:
 - `PUT /api/saas/categorias/{id}` - Actualizar categoría
 - `DELETE /api/saas/categorias/{id}` - Eliminar categoría
 
-### Ventas
-- `GET /api/saas/ventas` - Listar ventas
-- `POST /api/saas/ventas` - Crear venta
+### Ventas (en desarrollo)
+- `GET /api/saas/ventas` - **Pendiente de publicación (Q1 2026)**
+- `POST /api/saas/ventas` - **Pendiente de publicación (Q1 2026)**
 
 ### Usuarios
 - `GET /api/saas/usuarios` - Listar usuarios

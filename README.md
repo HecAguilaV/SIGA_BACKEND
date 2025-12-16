@@ -12,7 +12,7 @@ Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Min
 
 ## Descripción
 
-SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporciona servicios para la gestión de inventario, ventas, suscripciones y asistentes de inteligencia artificial conversacionales.
+SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporciona servicios para la gestión de inventario, suscripciones y asistentes de inteligencia artificial conversacionales. El módulo de ventas está definido en los esquemas y en desarrollo para su publicación en producción.
 
 ## Tecnologías
 
@@ -30,10 +30,15 @@ SIGA Backend es una API REST desarrollada con Spring Boot y Kotlin que proporcio
 
 ### Documentación Principal
 
-- **[API Endpoints](./docs/API_ENDPOINTS.md)** - Documentación completa de todos los endpoints del backend
-- **[Fuente de Verdad Backend](./docs/FUENTE_VERDAD_BACKEND.md)** - Documento maestro que define el estado actual del backend
-- **[Sincronización App Móvil ↔ WebApp](./docs/SINCRONIZACION_APPMOVIL_WEBAPP.md)** - Guía de sincronización entre aplicaciones
-- **[Plan de Acción Sincronización](./docs/PLAN_ACCION_SINCRONIZACION_PERFECTA.md)** - Plan detallado para sincronización perfecta
+- **[API Endpoints](./docs/API_ENDPOINTS.md)** – Especificación exhaustiva de rutas y payloads.
+- **[Endpoints Operativos Verificados](./docs/ENDPOINTS_OPERATIVOS.md)** – Matriz de consumo real por cliente oficial.
+- **[Análisis Endpoints & Sincronización](./docs/ANALISIS_ENDPOINTS_Y_SINCRONIZACION.md)** – Flujos compartidos WebApp ↔ App Móvil.
+- **[Arquitectura Backend](./docs/ARQUITECTURA_BACKEND.md)** – Fuente de verdad de módulos y decisiones.
+- **[Esquemas de Base de Datos](./docs/ESQUEMAS_DATABASE.md)** – Estructura completa de `siga_saas` y `siga_comercial`.
+- **[Sincronización App Móvil ↔ WebApp](./docs/SINCRONIZACION_APPMOVIL_WEBAPP.md)** – Guía práctica de consumo simultáneo.
+- **[Visión Asistente IA](./docs/VISION_SIGA_ASISTENTE_IA.md)** – Rol y roadmap del asistente inteligente.
+- **[Ecosistema Frontend & App](./docs/ECOSISTEMA/README.md)** – Acceso directo a especificaciones de WebApp, Portal Comercial y App Móvil.
+- **[Índice de Documentación](./docs/README_DOCS.md)** – Referencia rápida para mantener documentación alineada.
 
 ### Documentación Interactiva
 
@@ -139,10 +144,10 @@ curl http://localhost:8080/health
 - `POST /api/saas/locales` - Crear local (solo ADMIN)
 - `PUT /api/saas/locales/{id}` - Actualizar local (solo ADMIN)
 
-### Ventas (Requiere autenticación + suscripción activa)
+### Ventas (En desarrollo)
 
-- `GET /api/saas/ventas` - Listar ventas
-- `POST /api/saas/ventas` - Crear venta
+- `GET /api/saas/ventas` - Pendiente de publicación (Q1 2026)
+- `POST /api/saas/ventas` - Pendiente de publicación (Q1 2026)
 
 ### Planes (Público)
 
@@ -286,6 +291,7 @@ El filtrado es automático en el backend basado en el token JWT del usuario aute
 - Todos los datos operativos están asociados a una empresa
 - Los endpoints filtran automáticamente por empresa del usuario
 
+
 ## Licencia
 
 Copyright (c) 2025 Héctor Aguila - All Rights Reserved
@@ -297,4 +303,4 @@ Este software es propiedad privada. No se permite su uso comercial sin autorizac
 ## Autor
 
 > **Héctor Aguila**  
-> Un Soñasor con Poca RAM
+> Un Soñador con Poca RAM 

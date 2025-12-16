@@ -49,9 +49,3 @@ bin/
 .env.local
 .env.*.local
 
-### Desarrollo Local / Challas ###
-CHALLA/
-# Carpetas de documentación por equipo (ya están dentro de CHALLA/)
-CHALLA/docs/appweb/
-CHALLA/docs/appmovil/
-CHALLA/docs/webcomercial/

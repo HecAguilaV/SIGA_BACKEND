@@ -1,4 +1,4 @@
-# 🎯 FUENTE DE VERDAD - SIGA Backend
+#  FUENTE DE VERDAD - SIGA Backend
 
 **Documento Único y Definitivo**  
 **Fecha:** 2025-01-XX  
@@ -6,7 +6,7 @@
 
 ---
 
-## ⚠️ IMPORTANTE
+##  IMPORTANTE
 
 **Este es el ÚNICO documento que define qué tiene el backend y qué deben implementar los frontends.**
 
@@ -14,17 +14,17 @@
 
 ---
 
-## 🏢 SEPARACIÓN POR EMPRESA (NUEVO - 2025-01-XX)
+##  SEPARACIÓN POR EMPRESA (NUEVO - 2025-01-XX)
 
-**✅ IMPLEMENTADO:** Separación completa de datos por empresa. Cada dueño tiene sus propios datos completamente aislados.
+** IMPLEMENTADO:** Separación completa de datos por empresa. Cada dueño tiene sus propios datos completamente aislados.
 
-- ✅ Usuarios operativos separados por empresa
-- ✅ Productos separados por empresa
-- ✅ Locales separados por empresa
-- ✅ Categorías separadas por empresa
-- ✅ Stock separado por empresa
-- ✅ Ventas separadas por empresa
-- ✅ Asistente IA filtra por empresa
+-  Usuarios operativos separados por empresa
+-  Productos separados por empresa
+-  Locales separados por empresa
+-  Categorías separadas por empresa
+-  Stock separado por empresa
+-  Ventas separadas por empresa
+-  Asistente IA filtra por empresa
 
 **Los frontends NO requieren cambios** - El filtrado es automático en el backend. Los endpoints funcionan igual, pero ahora solo retornan datos de la empresa del usuario autenticado.
 
@@ -32,98 +32,98 @@
 
 ---
 
-## 📋 ¿QUÉ TIENE EL BACKEND?
+##  ¿QUÉ TIENE EL BACKEND?
 
-### ✅ Endpoints Implementados y Funcionando
+###  Endpoints Implementados y Funcionando
 
-#### 🔐 Autenticación Comercial (`/api/comercial/auth`)
-- ✅ `POST /api/comercial/auth/register` - Registro (incluye `nombreEmpresa`)
-- ✅ `POST /api/comercial/auth/login` - Login
-- ✅ `POST /api/comercial/auth/refresh` - Renovar token
-- ✅ `PUT /api/comercial/auth/update-email` - Actualizar email (requiere auth + contraseña)
-- ✅ `POST /api/comercial/auth/reset-password` - Solicitar reset (retorna token en MVP)
-- ✅ `POST /api/comercial/auth/change-password` - Cambiar contraseña con token
-- ✅ `POST /api/comercial/auth/obtener-token-operativo` - Obtener token para WebApp (SSO)
+####  Autenticación Comercial (`/api/comercial/auth`)
+-  `POST /api/comercial/auth/register` - Registro (incluye `nombreEmpresa`)
+-  `POST /api/comercial/auth/login` - Login
+-  `POST /api/comercial/auth/refresh` - Renovar token
+-  `PUT /api/comercial/auth/update-email` - Actualizar email (requiere auth + contraseña)
+-  `POST /api/comercial/auth/reset-password` - Solicitar reset (retorna token en MVP)
+-  `POST /api/comercial/auth/change-password` - Cambiar contraseña con token
+-  `POST /api/comercial/auth/obtener-token-operativo` - Obtener token para WebApp (SSO)
 
-#### 🔐 Autenticación Operativa (`/api/auth`)
-- ✅ `POST /api/auth/login` - Login usuarios operativos (ADMINISTRADOR, OPERADOR, CAJERO)
-- ✅ `POST /api/auth/register` - Registro usuarios operativos (solo para testing, en producción se crean desde WebApp)
+####  Autenticación Operativa (`/api/auth`)
+-  `POST /api/auth/login` - Login usuarios operativos (ADMINISTRADOR, OPERADOR, CAJERO)
+-  `POST /api/auth/register` - Registro usuarios operativos (solo para testing, en producción se crean desde WebApp)
 
-#### 💬 Asistente IA
-- ✅ `POST /api/comercial/chat` - Chat comercial (público, NO requiere auth)
-- ✅ `POST /api/saas/chat` - Chat operativo (requiere auth + suscripción activa)
+####  Asistente IA
+-  `POST /api/comercial/chat` - Chat comercial (público, NO requiere auth)
+-  `POST /api/saas/chat` - Chat operativo (requiere auth + suscripción activa)
 
-#### 📦 Gestión Operativa (`/api/saas`)
-- ✅ `GET /api/saas/productos` - Listar productos
-- ✅ `POST /api/saas/productos` - Crear producto (requiere permiso `PRODUCTOS_CREAR` - OPERADOR y ADMINISTRADOR tienen)
-- ✅ `PUT /api/saas/productos/{id}` - Actualizar producto (requiere permiso `PRODUCTOS_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
-- ✅ `DELETE /api/saas/productos/{id}` - Eliminar producto (requiere permiso `PRODUCTOS_ELIMINAR` - solo ADMINISTRADOR)
-- ✅ `GET /api/saas/locales` - Listar locales (todos los usuarios operativos pueden ver)
-- ✅ `GET /api/saas/locales/{id}` - Obtener local por ID
-- ✅ `POST /api/saas/locales` - Crear local (requiere permiso `LOCALES_CREAR` - solo ADMINISTRADOR)
-- ✅ `GET /api/saas/categorias` - Listar categorías
-- ✅ `GET /api/saas/stock` - Ver stock (puede filtrar por `?localId={id}`)
-- ✅ `GET /api/saas/stock/{productoId}/{localId}` - Obtener stock específico
-- ✅ `PUT /api/saas/stock/{productoId}/{localId}` - Actualizar stock (requiere permiso `STOCK_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
-- ✅ `GET /api/saas/usuarios` - Listar usuarios operativos
-- ✅ `GET /api/saas/usuarios/{id}/permisos` - Ver permisos de usuario
-- ✅ `POST /api/saas/usuarios/{id}/permisos` - Asignar permiso a usuario
+####  Gestión Operativa (`/api/saas`)
+-  `GET /api/saas/productos` - Listar productos
+-  `POST /api/saas/productos` - Crear producto (requiere permiso `PRODUCTOS_CREAR` - OPERADOR y ADMINISTRADOR tienen)
+-  `PUT /api/saas/productos/{id}` - Actualizar producto (requiere permiso `PRODUCTOS_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
+-  `DELETE /api/saas/productos/{id}` - Eliminar producto (requiere permiso `PRODUCTOS_ELIMINAR` - solo ADMINISTRADOR)
+-  `GET /api/saas/locales` - Listar locales (todos los usuarios operativos pueden ver)
+-  `GET /api/saas/locales/{id}` - Obtener local por ID
+-  `POST /api/saas/locales` - Crear local (requiere permiso `LOCALES_CREAR` - solo ADMINISTRADOR)
+-  `GET /api/saas/categorias` - Listar categorías
+-  `GET /api/saas/stock` - Ver stock (puede filtrar por `?localId={id}`)
+-  `GET /api/saas/stock/{productoId}/{localId}` - Obtener stock específico
+-  `PUT /api/saas/stock/{productoId}/{localId}` - Actualizar stock (requiere permiso `STOCK_ACTUALIZAR` - OPERADOR y ADMINISTRADOR tienen)
+-  `GET /api/saas/usuarios` - Listar usuarios operativos
+-  `GET /api/saas/usuarios/{id}/permisos` - Ver permisos de usuario
+-  `POST /api/saas/usuarios/{id}/permisos` - Asignar permiso a usuario
 
-#### 💰 Portal Comercial (`/api/comercial`)
-- ✅ `GET /api/comercial/planes` - Listar planes (público)
-- ✅ `GET /api/comercial/planes/{id}` - Obtener plan (público)
-- ✅ `GET /api/comercial/suscripciones` - Listar suscripciones del usuario
-- ✅ `POST /api/comercial/suscripciones` - Crear suscripción (compra plan)
-- ✅ `GET /api/comercial/facturas` - Listar facturas del usuario
+####  Portal Comercial (`/api/comercial`)
+-  `GET /api/comercial/planes` - Listar planes (público)
+-  `GET /api/comercial/planes/{id}` - Obtener plan (público)
+-  `GET /api/comercial/suscripciones` - Listar suscripciones del usuario
+-  `POST /api/comercial/suscripciones` - Crear suscripción (compra plan)
+-  `GET /api/comercial/facturas` - Listar facturas del usuario
 
-#### 🏥 Healthcheck
-- ✅ `GET /health` - Healthcheck para Railway
+####  Healthcheck
+-  `GET /health` - Healthcheck para Railway
 
 ---
 
-## 🗄️ Base de Datos
+##  Base de Datos
 
-### ✅ Tablas Existentes
+###  Tablas Existentes
 
 #### Esquema `siga_saas` (Operativo)
-- ✅ `USUARIOS` - Usuarios operativos (ADMINISTRADOR, OPERADOR, CAJERO)
-- ✅ `PRODUCTOS` - Catálogo de productos
-- ✅ `CATEGORIAS` - Categorías de productos
-- ✅ `LOCALES` - Bodegas/sucursales
-- ✅ `STOCK` - Inventario por local
-- ✅ `VENTAS` - Registro de ventas
-- ✅ `PERMISOS` - Catálogo de permisos (26 permisos)
-- ✅ `ROLES_PERMISOS` - Permisos por rol (40 registros)
-- ✅ `USUARIOS_PERMISOS` - Permisos adicionales por usuario
+-  `USUARIOS` - Usuarios operativos (ADMINISTRADOR, OPERADOR, CAJERO)
+-  `PRODUCTOS` - Catálogo de productos
+-  `CATEGORIAS` - Categorías de productos
+-  `LOCALES` - Bodegas/sucursales
+-  `STOCK` - Inventario por local
+-  `VENTAS` - Registro de ventas
+-  `PERMISOS` - Catálogo de permisos (26 permisos)
+-  `ROLES_PERMISOS` - Permisos por rol (40 registros)
+-  `USUARIOS_PERMISOS` - Permisos adicionales por usuario
 
 #### Esquema `siga_comercial` (Comercial)
-- ✅ `USUARIOS` - Usuarios comerciales (clientes)
-- ✅ `PLANES` - Planes de suscripción (2 planes)
-- ✅ `SUSCRIPCIONES` - Suscripciones activas
-- ✅ `FACTURAS` - Facturas de compra
+-  `USUARIOS` - Usuarios comerciales (clientes)
+-  `PLANES` - Planes de suscripción (2 planes)
+-  `SUSCRIPCIONES` - Suscripciones activas
+-  `FACTURAS` - Facturas de compra
 
-### ✅ Datos Iniciales
-- ✅ 26 permisos insertados
-- ✅ Permisos por rol configurados:
+###  Datos Iniciales
+-  26 permisos insertados
+-  Permisos por rol configurados:
   - ADMINISTRADOR: 26 permisos (todos)
   - OPERADOR: 9 permisos
   - CAJERO: 5 permisos
-- ✅ 2 planes insertados (Emprendedor Pro, Crecimiento)
+-  2 planes insertados (Emprendedor Pro, Crecimiento)
 
 ---
 
-## 🔐 Sistema de Permisos
+##  Sistema de Permisos
 
-### ✅ Funcionamiento
-- ✅ `ADMINISTRADOR` tiene **todos los permisos automáticamente** (sin validar BD)
-- ✅ `OPERADOR` y `CAJERO` validan permisos en BD (rol + adicionales)
-- ✅ Permisos disponibles: 26 permisos (PRODUCTOS_*, STOCK_*, VENTAS_*, etc.)
+###  Funcionamiento
+-  `ADMINISTRADOR` tiene **todos los permisos automáticamente** (sin validar BD)
+-  `OPERADOR` y `CAJERO` validan permisos en BD (rol + adicionales)
+-  Permisos disponibles: 26 permisos (PRODUCTOS_*, STOCK_*, VENTAS_*, etc.)
 
 ---
 
-## 💳 Planes y Suscripciones
+##  Planes y Suscripciones
 
-### ✅ Planes Disponibles
+###  Planes Disponibles
 1. **Emprendedor Pro** (ID: 2) - 0.9 UF/mes
    - 2 bodegas, 3 usuarios, 500 productos
    - Trial de 14 días automático
@@ -132,30 +132,30 @@
    - Ilimitado (bodegas, usuarios, productos)
    - Trial de 14 días automático
 
-### ✅ Trial
-- ✅ Se activa automáticamente al comprar cualquier plan
-- ✅ Duración: 14 días
-- ✅ Durante el trial, acceso completo
-- ✅ Después de 14 días, necesita pagar
+###  Trial
+-  Se activa automáticamente al comprar cualquier plan
+-  Duración: 14 días
+-  Durante el trial, acceso completo
+-  Después de 14 días, necesita pagar
 
 ---
 
-## 🚫 ¿QUÉ NO TIENE EL BACKEND?
+##  ¿QUÉ NO TIENE EL BACKEND?
 
-### ❌ NO Implementado
-- ❌ Envío de emails (reset de contraseña retorna token en respuesta - MVP)
-- ❌ Plan gratis permanente (eliminado, solo planes de pago con trial)
-- ❌ Webhooks de pagos
-- ❌ Notificaciones push
-- ❌ Reportes avanzados (solo estructura básica)
+###  NO Implementado
+-  Envío de emails (reset de contraseña retorna token en respuesta - MVP)
+-  Plan gratis permanente (eliminado, solo planes de pago con trial)
+-  Webhooks de pagos
+-  Notificaciones push
+-  Reportes avanzados (solo estructura básica)
 
 ---
 
-## 📱 ¿QUÉ DEBEN IMPLEMENTAR LOS FRONTENDS?
+##  ¿QUÉ DEBEN IMPLEMENTAR LOS FRONTENDS?
 
-### 🌐 Web Comercial
+###  Web Comercial
 
-#### ✅ Debe Implementar
+####  Debe Implementar
 1. **Registro de usuario**
    - Campo `nombreEmpresa` (opcional)
    - Endpoint: `POST /api/comercial/auth/register`
@@ -163,33 +163,33 @@
 2. **Actualizar email**
    - Formulario con contraseña actual
    - Endpoint: `PUT /api/comercial/auth/update-email`
-   - ⚠️ Método: `PUT` (no POST)
+   -  Método: `PUT` (no POST)
 
 3. **Reset de contraseña**
    - Flujo: Solicitar reset → Mostrar token → Cambiar contraseña
    - Endpoints: `POST /api/comercial/auth/reset-password` y `POST /api/comercial/auth/change-password`
-   - ⚠️ En MVP, el token se retorna en la respuesta (no se envía por email)
+   -  En MVP, el token se retorna en la respuesta (no se envía por email)
 
 4. **Asistente IA**
-   - ⚠️ NO usar `VITE_GEMINI_API_KEY`
+   -  NO usar `VITE_GEMINI_API_KEY`
    - Usar endpoint: `POST /api/comercial/chat`
-   - ⚠️ NO llamar directamente a Google Gemini API
+   -  NO llamar directamente a Google Gemini API
 
 5. **Compra de planes**
    - Mostrar 2 planes (Emprendedor Pro, Crecimiento)
    - Trial de 14 días se activa automáticamente
    - Endpoint: `POST /api/comercial/suscripciones`
 
-#### ❌ NO Debe Implementar
-- ❌ Login operativo (solo comercial)
-- ❌ Llamadas directas a Gemini API
-- ❌ Plan gratis (no existe)
+####  NO Debe Implementar
+-  Login operativo (solo comercial)
+-  Llamadas directas a Gemini API
+-  Plan gratis (no existe)
 
 ---
 
-### 🖥️ WebApp
+###  WebApp
 
-#### ✅ Debe Implementar
+####  Debe Implementar
 1. **Login de usuarios operativos**
    - **ADMINISTRADOR (dueño):** Puede usar SSO desde Web Comercial O login directo
      - SSO: `POST /api/comercial/auth/obtener-token-operativo` (intercambia token comercial)
@@ -201,7 +201,7 @@
 
 2. **Sistema de permisos**
    - Consultar permisos: `GET /api/saas/usuarios/{id}/permisos`
-   - ⚠️ ADMINISTRADOR tiene todos los permisos (no validar en frontend)
+   -  ADMINISTRADOR tiene todos los permisos (no validar en frontend)
    - Validar permisos antes de mostrar acciones
 
 3. **Gestión de productos**
@@ -223,15 +223,15 @@
    - Endpoint: `POST /api/saas/chat`
    - Requiere: auth + suscripción activa
 
-#### ❌ NO Debe Implementar
-- ❌ Asumir que ADMINISTRADOR necesita permisos explícitos (el backend ya lo maneja)
-- ❌ Asumir que OPERADOR/CAJERO pueden usar SSO (solo tienen login directo)
+####  NO Debe Implementar
+-  Asumir que ADMINISTRADOR necesita permisos explícitos (el backend ya lo maneja)
+-  Asumir que OPERADOR/CAJERO pueden usar SSO (solo tienen login directo)
 
 ---
 
-### 📱 App Móvil
+###  App Móvil
 
-#### ✅ Debe Implementar
+####  Debe Implementar
 1. **Login operativo**
    - Endpoint: `POST /api/auth/login`
    - Credenciales: email + password de usuario operativo
@@ -246,7 +246,7 @@
 3. **Consultar permisos**
    - Endpoint: `GET /api/saas/usuarios/{id}/permisos`
    - Validar permisos antes de mostrar acciones
-   - ⚠️ ADMINISTRADOR tiene todos los permisos automáticamente
+   -  ADMINISTRADOR tiene todos los permisos automáticamente
 
 4. **Gestión de productos**
    - Listar productos: `GET /api/saas/productos`
@@ -261,19 +261,19 @@
 6. **Gestión de ventas**
    - Crear ventas: `POST /api/saas/ventas` (CAJERO y otros con permiso)
 
-#### ⚠️ Notas Importantes
+####  Notas Importantes
 - **OPERADOR puede crear productos** (tiene permiso `PRODUCTOS_CREAR`)
 - **ADMINISTRADOR y OPERADOR deben poder seleccionar local** desde la app
 - El local seleccionado se usa para filtrar stock y operaciones
 - El backend NO valida qué locales puede ver cada usuario (todos ven todos los locales)
 
-#### ❌ NO Debe Implementar
-- ❌ Login comercial (solo operativo)
-- ❌ Compra de planes (solo en Web Comercial)
+####  NO Debe Implementar
+-  Login comercial (solo operativo)
+-  Compra de planes (solo en Web Comercial)
 
 ---
 
-## 🔗 URLs del Backend
+##  URLs del Backend
 
 ### Producción (Railway)
 - **Base URL:** `https://siga-backend-production.up.railway.app`
@@ -282,7 +282,7 @@
 
 ---
 
-## ✅ Checklist de Verificación
+##  Checklist de Verificación
 
 ### Para Web Comercial
 - [ ] Campo `nombreEmpresa` en registro
@@ -314,7 +314,7 @@
 
 ---
 
-## 🚨 Errores Comunes y Soluciones
+##  Errores Comunes y Soluciones
 
 ### Error: "Tabla siga_saas.permisos no existe"
 **Solución:** Ejecutar migración `008_create_sistema_permisos.sql` (ya ejecutada)
@@ -333,7 +333,7 @@
 
 ---
 
-## 📞 Soporte
+##  Soporte
 
 **Si hay dudas o problemas:**
 1. Verificar este documento primero
@@ -343,7 +343,7 @@
 
 ---
 
-## 📝 Notas Finales
+##  Notas Finales
 
 - **Este documento es la ÚNICA fuente de verdad**
 - **Todo lo que está aquí está implementado y funcionando**
@@ -353,5 +353,5 @@
 ---
 
 **Última actualización:** 2025-01-XX  
-**Estado del Backend:** ✅ Completo y funcionando  
+**Estado del Backend:**  Completo y funcionando  
 **Desplegado en:** Railway (producción)
