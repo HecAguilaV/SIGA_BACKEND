@@ -40,7 +40,8 @@ data class UsuarioResponse(
     val apellido: String?,
     val rol: String,
     val activo: Boolean,
-    val permisos: List<String> = emptyList()
+    val permisos: List<String> = emptyList(),
+    val usuarioComercialId: Int? = null
 )
 
 data class AsignarPermisoRequest(
@@ -113,7 +114,8 @@ class UsuariosController(
                 apellido = usuario.apellido,
                 rol = usuario.rol.name,
                 activo = usuario.activo,
-                permisos = permisos
+                permisos = permisos,
+                usuarioComercialId = usuario.usuarioComercialId
             )
         }
         
@@ -151,7 +153,8 @@ class UsuariosController(
                 apellido = usuario.apellido,
                 rol = usuario.rol.name,
                 activo = usuario.activo,
-                permisos = permisos
+                permisos = permisos,
+                usuarioComercialId = usuario.usuarioComercialId
             )
         ))
     }
@@ -223,7 +226,8 @@ class UsuariosController(
                 apellido = usuarioGuardado.apellido,
                 rol = usuarioGuardado.rol.name,
                 activo = usuarioGuardado.activo,
-                permisos = permisos
+                permisos = permisos,
+                usuarioComercialId = usuarioGuardado.usuarioComercialId
             )
         ))
     }
@@ -280,7 +284,8 @@ class UsuariosController(
                 apellido = usuarioGuardado.apellido,
                 rol = usuarioGuardado.rol.name,
                 activo = usuarioGuardado.activo,
-                permisos = permisos
+                permisos = permisos,
+                usuarioComercialId = usuarioGuardado.usuarioComercialId
             )
         ))
     }
