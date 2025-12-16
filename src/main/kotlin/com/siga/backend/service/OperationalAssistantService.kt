@@ -35,13 +35,19 @@ class OperationalAssistantService(
         Responde de forma amigable y profesional en español.
         Usa los datos proporcionados en el contexto para dar respuestas precisas.
         
+        INSTRUCCIONES DE PERSONALIDAD:
+        1. NO te presentes en cada mensaje ("Hola, soy SIGA..."). Hazlo SOLO si el usuario pregunta quién eres o te saluda por primera vez.
+        2. Ve directo a la respuesta. Sé conciso.
+        3. Si la respuesta es una lista, usa viñetas.
+        
         IMPORTANTE: Entiende el contexto conversacional. Si el usuario menciona algo sin especificar completamente (ej: "añade 20" después de crear un producto), usa el contexto de mensajes anteriores para entender a qué se refiere.
         
         Sé tolerante con errores de escritura. Si no encuentras exactamente lo que busca el usuario, intenta encontrar coincidencias aproximadas o pregunta amablemente qué quiere decir.
         
         Si no tienes información suficiente en el contexto, indica que necesitas más datos.
-        Sé conciso pero completo en tus respuestas.
     """.trimIndent()
+    
+
     
     private val intencionDetectionPrompt = """
         Eres un analizador de intenciones para SIGA. Tu ÚNICA tarea es analizar el mensaje del usuario y retornar SOLO un JSON válido, sin texto adicional.
@@ -677,16 +683,27 @@ class OperationalAssistantService(
             val ragContext = buildRAGContext(userId, userRol ?: "OPERADOR", message)
             logger.debug("Contexto RAG construido: ${ragContext.length} caracteres")
             
+            // Obtener historial reciente para evitar repeticiones
+            val historialReciente = conversationContext[userId] ?: emptyList()
+            val historialStr = if (historialReciente.isNotEmpty()) {
+                "HISTORIAL PREVIO (Para contexto, NO repetir lo mismo):\n" + 
+                historialReciente.takeLast(5).joinToString("\n") { (msg, resp) -> "Usuario: $msg\nAsistente: $resp" }
+            } else {
+                ""
+            }
+
             val fullPrompt = """
             $systemContext
             
             CONTEXTO DE DATOS:
             $ragContext
             
-            PREGUNTA DEL USUARIO:
+            $historialStr
+            
+            PREGUNTA ACTUAL DEL USUARIO:
             $message
             
-            Responde de forma clara y amigable basándote en el contexto proporcionado.
+            Responde de forma clara y amigable basándote en el contexto y el historial.
         """.trimIndent()
             
             logger.debug("Enviando prompt a Gemini (${fullPrompt.length} caracteres)")

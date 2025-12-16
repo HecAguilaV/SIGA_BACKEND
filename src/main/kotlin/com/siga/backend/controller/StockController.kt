@@ -71,6 +71,11 @@ class StockController(
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                 .body(mapOf("success" to false, "stock" to emptyList<StockResponse>(), "total" to 0))
         }
+
+        if (!SecurityUtils.puedeVerStock()) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes permiso para ver stock"))
+        }
         
         // Filtrar stock por empresa (a través de productos y locales)
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()

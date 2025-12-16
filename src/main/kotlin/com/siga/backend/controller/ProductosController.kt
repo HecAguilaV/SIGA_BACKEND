@@ -56,6 +56,11 @@ class ProductosController(
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
         }
+
+        if (!SecurityUtils.puedeVerProductos()) {
+             return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(mapOf("success" to false, "message" to "No tienes permiso para ver productos"))
+        }
         
         // Filtrar productos por empresa
         val usuarioComercialId = SecurityUtils.getUsuarioComercialId()

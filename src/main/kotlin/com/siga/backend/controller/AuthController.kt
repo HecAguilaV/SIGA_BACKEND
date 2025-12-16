@@ -51,7 +51,8 @@ data class UserInfo(
     val apellido: String?,
     val rol: String,
     val nombreEmpresa: String? = null,
-    val localPorDefecto: LocalInfo? = null
+    val localPorDefecto: LocalInfo? = null,
+    val permisos: List<String> = emptyList()
 )
 
 data class LocalInfo(
@@ -68,7 +69,8 @@ class AuthController(
     private val usuarioComercialRepository: UsuarioComercialRepository,
     private val localRepository: LocalRepository,
     private val passwordService: PasswordService,
-    private val jwtService: JWTService
+    private val jwtService: JWTService,
+    private val permisosService: PermisosService
 ) {
     
     @PostMapping("/login")
@@ -135,7 +137,8 @@ class AuthController(
                     apellido = usuarioActualizado.apellido,
                     rol = usuarioActualizado.rol.name,
                     nombreEmpresa = usuarioComercial?.nombreEmpresa,
-                    localPorDefecto = localPorDefecto
+                    localPorDefecto = localPorDefecto,
+                    permisos = permisosService.obtenerPermisosUsuario(usuarioActualizado.id)
                 )
             )
         )
@@ -181,7 +184,8 @@ class AuthController(
                     email = savedUser.email,
                     nombre = savedUser.nombre,
                     apellido = savedUser.apellido,
-                    rol = savedUser.rol.name
+                    rol = savedUser.rol.name,
+                    permisos = permisosService.obtenerPermisosUsuario(savedUser.id)
                 )
             )
         )
@@ -264,7 +268,8 @@ class AuthController(
                 apellido = user.apellido,
                 rol = user.rol.name,
                 nombreEmpresa = usuarioComercial?.nombreEmpresa,
-                localPorDefecto = localPorDefecto
+                localPorDefecto = localPorDefecto,
+                permisos = permisosService.obtenerPermisosUsuario(user.id)
             )
         ))
     }

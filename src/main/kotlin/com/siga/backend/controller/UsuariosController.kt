@@ -29,7 +29,8 @@ data class CrearUsuarioRequest(
 data class ActualizarUsuarioRequest(
     val nombre: String? = null,
     val apellido: String? = null,
-    val activo: Boolean? = null
+    val activo: Boolean? = null,
+    val rol: String? = null
 )
 
 data class UsuarioResponse(
@@ -253,10 +254,16 @@ class UsuariosController(
                 .body(mapOf("success" to false, "message" to "No tienes acceso a este usuario"))
         }
         
+        // Parsear nuevo rol si se env?a
+        val nuevoRol = request.rol?.let { 
+            try { Rol.valueOf(it.uppercase()) } catch (e: Exception) { null } 
+        } ?: usuario.rol
+
         val usuarioActualizado = usuario.copy(
             nombre = request.nombre ?: usuario.nombre,
             apellido = request.apellido ?: usuario.apellido,
             activo = request.activo ?: usuario.activo,
+            rol = nuevoRol,
             fechaActualizacion = Instant.now()
         )
         
