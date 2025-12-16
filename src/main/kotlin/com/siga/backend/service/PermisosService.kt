@@ -35,31 +35,15 @@ class PermisosService(
             return true
         }
         
-        val permiso = permisosRepository.findByCodigo(codigoPermiso).orElse(null)
-        
-        if (permiso == null) {
-            System.out.println("DEBUG PERMISOS: Permiso no encontrado en BD: $codigoPermiso")
-            return false
+        // Admin siempre tiene todos los permisos
+        if (usuario.rol == Rol.ADMINISTRADOR) {
+            return true
         }
         
-        // Verificar si el permiso está en el rol base
-        // Usar la query explícita para evitar problemas de convención de nombres JPA con claves compuestas
-        val tienePorRol = rolesPermisosRepository.existsByRolAndPermisoId(
-            usuario.rol.name,
-            permiso.id
-        )
-        
-        // Verificar si tiene permiso adicional asignado
-        val tieneAdicional = usuariosPermisosRepository.existsById_UsuarioIdAndId_PermisoId(
-            usuarioId,
-            permiso.id
-        )
-        
-        if (!tienePorRol && !tieneAdicional) {
-             System.out.println("DEBUG PERMISOS: FALLO usuario=$usuarioId rol=${usuario.rol} permiso=$codigoPermiso(id=${permiso.id}) -> Rol=$tienePorRol Adicional=$tieneAdicional")
-        }
-        
-        return tienePorRol || tieneAdicional
+        // ESTRATEGIA SEGURA: Obtener la lista completa de permisos (que sabemos que funciona)
+        // y verificar en memoria. Esto evita problemas de JPA con claves compuestas.
+        val todosLosPermisos = obtenerPermisosUsuario(usuarioId)
+        return todosLosPermisos.contains(codigoPermiso)
     }
     
     /**
