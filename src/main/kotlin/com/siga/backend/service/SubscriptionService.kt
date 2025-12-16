@@ -1,6 +1,7 @@
 package com.siga.backend.service
 
 import com.siga.backend.entity.EstadoSuscripcion
+import com.siga.backend.repository.UsuarioSaasRepository
 import com.siga.backend.repository.SuscripcionRepository
 import com.siga.backend.repository.UsuarioComercialRepository
 import org.springframework.stereotype.Service
@@ -10,15 +11,26 @@ import java.time.LocalDate
 @Service
 class SubscriptionService(
     private val suscripcionRepository: SuscripcionRepository,
-    private val usuarioComercialRepository: UsuarioComercialRepository
+    private val usuarioComercialRepository: UsuarioComercialRepository,
+    private val usuarioSaasRepository: UsuarioSaasRepository
 ) {
     
     fun hasActiveSubscription(email: String): Boolean {
         return try {
-            val usuario = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
-                ?: return false
-                
-            checkSubscriptionStatus(usuario)
+            // 1. Caso: Es el Dueño (Usuario Comercial)
+            val usuarioComercial = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
+            if (usuarioComercial != null) {
+                return checkSubscriptionStatus(usuarioComercial)
+            }
+            
+            // 2. Caso: Es un Operador (Empleado)
+            val usuarioSaas = usuarioSaasRepository.findByEmail(email.lowercase()).orElse(null)
+            if (usuarioSaas != null && usuarioSaas.usuarioComercialId != null) {
+                // Hereda la suscripción del Jefe
+                return hasActiveSubscription(usuarioSaas.usuarioComercialId)
+            }
+            
+            return false
         } catch (e: Exception) {
             false
         }
@@ -36,30 +48,19 @@ class SubscriptionService(
     }
 
     private fun checkSubscriptionStatus(usuario: com.siga.backend.entity.UsuarioComercial): Boolean {
-        // Verificar si tiene trial activo (14 días)
-        if (usuario.enTrial && usuario.fechaFinTrial != null) {
-            val ahora = Instant.now()
-            if (ahora.isBefore(usuario.fechaFinTrial)) {
-                return true // Trial activo
-            } else {
-                // Trial expirado, desactivar
-                val usuarioActualizado = usuario.copy(
-                    enTrial = false,
-                    fechaActualizacion = ahora
-                )
-                usuarioComercialRepository.save(usuarioActualizado)
-            }
+        // 1. Revisar si tiene Trial activo
+        if (usuario.enTrial && usuario.fechaFinTrial != null && Instant.now().isBefore(usuario.fechaFinTrial)) {
+            return true
         }
         
-        // Verificar suscripción activa
-        val hoy = LocalDate.now()
-        val suscripciones = suscripcionRepository.findActiveByEmail(
-            usuario.email.lowercase(),
-            EstadoSuscripcion.ACTIVA,
-            hoy
+        // 2. Revisar si tiene Suscripción Activa en DB
+        val activeSubscriptions = suscripcionRepository.findActiveByUsuarioId(
+            usuario.id, 
+            EstadoSuscripcion.ACTIVA, 
+            LocalDate.now()
         )
         
-        return suscripciones.isNotEmpty()
+        return activeSubscriptions.isNotEmpty()
     }
     
     fun tieneTrialActivo(email: String): Boolean {

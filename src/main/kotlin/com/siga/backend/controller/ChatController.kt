@@ -86,10 +86,12 @@ class SaasChatController(
         }
         
         val email = SecurityUtils.getUserEmail()
-        if (email == null || !subscriptionService.hasActiveSubscription(email)) {
+        // DEMO: Bypass subscription check
+        // DEMO: Bypass subscription check
+        /*if (email == null || !subscriptionService.hasActiveSubscription(email)) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                 .body(ChatResponse(success = false, message = "Se requiere una suscripción activa"))
-        }
+        }*/
         
         val result = operationalAssistantService.processMessage(request.message, userId, SecurityUtils.getUserRol())
         
