@@ -16,8 +16,26 @@ class SecurityUtilsConfig(
     private val usuarioComercialRepository: UsuarioComercialRepository
 ) {
 
-    @PostConstruct
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
+import org.slf4j.LoggerFactory
+
+@Configuration
+class SecurityUtilsConfig(
+    private val permisosService: PermisosService,
+    private val usuarioSaasRepository: UsuarioSaasRepository,
+    private val usuarioComercialRepository: UsuarioComercialRepository
+) {
+    private val logger = LoggerFactory.getLogger(SecurityUtilsConfig::class.java)
+
+    @EventListener(ApplicationReadyEvent::class)
     fun init() {
-        SecurityUtils.init(permisosService, usuarioSaasRepository, usuarioComercialRepository)
+        logger.info("SecurityUtilsConfig: INICIALIZANDO SecurityUtils...")
+        try {
+            SecurityUtils.init(permisosService, usuarioSaasRepository, usuarioComercialRepository)
+            logger.info("SecurityUtilsConfig: SecurityUtils inicializado CORRECTAMENTE")
+        } catch (e: Exception) {
+            logger.error("SecurityUtilsConfig: ALERTA - Falló la inicialización de SecurityUtils", e)
+        }
     }
 }
