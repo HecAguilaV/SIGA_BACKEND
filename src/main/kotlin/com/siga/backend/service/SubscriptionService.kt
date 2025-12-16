@@ -17,34 +17,49 @@ class SubscriptionService(
         return try {
             val usuario = usuarioComercialRepository.findByEmail(email.lowercase()).orElse(null)
                 ?: return false
-            
-            // Verificar si tiene trial activo (14 días)
-            if (usuario.enTrial && usuario.fechaFinTrial != null) {
-                val ahora = Instant.now()
-                if (ahora.isBefore(usuario.fechaFinTrial)) {
-                    return true // Trial activo
-                } else {
-                    // Trial expirado, desactivar
-                    val usuarioActualizado = usuario.copy(
-                        enTrial = false,
-                        fechaActualizacion = ahora
-                    )
-                    usuarioComercialRepository.save(usuarioActualizado)
-                }
-            }
-            
-            // Verificar suscripción activa
-            val hoy = LocalDate.now()
-            val suscripciones = suscripcionRepository.findActiveByEmail(
-                email.lowercase(),
-                EstadoSuscripcion.ACTIVA,
-                hoy
-            )
-            
-            suscripciones.isNotEmpty()
+                
+            checkSubscriptionStatus(usuario)
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun hasActiveSubscription(usuarioComercialId: Int): Boolean {
+        return try {
+            val usuario = usuarioComercialRepository.findById(usuarioComercialId).orElse(null)
+                ?: return false
+                
+            checkSubscriptionStatus(usuario)
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun checkSubscriptionStatus(usuario: com.siga.backend.entity.UsuarioComercial): Boolean {
+        // Verificar si tiene trial activo (14 días)
+        if (usuario.enTrial && usuario.fechaFinTrial != null) {
+            val ahora = Instant.now()
+            if (ahora.isBefore(usuario.fechaFinTrial)) {
+                return true // Trial activo
+            } else {
+                // Trial expirado, desactivar
+                val usuarioActualizado = usuario.copy(
+                    enTrial = false,
+                    fechaActualizacion = ahora
+                )
+                usuarioComercialRepository.save(usuarioActualizado)
+            }
+        }
+        
+        // Verificar suscripción activa
+        val hoy = LocalDate.now()
+        val suscripciones = suscripcionRepository.findActiveByEmail(
+            usuario.email.lowercase(),
+            EstadoSuscripcion.ACTIVA,
+            hoy
+        )
+        
+        return suscripciones.isNotEmpty()
     }
     
     fun tieneTrialActivo(email: String): Boolean {

@@ -52,10 +52,10 @@ class CategoriasController(
                     .body(mapOf("success" to false, "message" to "No autenticado"))
             }
             
-            val email = SecurityUtils.getUserEmail()
-            if (email == null || !subscriptionService.hasActiveSubscription(email)) {
+            val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+            if (usuarioComercialId == null || !subscriptionService.hasActiveSubscription(usuarioComercialId)) {
                 return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
-                    .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
+                    .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa (Empresa)"))
             }
 
             if (!SecurityUtils.puedeVerCategorias()) {
