@@ -35,7 +35,11 @@ class PermisosService(
         }
         
         val permiso = permisosRepository.findByCodigo(codigoPermiso).orElse(null)
-            ?: return false
+        
+        if (permiso == null) {
+            System.out.println("DEBUG PERMISOS: Permiso no encontrado en BD: $codigoPermiso")
+            return false
+        }
         
         // Verificar si el permiso está en el rol base
         val tienePorRol = rolesPermisosRepository.existsById_RolAndId_PermisoId(
@@ -48,6 +52,10 @@ class PermisosService(
             usuarioId,
             permiso.id
         )
+        
+        if (!tienePorRol && !tieneAdicional) {
+             System.out.println("DEBUG PERMISOS: FALLO usuario=$usuarioId rol=${usuario.rol} permiso=$codigoPermiso(id=${permiso.id}) -> Rol=$tienePorRol Adicional=$tieneAdicional")
+        }
         
         return tienePorRol || tieneAdicional
     }
