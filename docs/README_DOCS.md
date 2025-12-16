@@ -1,4 +1,4 @@
-# Documentación SIGA Backend (Diciembre 2025)
+# Documentación SIGA Backend (Diciembre 2025) 
 
 Este directorio contiene la documentación profesional, consolidada y definitiva del sistema SIGA Backend.
 

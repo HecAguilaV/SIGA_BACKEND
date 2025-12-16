@@ -118,3 +118,7 @@ Railway asignará una URL automáticamente, por ejemplo:
 - **Tests**: Spring Boot Test (21 tests pasando)
 - **Deployment**: Docker + Railway
 
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM 

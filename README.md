@@ -303,4 +303,4 @@ Este software es propiedad privada. No se permite su uso comercial sin autorizac
 ## Autor
 
 > **Héctor Aguila**  
-> Un Soñador con Poca RAM 
+>> Un Soñador con Poca RAM 

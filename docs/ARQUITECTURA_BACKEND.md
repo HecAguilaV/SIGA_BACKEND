@@ -1,7 +1,7 @@
-#  FUENTE DE VERDAD - SIGA Backend
+# FUENTE DE VERDAD - SIGA Backend
 
-**Documento Único y Definitivo**  
-**Fecha:** 2025-01-XX  
+**Documento Definitivo**  
+**Fecha:** Noviembre 2025
 **Versión:** 1.0
 
 ---
@@ -10,13 +10,11 @@
 
 **Este es el ÚNICO documento que define qué tiene el backend y qué deben implementar los frontends.**
 
-**NO hay otros documentos. Este es la verdad.**
-
 ---
 
-##  SEPARACIÓN POR EMPRESA (NUEVO - 2025-01-XX)
+##  SEPARACIÓN POR EMPRESA
 
-** IMPLEMENTADO:** Separación completa de datos por empresa. Cada dueño tiene sus propios datos completamente aislados.
+**IMPLEMENTADO:** Separación completa de datos por empresa. Cada dueño tiene sus propios datos completamente aislados.
 
 -  Usuarios operativos separados por empresa
 -  Productos separados por empresa
@@ -27,8 +25,6 @@
 -  Asistente IA filtra por empresa
 
 **Los frontends NO requieren cambios** - El filtrado es automático en el backend. Los endpoints funcionan igual, pero ahora solo retornan datos de la empresa del usuario autenticado.
-
-**Ver:** `docs/CAMBIOS_SEPARACION_EMPRESA.md` para detalles completos.
 
 ---
 
@@ -183,8 +179,6 @@
 ####  NO Debe Implementar
 -  Login operativo (solo comercial)
 -  Llamadas directas a Gemini API
--  Plan gratis (no existe)
-
 ---
 
 ###  WebApp
@@ -285,11 +279,11 @@
 ##  Checklist de Verificación
 
 ### Para Web Comercial
-- [ ] Campo `nombreEmpresa` en registro
-- [ ] Actualizar email con método `PUT`
-- [ ] Reset de contraseña (mostrar token en MVP)
-- [ ] Asistente IA usando `/api/comercial/chat` (NO Gemini directo)
-- [ ] Mostrar solo 2 planes (sin plan gratis)
+- [x] Campo `nombreEmpresa` en registro
+- [x] Actualizar email con método `PUT`
+- [x] Reset de contraseña (mostrar token en MVP)
+- [x] Asistente IA usando `/api/comercial/chat` (NO Gemini directo)
+- [x] Mostrar solo 2 planes (sin plan gratis)
 
 ### Para WebApp
 - [ ] Login directo funcionando (`POST /api/auth/login`)
@@ -352,6 +346,14 @@
 
 ---
 
-**Última actualización:** 2025-01-XX  
+**Última actualización:** Diciembre-2025
 **Estado del Backend:**  Completo y funcionando  
 **Desplegado en:** Railway (producción)
+
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>Un Soñador con Poca RAM

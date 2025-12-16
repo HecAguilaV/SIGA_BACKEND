@@ -2,6 +2,7 @@
 -- Script de Migración: Datos Iniciales
 -- ============================================
 -- Insertar datos base necesarios para el funcionamiento del sistema
+-- NOTA: Categorías y productos se crean desde los frontends, no aquí
 
 -- ============================================
 -- MÉTODOS DE PAGO (siga_saas)
@@ -16,9 +17,8 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- PLANES DE SUSCRIPCIÓN (siga_comercial)
 -- ============================================
--- Nota: Ajustar precios y características según necesidades reales
+-- Planes disponibles para suscripción
 
--- NOTA: Plan Kiosco (gratis) fue eliminado. Solo planes de pago con trial de 14 días.
 INSERT INTO siga_comercial.PLANES (nombre, descripcion, precio_mensual, precio_anual, limite_bodegas, limite_usuarios, limite_productos, caracteristicas, orden) VALUES
     (
         'Emprendedor Pro',
@@ -42,14 +42,4 @@ INSERT INTO siga_comercial.PLANES (nombre, descripcion, precio_mensual, precio_a
         '{"trial_gratis": true, "soporte": "prioritario", "asistente_ia": true, "reportes_avanzados": true, "api_access": true}'::jsonb,
         2
     )
-ON CONFLICT (nombre) DO NOTHING;
-
--- ============================================
--- CATEGORÍAS BÁSICAS (siga_saas)
--- ============================================
-INSERT INTO siga_saas.CATEGORIAS (nombre, descripcion, activa) VALUES
-    ('Bebidas', 'Bebidas en general', true),
-    ('Alimentos', 'Productos alimenticios', true),
-    ('Limpieza', 'Productos de limpieza', true),
-    ('Otros', 'Otras categorías', true)
 ON CONFLICT (nombre) DO NOTHING;

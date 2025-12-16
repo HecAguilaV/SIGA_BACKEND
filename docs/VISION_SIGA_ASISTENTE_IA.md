@@ -48,12 +48,9 @@ Cliente → Gateway SIGA → Servicio de Orquestación IA → Controladores REST
 - Controles antifraude: límites de frecuencia, validación de montos y doble confirmación en operaciones críticas.
 - Observabilidad: métricas en Grafana (tasa de éxito, latencia, operaciones IA vs humanas).
 
-## 6. Roadmap 2026
-
-1. **Q1:** recomendaciones automáticas basadas en ventas históricas.
-2. **Q2:** integración con servicios externos de logística (orden de reposición).
-3. **Q3:** modo offline asistido (sincronización diferida en App Móvil).
-
 ---
 
-> La visión del asistente es compartida por todos los equipos. Cualquier cambio de alcance debe discutirse en el comité SIGA (PO + líderes Front + Backend).
+## Autor
+
+> **Héctor Aguila**  
+>Un Soñador con Poca RAM

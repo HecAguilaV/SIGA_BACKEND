@@ -25,12 +25,19 @@ class OperationalAssistantService(
     
     private val logger = LoggerFactory.getLogger(OperationalAssistantService::class.java)
     
+    // Almacenamiento de contexto conversacional por usuario (últimos 5 mensajes)
+    private val conversationContext = mutableMapOf<Int, MutableList<Pair<String, String>>>()
+    
     private val systemContext = """
         Eres SIGA, el asistente virtual del Sistema Inteligente de Gestión de Activos.
         Ayudas a usuarios a gestionar su inventario, consultar stock, ver ventas, etc.
         
         Responde de forma amigable y profesional en español.
         Usa los datos proporcionados en el contexto para dar respuestas precisas.
+        
+        IMPORTANTE: Entiende el contexto conversacional. Si el usuario menciona algo sin especificar completamente (ej: "añade 20" después de crear un producto), usa el contexto de mensajes anteriores para entender a qué se refiere.
+        
+        Sé tolerante con errores de escritura. Si no encuentras exactamente lo que busca el usuario, intenta encontrar coincidencias aproximadas o pregunta amablemente qué quiere decir.
         
         Si no tienes información suficiente en el contexto, indica que necesitas más datos.
         Sé conciso pero completo en tus respuestas.
@@ -165,18 +172,12 @@ class OperationalAssistantService(
     }
     
     /**
-     * Detecta la intención del usuario usando Gemini
+     * Detecta la intención del usuario usando Gemini con contexto conversacional
      */
-    private fun detectarIntencion(mensaje: String): Result<IntencionDetectada> {
+    private fun detectarIntencion(mensaje: String, userId: Int): Result<IntencionDetectada> {
         return try {
-            val prompt = """
-                $intencionDetectionPrompt
-                
-                MENSAJE DEL USUARIO:
-                $mensaje
-                
-                Responde SOLO con el JSON, sin texto adicional.
-            """.trimIndent()
+            val contextoConversacional = conversationContext[userId] ?: emptyList()
+            val prompt = buildIntencionDetectionPrompt(mensaje, contextoConversacional)
             
             val resultado = geminiService.generateContent(prompt)
             
@@ -601,8 +602,8 @@ class OperationalAssistantService(
         try {
             logger.debug("Procesando mensaje para usuario $userId con rol ${userRol ?: "OPERADOR"}")
             
-            // Paso 1: Detectar intención
-            val intencionResult = detectarIntencion(message)
+            // Paso 1: Detectar intención con contexto conversacional
+            val intencionResult = detectarIntencion(message, userId)
             val intencion = intencionResult.getOrNull() 
                 ?: IntencionDetectada(IntencionAccion.UNKNOWN, "", emptyMap())
             
@@ -612,6 +613,8 @@ class OperationalAssistantService(
             if (intencion.requiereConfirmacion && intencion.intencion.name.startsWith("DELETE")) {
                 val mensajeConfirmacion = intencion.mensajeConfirmacion 
                     ?: "¿Estás seguro de que deseas realizar esta acción?"
+                // Guardar en contexto conversacional
+                actualizarContextoConversacional(userId, message, mensajeConfirmacion)
                 return Result.success(mensajeConfirmacion)
             }
             
@@ -627,16 +630,24 @@ class OperationalAssistantService(
                         if (accion.ejecutada) {
                             // Acción ejecutada exitosamente
                             val respuesta = accion.mensaje ?: "Acción ejecutada exitosamente"
-                            return Result.success("Éxito: $respuesta")
+                            val respuestaFinal = "Éxito: $respuesta"
+                            // Guardar en contexto conversacional
+                            actualizarContextoConversacional(userId, message, respuestaFinal)
+                            return Result.success(respuestaFinal)
                         } else {
                             // Error en la ejecución - retornar mensaje sin emoji para evitar problemas de parsing
                             val errorMsg = accion.mensaje ?: "No se pudo ejecutar la acción"
-                            return Result.success("Error: $errorMsg")
+                            val respuestaFinal = "Error: $errorMsg"
+                            // Guardar en contexto conversacional
+                            actualizarContextoConversacional(userId, message, respuestaFinal)
+                            return Result.success(respuestaFinal)
                         }
                     },
                     onFailure = { error ->
                         logger.error("Error al ejecutar acción", error)
-                        return Result.success("Error al ejecutar la acción: ${error.message ?: "Error desconocido"}")
+                        val respuestaFinal = "Error al ejecutar la acción: ${error.message ?: "Error desconocido"}"
+                        actualizarContextoConversacional(userId, message, respuestaFinal)
+                        return Result.success(respuestaFinal)
                     }
                 )
             }
@@ -681,8 +692,10 @@ class OperationalAssistantService(
             logger.debug("Enviando prompt a Gemini (${fullPrompt.length} caracteres)")
             val result = geminiService.generateContent(fullPrompt)
             
-            result.onSuccess {
-                logger.debug("Respuesta exitosa de Gemini (${it.length} caracteres)")
+            result.onSuccess { respuesta ->
+                logger.debug("Respuesta exitosa de Gemini (${respuesta.length} caracteres)")
+                // Guardar en contexto conversacional
+                actualizarContextoConversacional(userId, message, respuesta)
             }.onFailure { error ->
                 logger.error("Error al generar contenido con Gemini", error)
             }
@@ -691,6 +704,18 @@ class OperationalAssistantService(
         } catch (e: Exception) {
             logger.error("Excepción no controlada en processMessage", e)
             return Result.failure(e)
+        }
+    }
+    
+    /**
+     * Actualiza el contexto conversacional del usuario (mantiene últimos 10 mensajes)
+     */
+    private fun actualizarContextoConversacional(userId: Int, mensajeUsuario: String, respuestaAsistente: String) {
+        val contexto = conversationContext.getOrPut(userId) { mutableListOf() }
+        contexto.add(Pair(mensajeUsuario, respuestaAsistente))
+        // Mantener solo los últimos 10 mensajes (5 intercambios)
+        if (contexto.size > 10) {
+            contexto.removeAt(0)
         }
     }
 }
