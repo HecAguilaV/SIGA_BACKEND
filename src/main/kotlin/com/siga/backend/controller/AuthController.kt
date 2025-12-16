@@ -7,6 +7,7 @@ import com.siga.backend.repository.UsuarioComercialRepository
 import com.siga.backend.repository.LocalRepository
 import com.siga.backend.service.JWTService
 import com.siga.backend.service.PasswordService
+import com.siga.backend.service.PermisosService
 import java.time.Instant
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
