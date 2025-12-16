@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
+@Transactional(readOnly = true)
 class PermisosService(
     private val permisosRepository: PermisoRepository,
     private val rolesPermisosRepository: RolPermisoRepository,
