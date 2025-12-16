@@ -177,14 +177,15 @@ class StockController(
                 .body(mapOf("success" to false, "message" to "No tienes permiso para actualizar stock"))
         }
         
-        val email = SecurityUtils.getUserEmail()
-        if (email == null || !subscriptionService.hasActiveSubscription(email)) {
+        // Verificar suscripción usando el ID de la empresa
+        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        if (usuarioComercialId == null || !subscriptionService.hasActiveSubscription(usuarioComercialId)) {
             return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED)
                 .body(mapOf("success" to false, "message" to "Se requiere una suscripción activa"))
         }
         
         // Verificar que producto y local pertenecen a la empresa del usuario
-        val usuarioComercialId = SecurityUtils.getUsuarioComercialId()
+        // val usuarioComercialId ya declarado arriba
         if (usuarioComercialId != null) {
             val producto = productoRepository.findById(request.productoId).orElse(null)
             val local = localRepository.findById(request.localId).orElse(null)
