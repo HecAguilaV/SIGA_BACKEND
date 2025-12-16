@@ -708,6 +708,27 @@ class OperationalAssistantService(
     }
     
     /**
+     * Construye el prompt para detectar la intención, incluyendo el historial de chat
+     */
+    private fun buildIntencionDetectionPrompt(mensaje: String, contexto: List<Pair<String, String>>): String {
+        val historialStr = if (contexto.isNotEmpty()) {
+            "HISTORIAL DE CONVERSACIÓN RECIENTE:\n" + 
+            contexto.joinToString("\n") { (msg, resp) -> "Usuario: $msg\nAsistente: $resp" } +
+            "\n\n"
+        } else {
+            ""
+        }
+        
+        return """
+            $intencionDetectionPrompt
+            
+            $historialStr
+            MENSAJE ACTUAL DEL USUARIO:
+            $mensaje
+        """.trimIndent()
+    }
+
+    /**
      * Actualiza el contexto conversacional del usuario (mantiene últimos 10 mensajes)
      */
     private fun actualizarContextoConversacional(userId: Int, mensajeUsuario: String, respuestaAsistente: String) {
