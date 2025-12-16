@@ -55,6 +55,8 @@ object SecurityUtils {
             val permisosService = ApplicationContextProvider.getBean(PermisosService::class.java)
             permisosService.tienePermiso(userId, codigoPermiso)
         } catch (e: Exception) {
+            val logger = org.slf4j.LoggerFactory.getLogger(SecurityUtils::class.java)
+            logger.error("Error al verificar permiso $codigoPermiso para usuario $userId", e)
             false
         }
     }
