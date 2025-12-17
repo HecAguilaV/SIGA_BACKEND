@@ -144,10 +144,10 @@ curl http://localhost:8080/health
 - `POST /api/saas/locales` - Crear local (solo ADMIN)
 - `PUT /api/saas/locales/{id}` - Actualizar local (solo ADMIN)
 
-### Ventas (En desarrollo)
+### Ventas
 
-- `GET /api/saas/ventas` - Pendiente de publicación (Q1 2026)
-- `POST /api/saas/ventas` - Pendiente de publicación (Q1 2026)
+- `GET /api/saas/ventas` - Listar historial de ventas
+- `POST /api/saas/ventas` - Registrar nueva venta
 
 ### Planes (Público)
 
