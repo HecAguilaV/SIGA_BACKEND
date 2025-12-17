@@ -35,10 +35,10 @@ Gracias por elegir SIGA. Este manual le guiará a través de las funcionalidades
 ---
 
 ## 3. App Móvil (Operaciones en Terreno)
-**Descarga**: Disponible en Play Store (Beta) o vía APK directo.
+**Descarga**: Disponible vía APK firmada.
 
 ### Funcionalidades
-- **Login Biométrico**: Si su dispositivo lo soporta, active el ingreso con huella.
+- **Login Biométrico**: Si su dispositivo lo soporta, active el ingreso con huella. (Futura Integración)
 - **Consulta Rápida**: Escanee o busque productos para ver stock en tiempo real.
 - **Ajustes de Stock**: Seleccione un producto y actualice la cantidad disponible en la estantería.
 
@@ -47,4 +47,4 @@ Gracias por elegir SIGA. Este manual le guiará a través de las funcionalidades
 ## 4. Soporte y Ayuda
 Si requiere asistencia técnica:
 - **Asistente Virtual**: Pregunte directamente a la IA de SIGA.
-- **Contacto**: help@siga.cl
+- **Contacto**: hdaguila@gmail.com
