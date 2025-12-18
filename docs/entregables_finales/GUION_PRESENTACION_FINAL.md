@@ -1,4 +1,4 @@
-# 🎓 GUION SECRETO DE DEFENSA - SIGA
+# PRESENTACIÓN - SIGA
 
 ¡Hola! Este documento es tu "chuleta" o guía maestra para la presentación. Aquí tienes los argumentos técnicos exactos basados en el código real de tu proyecto para responder a cada uno de los 8 puntos de la evaluación.
 
