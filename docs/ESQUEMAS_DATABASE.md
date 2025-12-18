@@ -678,3 +678,10 @@ Los esquemas `siga_saas` y `siga_comercial` son **independientes** a nivel de ba
 
 **Última actualización**: Diciembre 2025
 **Versión del esquema**: 1.0.0 MVP
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM

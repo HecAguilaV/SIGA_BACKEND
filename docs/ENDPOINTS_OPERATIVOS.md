@@ -95,4 +95,11 @@ Este documento consolida la verificación funcional de los endpoints expuestos p
 
 ---
 
-> Cualquier discrepancia encontrada por los equipos frontend debe documentarse levantando un issue en GitHub (`labels: docs, backend`) y referenciar este documento.
+> Cualquier discrepancia encontrada debe documentarse levantando un issue en GitHub (`labels: docs, backend`) y referenciar este documento.
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM

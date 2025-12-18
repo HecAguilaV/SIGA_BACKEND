@@ -65,6 +65,10 @@ docs/
 └── ESQUEMAS_DATABASE.md
 ```
 
+
 ---
 
-**Nota**: Documentación de desarrollo interno y verificaciones temporales se encuentra en el directorio `CHALLA/` (excluido del repositorio público).
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM

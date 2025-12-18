@@ -14,3 +14,10 @@ Este directorio contiene la documentación profesional, consolidada y definitiva
 - `ECOSISTEMA/` – Especificaciones técnicas de WebApp, Portal Comercial y App Móvil.
 
 Todos los documentos se mantienen sincronizados al cierre de iteraciones mayores. Para cambios sustantivos, actualizar el archivo correspondiente y registrar el enlace en este índice.
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM

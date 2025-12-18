@@ -270,5 +270,12 @@ GET /api/saas/stock
 
 ---
 
-**Última actualización:** 2025-01-XX  
+**Última actualización:** Diciembre 2025
 **Revisión:** Código fuente completo verificado
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM

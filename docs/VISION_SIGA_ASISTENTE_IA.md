@@ -48,9 +48,11 @@ Cliente → Gateway SIGA → Servicio de Orquestación IA → Controladores REST
 - Controles antifraude: límites de frecuencia, validación de montos y doble confirmación en operaciones críticas.
 - Observabilidad: métricas en Grafana (tasa de éxito, latencia, operaciones IA vs humanas).
 
+
+
 ---
 
 ## Autor
 
 > **Héctor Aguila**  
->Un Soñador con Poca RAM
+>> Un Soñador con Poca RAM

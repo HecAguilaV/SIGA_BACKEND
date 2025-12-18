@@ -56,4 +56,4 @@ Este documento describe cómo los clientes oficiales consumen los endpoints del 
 ## Autor
 
 > **Héctor Aguila**  
-> Un Soñador con Poca RAM
+>> Un Soñador con Poca RAM

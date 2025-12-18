@@ -8,7 +8,7 @@ Backend API REST para el Sistema Inteligente de Gestión de Activos (SIGA) - Min
 - **Swagger UI:** `https://siga-backend-production.up.railway.app/swagger-ui/index.html`
 - **Web Comercial:** `https://siga-webcomercial.vercel.app`
 - **WebApp Operativa:** `https://siga-webapp.vercel.app`
-- **App Móvil:** Disponible en Google Play Store
+- **App Móvil:** APK compilado (Android)
 
 ## Descripción
 

@@ -6,7 +6,7 @@ Gracias por elegir SIGA. Este manual le guiará a través de las funcionalidades
 ---
 
 ## 1. Web Comercial (Portal de Clientes)
-**Acceso**: [https://siga-web.vercel.app](https://siga-web.vercel.app)
+**Acceso**: [https://siga-webcomercial.vercel.app](https://siga-webcomercial.vercel.app)
 
 ### Registro y Suscripción
 1. Navegue a la sección "Planes".
@@ -17,7 +17,7 @@ Gracias por elegir SIGA. Este manual le guiará a través de las funcionalidades
 ---
 
 ## 2. Web App (Sistema de Gestión)
-**Acceso**: [https://siga-appweb.vercel.app](https://siga-appweb.vercel.app)
+**Acceso**: [https://siga-webapp.vercel.app](https://siga-webapp.vercel.app)
 
 ### Inicio de Sesión
 - Utilice el correo y contraseña registrados.
@@ -48,3 +48,11 @@ Gracias por elegir SIGA. Este manual le guiará a través de las funcionalidades
 Si requiere asistencia técnica:
 - **Asistente Virtual**: Pregunte directamente a la IA de SIGA.
 - **Contacto**: hdaguila@gmail.com
+
+
+---
+
+## Autor
+
+> **Héctor Aguila**  
+>> Un Soñador con Poca RAM
